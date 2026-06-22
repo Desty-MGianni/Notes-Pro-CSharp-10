@@ -188,11 +188,26 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
-### Étape 2 — Configurer GitHub Pages
+### Étape 2 — Changez le remote `origin` pour pointer vers votre repo
+
+```bash
+git remote set-url origin https://github.com/Desty-MGianni/nom-du-repo.git
+```
+
+pour vérifier que c'est correcte :
+
+```bash
+git remote -v
+```
+
+>[!tip] Upstream vs Origin  
+Quartz configure automatiquement un remote `upstream` qui pointe vers `jackyzha0/quartz` — c'est normal et c'est utilisé par `npx quartz upgrade` pour récupérer les mises à jour de Quartz. Ne touchez pas à `upstream`, uniquement à `origin`.
+
+### Étape 3 — Configurer GitHub Pages
 
 Allez dans l'onglet "Settings" de votre repo GitHub, cliquez sur "Pages" dans la sidebar, et sous "Source" sélectionnez "GitHub Actions". [GitHub](https://github.com/refactoringhq/tolaria/commit/95bcf3b25a542c673a231b3b766337e9876805f1)
 
-### Étape 3 — Pousser et déployer
+### Étape 4 — Pousser et déployer
 
 Commitez ces changements en lançant `npx quartz sync`. Cela déploiera votre site sur `<votre-pseudo>.github.io/<nom-du-repo>`. [GitHub](https://github.com/refactoringhq/tolaria/commit/95bcf3b25a542c673a231b3b766337e9876805f1)
 
