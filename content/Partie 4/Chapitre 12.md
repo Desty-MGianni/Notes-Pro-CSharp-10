@@ -5,7 +5,7 @@ publish: true
 
 # <big><big><big><b><font color =green>Délégués, Événements et Expressions Lambda</font></b></big></big></big>
 
-==Jusqu'à présent, la plupart des applications que vous avez développées ajoutaient divers fragments de code à== *Program.cs* sous forme d'instructions de niveau supérieur, qui, d'une manière ou d'une autre, envoyaient des requêtes *à* un objet donné. Cependant, **de nombreuses applications exigent qu'un objet puisse communiquer avec l'entité qui l'a créé à l'aide d'un mécanisme de rappel**. Bien que les mécanismes de rappel puissent être utilisés dans n'importe quelle application, **ils sont particulièrement critiques pour les interfaces utilisateur graphiques, car les contrôles** (comme un bouton) **doivent appeler des méthodes externes dans les circonstances appropriées** (lorsqu'on clique sur le bouton, lorsque la souris entre dans la zone du bouton, etc.).
+Jusqu'à présent, la plupart des applications que vous avez développées ajoutaient divers fragments de code à *Program.cs* sous forme d'instructions de niveau supérieur, qui, d'une manière ou d'une autre, envoyaient des requêtes *à* un objet donné. Cependant, **de nombreuses applications exigent qu'un objet puisse communiquer avec l'entité qui l'a créé à l'aide d'un mécanisme de rappel**. Bien que les mécanismes de rappel puissent être utilisés dans n'importe quelle application, **ils sont particulièrement critiques pour les interfaces utilisateur graphiques, car les contrôles** (comme un bouton) **doivent appeler des méthodes externes dans les circonstances appropriées** (lorsqu'on clique sur le bouton, lorsque la souris entre dans la zone du bouton, etc.).
 
 
 test
