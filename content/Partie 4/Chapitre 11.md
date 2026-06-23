@@ -638,7 +638,7 @@ MiniVan newVan = myVan * yourVan;
 
 **La surcharge d'opérateurs est généralement utile uniquement lors de la création de types de données atomiques**. *Les vecteurs, les matrices, le texte, les points, les formes, les ensembles*, etc., ==sont de bons candidats pour la surcharge d'opérateurs==. Les personnes, les gestionnaires, les voitures, les connexions aux bases de données et les pages web ne le sont pas. ***==En règle générale, si un opérateur surchargé rend plus difficile la compréhension du fonctionnement d'un type par l'utilisateur, il vaut mieux ne pas l'utiliser. Utilisez cette fonctionnalité avec discernement==***.
 
->[!example] Dans [[Note annexe au chapitre 11|cette note]], une implémentation de l'interface `INumber<T>` est proposé permettant l'implémentation, entre autre, des surcharges d'opérateurs
+>[!example] Dans [[Note annexe au chapitre 11|cette note]], une implémentation de l'interface `INumber<T>` est proposé permettant, entre autre, de surcharger les opérateurs
 
 # Comprendre les conversions de types personnalisés
  
@@ -772,7 +772,7 @@ public struct Square
     public override readonly string ToString() => $"[Length = {Length}]";
 
     // Les objets Rectangle peuvent être convertit
-    // explicitement en des objet Square
+    // explicitement en des objets Square
     public static explicit operator Square(Rectangle r)
     {
         return new Square { Length = r.Height };
@@ -887,7 +887,7 @@ Jusqu'à présent, vous avez créé diverses opérations de conversion *explicit
 
 ```cs
 ...
-Square s3 = new Square {Longueur = 83};
+Square s3 = new Square { Length = 83};
 
 // Tentative de conversion implicite ?
 Rectangle rect2 = s3;
@@ -925,7 +925,7 @@ Console.WriteLine($"rect 2 = {rect2}");
 // Syntaxe de conversion explicite toujours OK!
 Square s4 = new Square { Length = 3 };
 Rectangle rect3 = (Rectangle)s4;
-Console.WriteLine($"rect3 = {rect3}");
+Console.WriteLine($"rect 3 = {rect3}");
 
 Console.ReadLine();
 ```
@@ -951,7 +951,7 @@ La seconde contrainte est que **toutes les méthodes d'extension sont marquées 
 Pour illustrer cela, créez un nouveau projet d'application console nommé *ExtensionMethods*. Supposons maintenant que vous écriviez une classe nommée `MyExtensions` qui définit deux méthodes d'extension. La première méthode permet à tout objet d'utiliser une nouvelle méthode nommée `DisplayDefiningAssembly()` qui utilise des types de l'espace de noms de réflexion du système pour afficher le nom de l'assembly contenant le type en question.
 
 >[!note]
->Vous étudierez formellement l'API de réflexion au [[Chapitre 17|Chapitre 17]]. Si vous découvrez le sujet, retenez simplement que la **réflexion vous permet de découvrir la structure des assemblys, des types et des membres de type lors de l'exécution.**
+>Vous étudierez formellement l'API de réflexion au [[Chapitre 17#Comprendre la réflexion|Chapitre 17]]. Si vous découvrez le sujet, retenez simplement que la **réflexion vous permet de découvrir la structure des assemblys, des types et des membres de type lors de l'exécution.**
 
 La seconde méthode d'extension, nommée `ReverseDigits()`, permet à tout entier d'obtenir une nouvelle version de lui-même où sa valeur est inversée chiffre par chiffre. Par exemple, si un entier de valeur $1234$ appelle `ReverseDigits()`, l'entier retourné aura la valeur $4321$. Considérez l'implémentation de classe suivante (==veillez à importer l'espace de noms `System.Reflection` si vous suivez cet exemple)== :
 
@@ -995,33 +995,79 @@ static class MyExtensions
 > La méthode d'extension `ReverseDigits()` présenté est très pédagogique mais très inefficace!
 > 
 > L'approche plus performante la plus proche à celle du livre est la suivante:
-> ```cs
-> public static int ReverseDigits(this int i)
->{
->	// On travaille sur la pile (stack) avec Span
->	Span<char> s = stackalloc char[11]; // Un int a max 10 chiffres + signe
->	if (!i.TryFormat(s, out int charsWritten)) return 0;
+>```cs
+>public static int ReverseDigits(this int i)
+>    {
+>        /*
+>         * Alloue un buffer de 11 caractères
+>         * directement sur la stack (pas de heap).
+>         *
+>         * 11 = 10 chiffres max pour un int (2,147,483,647)
+>         * + 1 caractère pour le signe '-'.
+>         */
+>        Span<char> s = stackalloc char[11];
 >
->	Span<char> actualDigits = s.Slice(0, charsWritten);
->	actualDigits.Reverse();
+>        /*
+>         * TryFormat écrit la représentation textuelle
+>         * de 'i' dans le Span 's'.
+>         *
+>         * charsWritten' contiendra le nombre exact de
+>         * caractères écrits (ex: 123 -> 3).
+>         *
+>         * Si l'écriture échoue (cas très rare), on retourne 0.
+>        */
+>        if (!i.TryFormat(s, out int charsWritten))
+>            return 0;
 >
->	return int.Parse(actualDigits);
->}
+>        /*
+>         * On crée une "vue" (slice) sur uniquement les caractères
+>         * réellement écrits.
+>         *
+>         * Exemple : pour i = 123, on isole ['1','2','3']
+>         * et on ignore les cases vides.
+>         *
+>         * Utilisation de la syntaxe de collection au lieu de
+>         * l'appel à Span.Slice.
+>         */
+>        Span<char> actualDigits = s[..charsWritten];
+>
+>        /*
+>         * Inverse les caractères du Span en place,
+>         * sans aucune allocation supplémentaire.
+>         *
+>         * Exemple : ['1','2','3'] devient ['3','2','1']
+>         *
+>         * .Le signe '-' se retrouve en fin de slice,
+>         * il sera géré par int.Parse().
+>         */
+>        actualDigits.Reverse();
+>
+>        /*
+>         * Parse le Span<char> inversé directement en int,
+>         * sans créer de string intermédiaire.
+>         *
+>         * int.Parse() accepte un Span<char> depuis C# 7.2.
+>         */
+>        return int.Parse(actualDigits);
+>    }
 >```
 >
 > **L'approche la plus performantes est algorithmique:**
 >
 > ```cs
-> public static int ReverseDigits(this int i)
+>public static int ReverseDigits(this int i)
 >{
->	int reverse = 0;
->	while (i > 0)
->	{
->		// On prend le dernier chiffre (modulo) et on l'ajoute au résultat
->		reverse = (reverse * 10) + (i % 10);
->		i /= 10;
->	}
->	return reverse;
+>	bool isNegative = i < 0;
+> 	if (isNegative) i = -i; // On travaille avec la valeur absolue
+>
+> 	int reverse = 0;
+> 	while (i > 0)
+> 	{
+> 		reverse = (reverse * 10) + (i % 10);
+> 		i /= 10;
+> 	}
+>
+> 	return isNegative ? -reverse : reverse;
 >}
 >```
 
@@ -1143,7 +1189,14 @@ myInts.PrintDataAndBeep();
 Console.ReadLine();
 ```
 
->[!warning] Sur MacOS, c'est complètement normal si on entend qu'un seul bip, c'est lié à comment le système gère les alertes sonore (notifications).
+>[!important] Sur MacOS, c'est complètement normal si on entend qu'un seul bip, c'est lié à comment le système gère les alertes sonore (notifications).
+>>[!warning] Depuis .NET 10, `Console.Beep()` émet le caractère Bell `\u0007` dans le terminal au lieu d'appeler une API système. 
+>>Le son dépend donc entièrement de la configuration du terminal. 
+>>>[!example] Ghostty
+>>>Sous Ghostty, le Bell audio est désactivé par défaut et doit être activé manuellement via `bell-features = system` dans la config.
+>>
+>>>[!example] WezTerm
+>>>Sous WezTerm, il n'y a pas besoin de faire quelque chose.
 
 Ceci conclut votre étude des méthodes d'extension C#. N'oubliez pas que **cette fonctionnalité du langage peut s'avérer utile chaque fois que vous souhaitez étendre les fonctionnalités d'un type sans créer de sous-classe** (ou sans possibilité de sous-classe si le type est scellé), **dans le cadre du polymorphisme**. Comme vous le verrez plus loin, **==les méthodes d'extension jouent un rôle clé pour les API LINQ. En effet, vous constaterez que, dans les API LINQ, l'un des éléments les plus fréquemment étendus est une classe ou une structure implémentant (surprise !) la version générique de `IEnumerable`==**.
 
@@ -1239,7 +1292,7 @@ Fred is going 30 km/h
 # Comprendre les types anonymes
 
 >[!info]- L'utilisation moderne des types anonymes
->Les types anonymes sont très utilisés pour tout ce qui va toucher à l'API LINQ ([[Chapitre 13#Types anonymes|Chapitre13]]. Pout les autres usage, les tuples ([[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ C 7.0)|Chapitre 4]]) et les records ([[Chapitre 5#Le type de donnée `record` (Nouveauté C 9.0)|Chapitre 5]]) sont préférés pour transférer des données temporaires car les types anonymes ont deux gros défaut:
+>Les types anonymes sont très utilisés pour tout ce qui va toucher à l'API LINQ ([[Chapitre 13#Types anonymes|Chapitre 13]]). Pour les autres usage, les tuples ([[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ C 7.0)|Chapitre 4]]) et les records ([[Chapitre 5#Le type de donnée `record` (Nouveauté C 9.0)|Chapitre 5]]) sont préférés pour transférer des données temporaires car les types anonymes ont deux gros défaut:
 >
 >- **Portée locale uniquement** : Vous ne pouvez pas retourner un type anonyme d'une méthode (la méthode devrait retourner `object`, et vous perdriez tout l'intérêt du typage).
 >- **Lecture seule** : Ils sont immuables (ce qui est bien), mais moins flexibles que d'autres structures.
@@ -1373,7 +1426,7 @@ obj.ToString() == { Color = Bright Pink, Make = Saab, CurrentSpeed = 55 }
 obj.GetHashCode() == -1467690625
 ```
 
-Tout d'abord, notez que, dans cet exemple, l'objet `myCar` est de type `<>f__AnonymousType...` (votre nom peut être différent). ==N'oubliez pas que le nom de type attribué est entièrement déterminé par le compilateur et n'est pas directement accessible dans votre code C#.==
+Tout d'abord, notez que, dans cet exemple, l'objet `myCar` est de type ```<>f__AnonymousType0`3``` (votre nom peut être différent). ==N'oubliez pas que le nom de type attribué est entièrement déterminé par le compilateur et n'est pas directement accessible dans votre code C#.==
 
 Plus important encore, **notez que chaque paire nom-valeur définie à l'aide de la syntaxe d'initialisation d'objet est associée à une propriété en lecture seule portant le même nom et à un champ de stockage privé correspondant, réservé à l'initialisation**. Le code C# suivant illustre **==approximativement**== la classe générée par le compilateur pour représenter l'objet `myCar` (que vous pouvez vérifier à l'aide d'*ildasm.exe)* :
 
@@ -1444,7 +1497,6 @@ static void EqualityTest()
     {
         Color = "Bright Pink",
         Make = "Saab",
-
         CurrentSpeed = 55,
     };
 
@@ -1452,7 +1504,6 @@ static void EqualityTest()
     {
         Color = "Bright Pink",
         Make = "Saab",
-
         CurrentSpeed = 55,
     };
 
@@ -1519,11 +1570,11 @@ obj.ToString() == { Color = Bright Pink, Make = Saab, CurrentSpeed = 55 }
 obj.GetHashCode() == 1789772488
 ```
 
-Lorsque vous exécuterez ce code de test, ==vous constaterez que le premier test conditionnel, où vous appelez `Equals()`, renvoie `true`== et, par conséquent, le message « Même objet anonyme ! » s'affiche à l'écran. Cela s'explique par le fait que **la méthode `Equals()` générée par le compilateur utilise une sémantique basée sur les valeurs lors du test d'égalité** (par exemple, en vérifiant la valeur de chaque champ des objets comparés).
+Lorsque vous exécuterez ce code de test, ==vous constaterez que le premier test conditionnel, où vous appelez `Equals()`, renvoie `true`== et, par conséquent, le message `"Same anonymous object!"` s'affiche à l'écran. Cela s'explique par le fait que **la méthode `Equals()` générée par le compilateur utilise une sémantique basée sur les valeurs lors du test d'égalité** (par exemple, en vérifiant la valeur de chaque champ des objets comparés).
 
-Cependant, ==le second test conditionnel, qui utilise l'opérateur d'égalité C# (`==`), renvoie `false`.== Cela peut sembler contre-intuitif au premier abord. **Ce résultat s'explique par le fait que les types anonymes ne reçoivent pas de versions surchargées des opérateurs d'égalité C# (`==` et `!=`)**. Par conséquent, lorsque vous testez l'égalité de types anonymes à l'aide des opérateurs d'égalité C# (plutôt que de la méthode `Equals()`), ==ce sont les références, et non les valeurs conservées par les objets, qui sont testées.==
+Cependant, **le second test conditionnel, qui utilise l'opérateur d'égalité C# (`==`), renvoie `false`.** Cela peut sembler contre-intuitif au premier abord. **Ce résultat s'explique par le fait que les types anonymes ne reçoivent pas de versions surchargées des opérateurs d'égalité C# (`==` et `!=`)**. ==Par conséquent, lorsque vous testez l'égalité de types anonymes à l'aide des opérateurs d'égalité C#== (plutôt que de la méthode `Equals()`), ==ce sont les références, et non les valeurs conservées par les objets, qui sont testées.==
 
-Enfin, ==dans le dernier test conditionnel== (où vous examinez le nom du type sous-jacent), ==vous constatez que les types anonymes sont des instances du même type de classe généré par le compilateur== (dans cet exemple, `<>f AnonymousType...`) **car `firstCar` et `secondCar` ont les mêmes propriétés (`Color`, `Make` et `CurrentSpeed`).**
+Enfin, ==dans le dernier test conditionnel== (où vous examinez le nom du type sous-jacent), ==vous constatez que les types anonymes sont des instances du même type de classe généré par le compilateur== (dans cet exemple, ```<>f AnonymousType0`3```) **car `firstCar` et `secondCar` ont les mêmes propriétés (`Color`, `Make` et `CurrentSpeed`).**
 
 Ceci illustre un point important, bien que subtil : **le compilateur ne génère une nouvelle définition de classe que lorsqu'un type anonyme contient des noms uniques**. Ainsi, **==si vous déclarez des types anonymes identiques==** (c'est-à-dire portant les mêmes noms) **==au sein du même assembly, le compilateur ne génère qu'une seule définition de type anonyme.==**
 
@@ -1563,7 +1614,7 @@ Console.ReadLine();
 **Toutefois, lors de la programmation avec l'ensemble de technologies LINQ, vous constaterez que, dans de nombreux cas, cette syntaxe peut s'avérer utile lorsque vous souhaitez modéliser rapidement la forme générale d'une entité plutôt que sa fonctionnalité.**
 
 >[!tip]- Autre cas pratique pour cette syntaxe
->En plus de l'API LINQ, les types anonymes peut être utilisé avec des convertisseurs JSON, et c'est d'ailleurs l'un de leurs cas d'usage les plus fréquents aujourd'hui. Bien que les "entrailles" diffèrent, les bibliothèques de sérialisation comme `System.Text.Json` ou `Newtonsoft.Json` savent parfaitement lire les types anonymes par réflexion.
+>En plus de l'API LINQ, les types anonymes peut être utilisé avec des convertisseurs JSON, et c'est d'ailleurs l'un de leurs cas d'usage les plus fréquents aujourd'hui. Bien que les "entrailles" diffèrent, les bibliothèques de sérialisation comme `System.Text.Json` ou `Newtonsoft.Json` savent parfaitement lire les types anonymes par réflexion.
 >- **Prototypage rapide :** Idéal pour tester une structure de données avant de figer une classe.
 >- **Performance :** Depuis .NET 6, [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview) est extrêmement optimisé pour transformer ces objets en chaînes de caractères.
 >- **LINQ :** Vous pouvez transformer une liste d'objets complexes en une liste de types anonymes simplifiés en une seule ligne, puis la convertir directement en JSON pour un client JavaScript.
@@ -1575,6 +1626,17 @@ Console.ReadLine();
 
 # Utilisation des types pointeurs
 
+>[!tip] Le cours [boot.dev sur la gestion mémoire en C](https://www.boot.dev/courses/learn-memory-management-c) pose les bases "historique" concernant cette section. 
+
+>[!example] Il est même possible, comme en C, de stocké un entier sur le heap
+>Depuis .NET 6, un wrapper autour de malloc existe : `NativeMerory.Alloc`.
+>```cs
+>int* ptr = (int*)NativeMemory.Alloc(sizeof(int)); 
+>*ptr = 42; 
+>// ... 
+>NativeMemory.Free(ptr);
+>```
+
 Et maintenant, le dernier sujet de ce chapitre, qui sera probablement le moins utilisé de toutes les fonctionnalités C# dans la plupart de vos projets .NET.
 
 >[!note] 
@@ -1584,17 +1646,17 @@ Et maintenant, le dernier sujet de ce chapitre, qui sera probablement le moins u
 
 ##### Tableau 11-2: Opérateurs et mots-clés C# centrés sur les pointeurs
 
-| Opérateur/mot-clé                | Description                                                                                                                                                                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `*`                              | Cet opérateur sert à créer une variable pointeur (c’est-à-dire une variable qui représente une adresse mémoire directe). Comme en C/C++, ce même opérateur est utilisé pour l’indirection de pointeurs.                                                      |
-| `&`                              | Cet opérateur permet d'obtenir l'adresse d'une variable en mémoire.                                                                                                                                                                                          |
-| `->`                             | Cet opérateur est utilisé pour accéder aux champs d'un type représenté par un pointeur (la version non sécurisée de l'opérateur point C#).                                                                                                                   |
-| `[]`                             | Cet opérateur (dans un contexte non sécurisé) vous permet d'indexer l'emplacement pointé par une variable pointeur (si vous êtes programmeur C/C++, vous vous souviendrez de l'interaction entre une variable pointeur et l'opérateur []).                   |
-| `++`, `--`                       | Dans un contexte non sécurisé, les opérateurs d'incrémentation et de décrémentation peuvent être appliqués aux types pointeurs.                                                                                                                              |
-| `+`, `-`                         | Dans un contexte non sécurisé, les opérateurs d'addition et de soustraction peuvent être appliqués aux types pointeurs.                                                                                                                                      |
-| `==`, `!=`, `<`, `>`, `<=`, `=>` | Dans un contexte non sécurisé, les opérateurs de comparaison et d'égalité peuvent être appliqués aux types pointeurs.                                                                                                                                        |
-| `Stackalloc`                     | Dans un contexte non sécurisé, le mot-clé `stackalloc` peut être utilisé pour allouer des tableaux C# directement sur la pile.                                                                                                                               |
-| `Fixed`                          | Dans un contexte non sécurisé, le mot-clé `fixed` peut être utilisé pour fixer temporairement une variable afin que son adresse puisse être trouvée. (voir [[Chapitre 9#Faire le lien avec la gestion de la mémoire en C (Boot.dev et Gemini)\|Chapitre 9]]) |
+| Opérateur/mot-clé                | Description                                                                                                                                                                                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `*`                              | Cet opérateur sert à créer une variable pointeur (c’est-à-dire une variable qui représente une adresse mémoire directe). Comme en C/C++, ce même opérateur est utilisé pour l’indirection de pointeurs.                                      |
+| `&`                              | Cet opérateur permet d'obtenir l'adresse d'une variable en mémoire.                                                                                                                                                                          |
+| `->`                             | Cet opérateur est utilisé pour accéder aux champs d'un type représenté par un pointeur (la version non sécurisée de l'opérateur point C#).                                                                                                   |
+| `[]`                             | Cet opérateur (dans un contexte non sécurisé) vous permet d'indexer l'emplacement pointé par une variable pointeur (si vous êtes programmeur C/C++, vous vous souviendrez de l'interaction entre une variable pointeur et l'opérateur `[]`). |
+| `++`, `--`                       | Dans un contexte non sécurisé, les opérateurs d'incrémentation et de décrémentation peuvent être appliqués aux types pointeurs.                                                                                                              |
+| `+`, `-`                         | Dans un contexte non sécurisé, les opérateurs d'addition et de soustraction peuvent être appliqués aux types pointeurs.                                                                                                                      |
+| `==`, `!=`, `<`, `>`, `<=`, `=>` | Dans un contexte non sécurisé, les opérateurs de comparaison et d'égalité peuvent être appliqués aux types pointeurs.                                                                                                                        |
+| `Stackalloc`                     | Dans un contexte non sécurisé, le mot-clé `stackalloc` peut être utilisé pour allouer des tableaux C# directement sur la pile.                                                                                                               |
+| `Fixed`                          | Dans un contexte non sécurisé, le mot-clé `fixed` peut être utilisé pour fixer temporairement une variable afin que son adresse puisse être trouvée.                                                                                         |
 
 Avant d'entrer dans les détails, je tiens à rappeler que vous aurez *rarement, voire jamais*, besoin d'utiliser les types pointeurs. ==Bien que C# vous permette de manipuler les pointeurs, sachez que le runtime .NET ignore totalement vos intentions==. Par conséquent, **si vous manipulez mal un pointeur, vous serez seul responsable des conséquences**. Compte tenu de ces avertissements, ==dans quels cas précis auriez-vous besoin de travailler avec des types pointeurs ?== Il existe deux situations courantes.
 
@@ -1602,6 +1664,12 @@ Avant d'entrer dans les détails, je tiens à rappeler que vous aurez *rarement,
 - Vous appelez des méthodes d'une *.dll* C ou d'un serveur COM qui requièrent des types pointeur comme paramètres. Même dans ce cas, vous pouvez souvent contourner les types pointeur et privilégier le type `System.IntPtr` et les membres de `System.Runtime.InteropServices.Marshal`.
 
 **Lorsque vous décidez d'utiliser cette fonctionnalité du langage C#, vous devez informer le compilateur C# de vos intentions en autorisant votre projet à prendre en charge le «code non sécurisé»**. Créez un nouveau projet d'application console, nommé *UnsafeCode*, et configurez-le pour prendre en charge le code non sécurisé en ajoutant ce qui suit au fichier *UnsafeCode.csproj* :
+
+```xml
+<PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+</PropertyGroup>
+```
 
 ### Activer le code non sécurisé avec Visual Studio 2022
 
@@ -1620,8 +1688,8 @@ Lorsque vous souhaitez manipuler des pointeurs en C#, **vous devez déclarer exp
 ```cs
 using UnsafeCode;
 
-Console.Title = "Calling Method with Unisafe Code";
-Console.WriteLine("***** Calling Method with Unisafe Code *****\n");
+Console.Title = "Calling Method with Unsafe Code";
+Console.WriteLine("***** Calling Method with Unsafe Code *****\n");
 
 unsafe
 {
@@ -1646,7 +1714,7 @@ unsafe struct Node
 
 // Cette structure est sûre, mais les membres Node2*
 // ne le sont pas. Techniquement, vous pouvez accéder à « Value » depuis
-// un contexte non sécurisé, mais pas à « Left » et « Right ».
+// un contexte sécurisé, mais pas à « Left » et « Right ».
 public struct Node2
 {
     public int Value;
@@ -1753,9 +1821,32 @@ Value of myInt: 123
 Address of myInt: 16D3C9C70
 ```
 
-## Fonction d'échange non sécurisée (et sécurisée)
+## Fonction de permutations non sécurisée (et sécurisée)
 
 Bien sûr, déclarer des pointeurs vers des variables locales simplement pour leur assigner une valeur (comme dans l'exemple précédent) n'est jamais nécessaire et pas toujours utile. **Pour illustrer un exemple plus concret de code non sécurisé, supposons que vous souhaitez créer une fonction d'échange utilisant l'arithmétique des pointeurs**.
+
+```cs
+static unsafe void UnsafeSwap(int* i, int* j)
+{
+    int temp = *i;
+    *i = *j;
+    *j = *temp;
+    
+    // Possible en une seule ligne et sans crée ne nouvelle variable:
+    // (*i, *j) = (*j, *i);
+}
+```
+
+Très C-like, vous ne trouvez pas ? Cependant, ==compte tenu de votre travail précédent, vous devez savoir que vous pouvez écrire la version sécurisée suivante de votre algorithme d'échange à l'aide du mot-clé C# `ref`== :
+
+```cs
+static void SafeSwap(ref int i, ref int j)
+{
+    (i, j) = (j, i);
+}
+```
+
+**La fonctionnalité de chaque méthode est identique, renforçant ainsi le fait que la manipulation directe du pointeur n’est pas une tâche obligatoire sous C#**. Voici la logique d'appel utilisant des instructions de niveau supérieur sécurisées, avec un contexte non sécurisé :
 
 ```cs
 // Valeurs pour l'échange.
@@ -1831,7 +1922,17 @@ static unsafe string UnsafeStackAlloc()
 }
 ```
 
+>[!example] explication détaillé du code précédent
 >un type `char` possède une taille de 2 octets. Le code précédent alloue 52 emplacements mémoire de 2 octets chacun sur la pile (*stack*).
+>
+> `char* p` stocke l'adresse du premier emplacement mémoire puis, avec un décalage de 2 octets à chaque fois (*offset*), on peut accéder à tous les emplacement mémoire déclaré avec `stackalloc`
+>
+> **En C#  unsafe, tout comme en C, `char*` ou `char[]` sont tout les deux la même chose**.
+>
+> C'est pour cette raison que l'on peut utiliser `p[k]` ainsi qu'une boucle `for` pour parcourir `p`.
+> 
+> Pour chaque emplacement dans le pointeur, on stocke une lettre correspondant à la valeur ASCII liée. pour une valeur de $65$, la lettre sera `'A'`, pour $66$, `B`, etc...
+>>[!info] **La notation `p[k]` est du "sucre syntaxique" pour `(*p + k)`.**
 
 ## Fixer un type via le mot-clé `fixed`
 
@@ -1902,7 +2003,32 @@ static void UseSizeOfOperator()
 }
 ```
 
+>[!tip] Pourquoi ce comportement pour les types personnalisé ?
+>C'est une décision **conservatrice** de Microsoft. En contexte managé, `sizeof` n'est autorisé que pour les types primitifs built-in (`int`, `char`, `bool`...) car le CLR **garantit** leur taille.
+>
+>Pour les structs custom, même simples, le compilateur refuse `sizeof` en contexte managé car théoriquement le runtime pourrait :
+>
+>- Ajouter du **padding** entre les champs
+>- **Réordonner** les champs pour l'alignement mémoire
+
+
 Ceci conclut notre présentation de certaines des fonctionnalités avancées du langage de programmation C#. Pour être sûrs que nous sommes tous sur la même longueur d'onde, je tiens à préciser que **la plupart de vos projets .NET n'auront probablement jamais besoin d'utiliser directement ces fonctionnalités** (notamment les pointeurs). Néanmoins, comme vous le verrez dans les chapitres suivants, **certains sujets sont très utiles, voire indispensables, pour travailler avec les API LINQ, en particulier les méthodes d'extension et les types anonymes.**
+
+>[!tip] Petit pense bête pour les pointeurs
+>```cs
+>int myInt = 11;
+>
+>// On crée un pointeur vers myInt
+>int* ptr = &myInt;
+>
+> // "Extrait" l'adresse du pointeur.
+> int addr = (int)&ptr;
+> // "Extrait" la valeur de myInt en parcourant l'adresse stoké dans ptr. 
+> int val = *ptr;
+> // "Extrait" la valur stocké dans ptr, étant l'adresse de myInt.
+> // Cela en fait une copie de ptr.
+> int* reference = ptr;
+>```
 
 # Résumé du chapitre
 

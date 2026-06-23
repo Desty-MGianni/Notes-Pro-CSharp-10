@@ -1,5 +1,6 @@
 ---
 title: "Chapitre 12: Délégués, Événemenmts et Expressions Lambda"
+publish: true
 ---
 
 # <big><big><big><b><font color =green>Délégués, Événements et Expressions Lambda</font></b></big></big></big>

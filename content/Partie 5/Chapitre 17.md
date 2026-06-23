@@ -106,7 +106,7 @@ Concernant *CarLibrary.dll*, un `TypeDef` correspond à la description des méta
 >[!note] 
 >Bien qu'elles ressemblent à des fautes de frappe, `TypDefName` ne contient pas le *e* et `DefltValue` ne contient pas le *au*  auxquels on pourrait s'attendre.
 
-## Affichage (partiel) des métadonnées du type Voiture
+## Affichage (partiel) des métadonnées du type `Car`
 
 Voici un extrait de la classe `Car` illustrant les points suivants :
 - Définition des champs en termes de métadonnées .NET

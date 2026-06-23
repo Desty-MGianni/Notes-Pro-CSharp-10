@@ -130,7 +130,7 @@ name: Deploy Quartz site to GitHub Pages
 on:
   push:
     branches:
-      - v5
+      - main
 
 permissions:
   contents: read
@@ -203,6 +203,24 @@ git remote -v
 >[!tip] Upstream vs Origin  
 Quartz configure automatiquement un remote `upstream` qui pointe vers `jackyzha0/quartz` — c'est normal et c'est utilisé par `npx quartz upgrade` pour récupérer les mises à jour de Quartz. Ne touchez pas à `upstream`, uniquement à `origin`.
 
+### Étape 4 — Changer le nom de la branche `v5` à `main`
+
+```bash
+git branch -m v5 main 
+git push --set-upstream origin main
+```
+
+La première commande renomme la branche locale `v5` en `main`, la deuxième la pousse sur GitHub en créant la branche distante.
+
+Pensez aussi à mettre à jour le workflow GitHub Actions pour qu'il se déclenche sur `main` et non `v5` :
+
+```yaml
+on:
+  push:
+    branches:
+      - main   # ← au lieu de v5
+```
+
 ### Étape 3 — Configurer GitHub Pages
 
 Allez dans l'onglet "Settings" de votre repo GitHub, cliquez sur "Pages" dans la sidebar, et sous "Source" sélectionnez "GitHub Actions". [GitHub](https://github.com/refactoringhq/tolaria/commit/95bcf3b25a542c673a231b3b766337e9876805f1)
@@ -217,16 +235,21 @@ Commitez ces changements en lançant `npx quartz sync`. Cela déploiera votre si
 > [!tip] `npx quartz sync` vs `git push`  
 > `npx quartz sync` est la commande Quartz 5 qui remplace un simple `git push` — elle pull d'abord les éventuelles modifications distantes, puis commit et push vos changements locaux en une seule commande.```
 
-## Pièges fréquents
+# Le Workflow au quotidien
 
-|Problème|Cause|Solution|
-|---|---|---|
-|`command not found: npm`|Node.js non installé|Réinstaller Node.js, redémarrer le terminal|
-|Erreur 404 après déploiement|Source ≠ GitHub Actions|Vérifier `Settings → Pages → Source`|
-|Erreur d'environnement protégé|Environnement Pages existant|Supprimer dans `Settings → Environments`, relancer le workflow|
-|Push refusé (authentification)|Mot de passe au lieu de token|Utiliser un Personal Access Token|
-|Symlink "cassé" après clone sur une autre machine|Symlink non versionné par Git|Recréer le symlink manuellement (étape 2)|
-|Liens internes cassés|`markdownLinkResolution` mal réglé|Aligner avec le format de lien Obsidian (`shortest`)|
+1. Écrire/modifier vos notes dans Obsidian
+2. `npx quartz sync`
+3. Le site est mis à jour automatiquement en quelques minutes
+
+> [!tip] Message de commit personnalisé  
+> Par défaut `npx quartz sync` génère un message de commit automatique. Si vous voulez un message personnalisé :
+> 
+> bash
+> 
+> ```bash
+> npx quartz sync --message "Chapitre 5 complété"
+> ```
+
 
 ## Notes complémentaires
 
