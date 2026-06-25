@@ -7,10 +7,6 @@ publish: true
 
 Jusqu'à présent, la plupart des applications que vous avez développées ajoutaient divers fragments de code à *Program.cs* sous forme d'instructions de niveau supérieur, qui, d'une manière ou d'une autre, envoyaient des requêtes *à* un objet donné. Cependant, **de nombreuses applications exigent qu'un objet puisse communiquer avec l'entité qui l'a créé à l'aide d'un mécanisme de rappel**. Bien que les mécanismes de rappel puissent être utilisés dans n'importe quelle application, **ils sont particulièrement critiques pour les interfaces utilisateur graphiques, car les contrôles** (comme un bouton) **doivent appeler des méthodes externes dans les circonstances appropriées** (lorsqu'on clique sur le bouton, lorsque la souris entre dans la zone du bouton, etc.).
 
-
-test
-
-
 **Sous la plateforme .NET, le type** *délégué* **est le moyen privilégié de définir et de répondre aux rappels au sein des applications. Essentiellement, le type délégué .NET est un objet typé qui « pointe » vers une méthode ou une liste de méthodes pouvant être appelées ultérieurement**. Contrairement à un pointeur de fonction C++ traditionnel, **les délégués sont des classes qui prennent en charge nativement la multidiffusion.**
 
 >[!note]
@@ -36,7 +32,7 @@ Une fois l'objet délégué créé et doté des informations nécessaires, il pe
 
 ## Définition d'un type délégué en C#
 
->[!warning] Cette sous-section n'est plus la manière privilégié pour déclarer des délégués.
+>[!warning] Cette sous-section n'est plus la manière privilégié pour déclarer des délégués. (Gemini)
 >**En C# moderne, on utilisera 95% du temps d'autre syntaxes qui seront abordé plus loin dans ce chapitre.**
 >
 Il reste néanmoins trois scénarios où déclarer son propre délégué est préférable :
@@ -163,7 +159,7 @@ sealed class MyDelegate : System.MulticastDelegate
 }
 ```
 
-**Les délégués peuvent également « pointer vers » des méthodes comportant un nombre quelconque de paramètres de sortie ou de référence** (ainsi que des paramètres de type tableau marqués avec le mot-clé `params`). Par exemple, considérons le type de délégué suivant :
+**Les délégués peuvent également « pointer vers » des méthodes comportant un nombre quelconque de paramètres `out` ou `ref`** (ainsi que des paramètres de type tableau marqués avec le mot-clé `params`). Par exemple, considérons le type de délégué suivant :
 
 ```cs
 public delegate string MyOtherDelegate(
@@ -517,7 +513,7 @@ Car c1 = new Car("SlugBug", 100, 10);
 c1.RegisterWithCarEngine(new Car.CarEngineHandler(OnCarEngineEvent));
 
 // Accélère (cela va déclencher l'événement).
-Console.WriteLine("**** Speeding up ****)");
+Console.WriteLine("**** Speeding up ****");
 for (int i = 0; i < 6; i++)
 {
     c1.Accelerate(20);
@@ -538,7 +534,7 @@ Le code commence par la création d'un nouvel objet `Car`. ==Puisque vous souhai
 ```
 ***** Delegates as Event Enablers *****
 
-**** Speeding up ****)
+**** Speeding up ****
 currentSpeed = 30
 currentSpeed = 50
 currentSpeed = 70
@@ -673,7 +669,7 @@ Car.CarEngineHandler handler2 = new Car.CarEngineHandler(OnCarEngineEvent2);
 c1.RegisterWithCarEngine(handler2);
 
 // Accélère (cela va déclencher l'événement).
-Console.WriteLine("**** Speeding up ****)");
+Console.WriteLine("**** Speeding up ****");
 for (int i = 0; i < 6; i++)
 {
     c1.Accelerate(20);
@@ -683,7 +679,7 @@ for (int i = 0; i < 6; i++)
 c1.UnregisterWithCarEngine(handler2);
 
 // On ne verra plus le message en Majuscule!
-Console.WriteLine("**** Speeding up ****)");
+Console.WriteLine("**** Speeding up ****");
 for (int i = 0; i < 6; i++)
 {
     c1.Accelerate(20);
@@ -731,7 +727,7 @@ Car c2 = new Car();
 // Abonnement avec simplement le nom de la méthode.
 c2.RegisterWithCarEngine(OnCarEngineEvent);
 
-Console.WriteLine("**** Speeding up ****)");
+Console.WriteLine("**** Speeding up ****");
 for (int i = 0; i < 6; i++)
 {
     c2.Accelerate(20);
@@ -751,7 +747,7 @@ Console.ReadLine();
 
 **Notez que vous n'allouez pas directement l'objet délégué associé, mais que vous spécifiez simplement une méthode correspondant à la signature attendue du délégué** (une méthode ne renvoyant aucune valeur et prenant une seule chaîne de caractères, dans ce cas). ==Sachez que le compilateur C# vérifie toujours la sécurité des types==. Par conséquent, si la méthode `OnCarEngineEvent()` ne prenait pas une chaîne de caractères et ne renvoyait pas aucune valeur, une erreur de compilation serait générée.
 
-### Method Group Conversion vs Instances de Délégués
+### Method Group Conversion vs Instances de Délégués (Gemini)
 
 Le passage d'une méthode à un délégué cache une étape de création d'objet que le compilateur gère pour vous.
 
@@ -785,28 +781,28 @@ En stockant le délégué dans une variable (`Car.CarEngineHandler handler2 = ..
 
 Bien que la mécanique soit la même, la manière dont on écrit le code a continué de s'affiner depuis .NET 6 :
 
-**.NET 7 : Optimisation des "Method Groups"**
+##### **.NET 7 : Optimisation des "Method Groups"**
 
 Avant .NET 7, faire `c1.Register(OnCarEngineEvent)` créait un nouvel objet délégué **à chaque fois** que le code passait sur cette ligne.
 
 - **Ajustement :** Le compilateur a commencé à "mettre en cache" (cacher) l'instance du délégué si la méthode est statique.
 - **Impact :** Moins de travail pour le Garbage Collector. Votre code devient plus performant sans que vous ayez à le modifier.
 
-**.NET 8 : Function Pointers & Native AOT**
+##### **.NET 8 : Function Pointers & Native AOT**
 
 .NET 8 a mis l'accent sur la compilation native (AOT - Ahead Of Time).
 
 - **Ajustement :** Les délégués ont été optimisés pour être plus "légers" lors de la compilation en code machine direct.
 - **Impact :** Le démarrage des applications est plus rapide, et l'invocation des événements coûte moins de cycles CPU.
 
-**.NET 9 : Inline Arrays et Amélioration du Multicast**
+##### **.NET 9 : Inline Arrays et Amélioration du Multicast**
 
 .NET 9 a peaufiné la manière dont les listes d'invocation (quand vous avez plusieurs abonnés avec `+=`) sont parcourues.
 
 - **Ajustement :** Amélioration de la localité des données dans la mémoire cache.
 - **Impact :** Si vous avez 50 abonnés sur une même voiture, l'appel de l'événement est beaucoup plus fluide.
 
-**.NET 10 Intelligence de Désabonnement (Static Analysis) et Zero-Allocation**
+##### **.NET 10 Intelligence de Désabonnement (Static Analysis) et Zero-Allocation**
 
 - **Ajustement :** L'analyseur de code (Roslyn) est devenu beaucoup plus agressif. Il peut maintenant vous avertir via un "Warning" si vous essayez de faire un `-=` sur une Lambda anonyme (ce qui, comme nous l'avons vu, ne fait rien).
 - **Impact :** Moins de bugs de "fuite de mémoire" où un abonné reste accroché parce que le désabonnement a échoué silencieusement.
@@ -867,7 +863,6 @@ static void StringTarget(string arg)
 }
 ```
 
-
 ## Les délégués génériques `Action<>` et `Func<>`
 
 >[!check] Très important 
@@ -888,7 +883,7 @@ Mettez à jour votre fichier *Program.cs* pour définir une nouvelle méthode st
 
 ```cs
 // Ceci est une cible pour le délégué Action<> (Abonné)
-static void DisplayMessage(stirng msg, ConsoleColor txtColor, int printCount)
+static void DisplayMessage(string msg, ConsoleColor txtColor, int printCount)
 {
     // Définir la couleur du texte de la console.
     ConsoleColor prev = Console.ForegroundColor;
@@ -962,8 +957,7 @@ Comme vous pouvez le constater, **l'utilisation du délégué `Action<>` vous é
 >- **L'état préservé :** Elle ne retourne pas une valeur, mais un **Itérateur** (comme le `ArrayWhereIterator` que nous avons vu). Elle se souvient d'où elle s'est arrêtée.
 >- **Conséquence matérielle :** Le compilateur transforme ces méthodes en **machines à états** (State Machines). Ce ne sont plus de simples appels de fonctions sur la pile, mais des objets complexes qui vivent sur le **Tas (Heap)**.
 >
----
-> ---
+>---
 > _Note : Dans les langages comme Rust ou Kotlin, `void` est remplacé par un type réel (`Unit`), ce qui permet d'unifier ces deux concepts. C# reste fidèle à ses racines C++ avec cette séparation stricte._
 
 ##### Tableau 12-2 : Les différents types de méthode et les rôles
@@ -1221,7 +1215,7 @@ Pour vous détacher d'une source d'événements, utilisez l'opérateur `-=` selo
 myCar.Exploded -= d;
 ```
 
-Notez que vous pouvez également utiliser la syntaxe de conversion de groupe de méthodes avec les événements (avec ces qualité et ses défauts. Voir [[#Method Group Conversion vs Instances de Délégués|Ici]]) :
+Notez que vous pouvez également utiliser la syntaxe de conversion de groupe de méthodes avec les événements (avec ces qualité et ses défauts. Voir [[#Method Group Conversion vs Instances de Délégués (Gemini)|Ici]]) :
 
 ```cs
 Car.CarEngineHandler d = CarExplodedEventHandler;
@@ -1405,6 +1399,26 @@ static void CarAboutToBlow(object sender, CarEventArgs e)
     }
 }
 ```
+
+>[!tip] Pourquoi l'argument `sender` est typé `object` et non pas une classe plus restrictive ?
+>- **Interopérabilité avec les frameworks .NET**. Ils sont tous basé sur cette signature:
+>```cs
+>voidHandler(objet sender, EventArgs e)
+>```
+>- **Flexibilité pour le re-raise**. Un événement peut être retransmis par un intermédiaire
+>```cs
+>button.Click += (s, e) => myControl.RaiseEvent(s, e); // s n'est pas myControl
+>```
+>- **Héritage**. Si une classe fille hérite et lève le même événement, le sender typé fortement serait incorrect.
+>>[!Example] Quand c'est acceptable ?
+>>Dans des systèmes **fermés** où tu contrôles tout et que tu n'exposeras jamais l'événement à l'extérieur :
+>>
+>>```csharp
+>>public event Action<MyClass, MyEventArgs> MyEvent;
+>>```
+>>
+>>Certains frameworks modernes comme **Reactive Extensions (Rx)** ou les **source generators** adoptent d'ailleurs des approches plus typées.
+
 
 ## Le délégué générique `EventHandler<T>`
 

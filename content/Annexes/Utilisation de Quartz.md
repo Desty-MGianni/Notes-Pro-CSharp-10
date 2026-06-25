@@ -232,23 +232,13 @@ Commitez ces changements en lançant `npx quartz sync --no-pull`. Cela déploier
 > [!warning] Erreur d'environnement protégé  
 > Si vous obtenez une erreur "not allowed to deploy to github-pages due to environment protection rules", allez dans Settings → Environments et supprimez l'environnement existant via l'icône de corbeille. GitHub Actions le recréera correctement au prochain push. [GitHub](https://github.com/refactoringhq/tolaria/commit/95bcf3b25a542c673a231b3b766337e9876805f1)
 
-> [!tip] `npx quartz sync` vs `git push`  
-
 # Le Workflow au quotidien
 
+>[!info] J'ai crée un alias dans mon *.zshrc* nommée `qsync`
+
 1. Écrire/modifier vos notes dans Obsidian
-2. Créer un commit (`git add . && git commit -m ... && git push`)
-3. Le site est mis à jour automatiquement en quelques minutes
-
-> [!tip] Message de commit personnalisé  
-> Par défaut `npx quartz sync` génère un message de commit automatique. Si vous voulez un message personnalisé :
-> 
-> bash
-> 
-> ```bash
-> npx quartz sync --message "Chapitre 5 complété"
-> ```
-
+2. `qsync` ou `qsync -m` pour ajouter un message de commit.
+3. FINI ! Le site est mis à jour automatiquement en quelques minutes
 
 ## Notes complémentaires
 

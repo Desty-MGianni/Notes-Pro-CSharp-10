@@ -1046,7 +1046,7 @@ Enfin, **vous pouvez créer des applications programmées pour interagir avec vo
 ## Utilisation des attributs en C#
 
 Pour illustrer l'application des attributs en C#, créez un projet d'application console nommé
-*ApplyingAttributes* et ajoutez une référence au package NuGet `System.Text.Json`. Mettez à jour le fichier *Program.cs* en y incluant les directives using globales suivantes :
+*ApplyingAttributes* et ajoutez une référence au package NuGet `System.Text.Json`. Mettez à jour le fichier *Program.cs* en y incluant les directives `using``globales suivantes :
 
 ```cs
 global using System.Text.Json.Serialization;
