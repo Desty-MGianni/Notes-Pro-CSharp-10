@@ -35,7 +35,7 @@ Une fois l'objet délégué créé et doté des informations nécessaires, il pe
 >[!warning] Cette sous-section n'est plus la manière privilégié pour déclarer des délégués. (Gemini)
 >**En C# moderne, on utilisera 95% du temps d'autre syntaxes qui seront abordé plus loin dans ce chapitre.**
 >
-Il reste néanmoins trois scénarios où déclarer son propre délégué est préférable :
+>Il reste néanmoins trois scénarios où déclarer son propre délégué est préférable :
 >
 >- **La clarté sémantique :** Si tu as une signature complexe, `delegate void CalculTransaction(int id, decimal montant, string devise, DateTime date)` est plus lisible que les alternatives utilisées actuellement.
 >- **Les paramètres `ref`, `out` ou `params` :** Les types `Action` et `Func` ne supportent pas ces modificateurs. Si tu as besoin d'un paramètre `ref`, tu **dois** déclarer ton propre `delegate`.
@@ -234,6 +234,7 @@ public abstract class Delegate : ICloneable, ISerializable
 | `Combine()`                | Cette méthode statique ajoute une méthode à la liste gérée par le délégué. En C#, vous appelez cette méthode à l'aide de l'opérateur surchargé `+=` comme notation abrégée.                                                                                   |
 | `GetInvocationList()`      | Cette méthode renvoie un tableau d'objets `System.Delegate`, chacun représentant une méthode pouvant être invoquée.                                                                                                                                           |
 | `Remove()` / `RemoveAll()` | Ces méthodes statiques suppriment une méthode (ou toutes les méthodes) de la liste d'appel du délégué. En C#, la méthode Remove() peut être appelée indirectement à l'aide de l'opérateur surchargé `-=`.                                                     |
+
 
 # L’exemple le plus simple possible de délégué
 
@@ -918,6 +919,7 @@ Comme vous pouvez le constater, **l'utilisation du délégué `Action<>` vous é
 **Le délégué générique `Func<>` peut pointer vers des méthodes qui** (comme `Action<>`) **acceptent jusqu'à 16 paramètres et une valeur de retour personnalisée**. Pour illustrer cela, ajoutez la méthode suivante au fichier *Program.cs* :
 
 > [!Tip] La Grande Ligne de Faille : `void` vs `Return Type` (généré par Gemini)
+> 
 > En C#, la différence entre une procédure (`void`) et une fonction (avec retour) n'est pas qu'une question de style, c'est une contrainte matérielle et logique qui dicte tout le système de types.
 >
 > ---
