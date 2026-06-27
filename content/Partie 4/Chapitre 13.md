@@ -12,7 +12,7 @@ Avant d'aborder LINQ to Objects proprement dit, ==la première partie de ce chap
 Après avoir passé en revue cette infrastructure de base, ==le reste du chapitre vous présentera le modèle de programmation LINQ et son rôle dans la plateforme .NET==. **Vous y découvrirez le rôle des opérateurs de requête et des expressions de requête, qui vous permettent de définir des instructions interrogeant une source de données afin d'obtenir le jeu de résultats demandé**. Vous créerez également de nombreux exemples LINQ interagissant avec des données contenues dans des tableaux ainsi que divers types de collections (génériques et non génériques) et **vous comprendrez les assemblies, les espaces de noms et les types qui représentent l'API *LINQ to Objects***.
 
 >[!check] Ce chapitre est ultra important !
->Les informations contenues dans ce chapitre constituent le fondement des sections et chapitres suivants de cet ouvrage, notamment Parallel LINQ ([[Chapitre 15|Chapitre 15]]) et Entity Framework Core ([[Chapitres 21|Chapitres 21 à 23]]).
+>Les informations contenues dans ce chapitre constituent le fondement des sections et chapitres suivants de cet ouvrage, notamment Parallel LINQ ([[Chapitre 15#Requêtes LINQ parallèles (PLINQ)|Chapitre 15]]) et Entity Framework Core ([[Chapitres 21|Chapitres 21 à 23]]).
 
 # Constructions de programmation spécifiques à LINQ
 
@@ -97,7 +97,7 @@ void LambdaExpressionSyntax()
     list.AddRange(new int[] { 20, 1, 4, 8, 9, 44 });
 
 	// Expression lambda C#.
-    List<int> evenNumbers = list.FindAll(i => (1 % 2) == 0);
+    List<int> evenNumbers = list.FindAll(i => (i % 2) == 0);
 
     Console.WriteLine("Here are your even numbers:");
     foreach (int evenNumber in evenNumbers)
@@ -346,7 +346,7 @@ static void QueryOverStringsWithExtensionsMethods()
 }
 ```
 
-Tout est identique à la méthode précédente, à l'exception de de l'expression de requête. ==Cette méthode utilise la syntaxe d'extension.== **Cette syntaxe utilise des expressions lambda au sein de chaque méthode pour définir l'opération**. Par exemple, le lambda de la méthode `Where()` définit la condition (où une valeur contient un espace). **==Tout comme dans la syntaxe d'expression de requête, la lettre utilisée pour indiquer la valeur évaluée dans la lambda est arbitraire**== ; j'aurais pu utiliser « v » pour les jeux vidéo.
+Tout est identique à la méthode précédente, à l'exception de de l'expression de requête. ==Cette méthode utilise la syntaxe d'extension.== **Cette syntaxe utilise des expressions lambda au sein de chaque méthode pour définir l'opération**. Par exemple, le lambda de la méthode `Where()` définit la condition (où une valeur contient un espace). **==Tout comme dans la syntaxe d'expression de requête, la lettre utilisée pour indiquer la valeur évaluée dans la lambda est arbitraire==** ; j'aurais pu utiliser « v » pour les jeux vidéo.
 
 ***==Bien que les résultats soient les mêmes==*** (l'exécution de cette méthode produit la même sortie que la méthode précédente utilisant l'expression de requête), **vous constaterez bientôt que le *type* de l'ensemble de résultats est légèrement différent**. **==Dans la plupart des cas (voire la quasi-totalité), cette différence ne pose aucun problème et les formats peuvent être utilisés indifféremment==**.
 
@@ -432,13 +432,13 @@ foreach (string s in subset)
 }
 ```
 
-**Lorsque vous exécuterez l'application, vous constaterez que la variable de sous-ensemble est en réalité une instance du type générique `OrderedEnumerable<TElement, TKey>`** (représenté par `OrderedEnumerable'2`), **qui est un type abstrait interne résidant dans l'assembly `System.Linq.dll`.**
+~~**Lorsque vous exécuterez l'application, vous constaterez que la variable de sous-ensemble est en réalité une instance du type générique `OrderedEnumerable<TElement, TKey>`** (représenté par ```OrderedEnumerable`2```), **qui est un type abstrait interne résidant dans l'assembly `System.Linq.dll`.**~~
 
 >[!warning] Ce qui a changé en .NET 10
 >
 >Dans les versions précédentes (jusqu'à .NET 9), LINQ utilisait souvent des classes comme `OrderedEnumerable`. .NET 10 a subi ce que certains appellent une "greffe de cerveau" pour améliorer radicalement les performances.
 >
->- **Nouveau type interne :** Votre `OrderedIterator`'2 est le nouveau moteur de tri. Il est conçu pour être beaucoup plus rapide et consommer moins de mémoire que l'ancien `OrderedEnumerable`.
+>- **Nouveau type interne :** Votre ```OrderedIterator`2``` est le nouveau moteur de tri. Il est conçu pour être beaucoup plus rapide et consommer moins de mémoire que l'ancien `OrderedEnumerable`.
 >- **Optimisation du "Short-circuiting" :** Si vous chaînez d'autres méthodes après votre tri (comme un `.First()` ou `.Contains()`), ce nouvel itérateur est capable de "regarder à l'intérieur" de la requête pour éviter de trier tout le tableau si ce n'est pas nécessaire.
 >- **Localisation :** Comme vous l'avez noté, il réside toujours dans l'assembly logique **`System.Linq`**, ce qui confirme que l'architecture modulaire de .NET moderne (Core/5/6+) est maintenue
 >
@@ -539,11 +539,13 @@ static void QueryOverInts()
     // Affiche seulement les éléments avec une valeur < 10.
     IEnumerable<int> subset = from i in numbers where i < 10 select i;
 
+    ReflectOverQueryResults(subset);
+    
     foreach (int i in subset)
     {
         Console.WriteLine($"Item: {i}");
     }
-    ReflectOverQueryResults(subset);
+    Console.WriteLine();
 }
 ```
 
@@ -618,7 +620,7 @@ En règle générale, **il est toujours préférable d'utiliser le typage implic
 >
 >Même si on ne manipule pas ces types directement, comprendre ce qu'ils font est devenu un atout pour le développeur moderne dans deux cas :
 >
->- **Le "Performance Profiling" :** Si votre application est lente, regarder ces types via la réflexion ou un profiler (comme DotTrace) vous permet de comprendre pourquoi. Par exemple, voir un `IteratorSelectIterator` vous indique que vous avez peut-être un `.Select()` inutile qui ralentit la boucle.
+>- **Le "Performance Profiling" :** Si votre application est lente, regarder ces types via la réflexion ou un profiler (comme *DotTrace*) vous permet de comprendre pourquoi. Par exemple, voir un `IteratorSelectIterator` vous indique que vous avez peut-être un `.Select()` inutile qui ralentit la boucle.
 >- **L'optimisation mémoire :** En .NET 10, savoir que `ArrayWhereIterator` utilise des `Spans` ou évite des allocations vous permet de dormir tranquille : vous savez que LINQ est devenu "gratuit" (ou presque) en termes de ressources, ce qui n'était pas le cas il y a 10 ans.
 
 ## LINQ et méthodes d'extension
@@ -642,7 +644,8 @@ public abstract class Array : ICloneable, IList,
 >[!tip]- Ce qui à changé sous le capot
 >### L'implémentation "magique" du Runtime
 >
->En réalité, dans le .NET moderne, le **CLR (Common Language Runtime)** injecte automatiquement `IEnumerable<T>` (et d'autres interfaces comme `IList<T>`) dans les tableaux à l'exécution.  
+>En réalité, dans le .NET moderne, le **CLR (Common Language Runtime)** injecte automatiquement `IEnumerable<T>` (et d'autres interfaces comme `IList<T>`) dans les tableaux à l'exécution. 
+>
 >Si vous faites `myArray is IEnumerable<string>`, cela renverra `true`. C'est une petite manipulation du moteur .NET pour s'assurer que les tableaux s'intègrent parfaitement partout.
 >
 >### L'optimisation par "Spécialisation"
@@ -689,6 +692,7 @@ static void QueryOverInts()
     var subset = from i in numbers where i < 10 select i;
 
     // L'instruction LINQ est évaluée ici !
+    // i.e: le programme fait les calculs maintenant.
     foreach (var i in subset)
     {
         Console.WriteLine($"{i} < 10");
@@ -829,7 +833,9 @@ static void ImmediateExecution()
 
     try
     {
-        // Lève une exception si aucun enregistrement n'est renvoyé.
+    
+        // Lève une exception si plus qu'un seul élément
+        // répondent à la requête.
         number = numbers.Where(i => i > 10).Select(i => i).Single();
     }
     catch (Exception ex)
@@ -853,6 +859,61 @@ static void ImmediateExecution()
 ```
 
 >[!warning] Si on ne transforme pas la donnée, **supprimez le `Select()` lors de l'utilisation des méthodes d'extensions**.
+>
+>>[!tip]- Raccourcis possible en C# moderne avec les exemples listé si-dessus.
+>>
+>>**Comme les éléments constituant le tableau ne sont pas modifié** (avec une méthode `Select()` dont la signature de la fonction de rappelle est différente de `x => x`) Les méthodes `First()`, `Single()` et leurs dérivées prennent un délégué en paramètre, permettant de supprimer les appels à `Where()` comme ceci:
+>>```cs
+>>static void ImmediateExecution()
+>>{
+>>    Console.WriteLine("* Imediate Execution *");
+>>
+>>    int[] numbers = [10, 20, 30, 40, 1, 2, 3, 8];
+>>
+>>    int number = numbers.First();
+>>    Console.WriteLine($"First is {number}");
+>>
+>>    number = numbers.OrderBy(i => i).First();
+>>    Console.WriteLine($"First is {number}");
+>>
+>>    number = numbers.Single(i => i > 30);
+>>    Console.WriteLine($"Single is {number}");
+>>
+>>    number = numbers.FirstOrDefault(i => i > 99, -1);
+>>    number = numbers.SingleOrDefault(i => i > 99, -1);
+>>
+>>    try
+>>    {
+>>        number = numbers.First(i => i > 99);
+>>    }
+>>    catch (Exception ex)
+>>    {
+>>        Console.WriteLine($"An exception occured: {ex.Message}");
+>>    }
+>>    try
+>>    {
+>>        number = numbers.Single(i => i > 99);
+>>    }
+>>    catch (Exception ex)
+>>    {
+>>        Console.WriteLine($"An exception occured: {ex.Message}");
+>>    }
+>>
+>>    try
+>>    {
+>>        // Lève une exception si plus qu'un seul élément
+>>        // répondent à la requête.
+>>        number = numbers.Single(i => i > 10);
+>>    }
+>>    catch (Exception ex)
+>>    {
+>>        Console.WriteLine($"An exception occured: {ex.Message}");
+>>    }
+>>
+>>    int[] subsetAsIntArray = [.. numbers.Where(i => i < 10)];
+>>    List<int> subsetAListOfInt = [.. numbers.Where(i => i < 10)];
+>>}
+>>```
 
 Notez que l'expression LINQ entière est placée entre parenthèses afin de la convertir dans le type sous-jacent approprié (quel qu'il soit) pour appeler les méthodes d'extension d'`Enumerable`[^1]. 
 
@@ -922,7 +983,7 @@ class LINQBasedFieldsAreClunky
 }
 ```
 
-**Souvent, les requêtes LINQ sont définies dans la portée d'une méthode ou d'une propriété**. De plus, pour simplifier votre programmation, **==la variable utilisée pour stocker le jeu de résultats sera stockée dans une variable locale à typage implicite à l'aide du mot-clé `var`==**. Or, *==rappelons du [[Chapitre 3#Comprendre les restrictions relatives aux variables de type implicite|Chapitre 3]] que les variables à typage implicite ne peuvent pas être utilisées pour définir les paramètres, les valeurs de retour ou les champs d'une classe ou d'une structure==*.
+**Souvent, les requêtes LINQ sont définies dans la portée d'une méthode ou d'une propriété**. De plus, pour simplifier votre programmation, **==la variable utilisée pour stocker le jeu de résultats sera stockée dans une variable locale à typage implicite à l'aide du mot-clé `var`==**. Or, *==rappel du [[Chapitre 3#Comprendre les restrictions relatives aux variables de type implicite|Chapitre 3]] que les variables à typage implicite ne peuvent pas être utilisées pour définir les paramètres, les valeurs de retour ou les champs d'une classe ou d'une structure==*.
 
 Partant de ce constat, vous pourriez vous demander ==comment renvoyer le résultat d'une requête à un appelant externe==. La réponse est : **cela dépend**. **==Si votre jeu de résultats est composé de données fortement typées, comme un tableau de chaînes de caractères ou une `List<Car>`, vous pouvez abandonner l'utilisation du mot-clé `var` et utiliser un type `IEnumerable<T>` ou un type `IEnumerable` approprié (car `IEnumerable<T>` étend `IEnumerable`)==**. Prenons l'exemple suivant pour une nouvelle application console nommée *LinqRetValues* :
 
@@ -930,14 +991,14 @@ Partant de ce constat, vous pourriez vous demander ==comment renvoyer le résult
 Console.Title = "LINQ Return Values";
 Console.WriteLine("***** LINQ Return Values *****\n");
 
-IEnumerable<string> subset = GetStringSubSet();
+IEnumerable<string> subset = GetStringSubset();
 
 foreach (string item in subset)
 {
     Console.WriteLine(item);
 }
 
-static IEnumerable<string> GetStringSubSet()
+static IEnumerable<string> GetStringSubset()
 {
     string[] colors =
     [
@@ -975,7 +1036,7 @@ Red
 ***==Comme il est quelque peu fastidieux de manipuler `IEnumerable<T>`, vous pouvez utiliser l'exécution immédiate==***. Par exemple, **au lieu de retourner `IEnumerable<string>`, vous pouvez simplement retourner un tableau de chaînes (`string[]`), si vous transformez la séquence en un tableau fortement typé**. Considérez cette nouvelle méthode du fichier *Program.cs*, qui fait exactement cela :
 
 ```cs
-static string[] GetStringSubSetAsArray()
+static string[] GetStringSubsetAsArray()
 {
     string[] colors =
     [
@@ -998,7 +1059,7 @@ static string[] GetStringSubSetAsArray()
 Ainsi, **==l'appelant peut ignorer que son résultat provient d'une requête LINQ et simplement travailler avec le tableau de `string` comme prévu==**. Voici un exemple :
 
 ```cs
-foreach (string item in GetStringSubSetAsArray())
+foreach (string item in GetStringSubsetAsArray())
 {
     Console.WriteLine(item);
 }
@@ -1006,7 +1067,7 @@ foreach (string item in GetStringSubSetAsArray())
 
 **L'exécution immédiate est également cruciale lorsqu'on tente de renvoyer à l'appelant les résultats d'une projection LINQ**. ***==Nous aborderons ce sujet plus loin dans ce chapitre==***. Voyons maintenant comment appliquer des requêtes LINQ à des objets de collection génériques et non génériques.
 
-# Application de requêtes LINQ aux objets de collection
+# Application de requêtes LINQ aux objets de collections
 
 Outre l'extraction de résultats à partir d'un simple tableau de données, **les expressions de requête LINQ peuvent également manipuler les données au sein des membres de l'espace de noms `System.Collections.Generic`, tels que le type `List<T>`**. Créez un nouveau projet d'application console nommé *LinqOverCollections* et définissez une classe `Car` de base qui conserve la vitesse actuelle, la couleur, la marque et le surnom, comme illustré dans le code suivant :
 
@@ -1190,7 +1251,7 @@ Comme les exemples précédents, cette méthode, lorsqu'elle est appelée depuis
 Comme vous le savez, ==les types non génériques peuvent contenir n'importe quelle combinaison d'éléments, car les membres de ces conteneurs== (comme `ArrayList`) ==sont prototypés pour recevoir des `System.Objects`==. Par exemple, supposons qu'une `ArrayList` contienne divers éléments, dont seulement une partie est numérique. **Si vous souhaitez obtenir un sous-ensemble ne contenant que des données numériques, vous pouvez utiliser `OfType<T>()`, car cette fonction filtre chaque élément dont le type est différent du type donné lors des itérations**.
 
 ```cs
-static void OftypeAsFilter()
+static void OfTypeAsFilter()
 {
     // Extrait les entiers de l'ArrayList
     ArrayList myStuff = new ArrayList();
@@ -1479,7 +1540,7 @@ static void PagingWithRanges(ProductInfo[] products)
     OutputResults("Skipping the first 3", list);
 
     list = (from p in products select p).Take(^2..);
-    OutputResults("the last 2", list);
+    OutputResults("The last 2", list);
 
     list = (from p in products select p).Take(3..5);
     OutputResults("Skip 3 take 2", list);
@@ -1555,6 +1616,8 @@ static void GetNamesAndDescriptions(ProductInfo[] products)
 
 *==N'oubliez jamais que lorsqu'une requête LINQ utilise une projection, vous ne pouvez pas connaître le type de données sous-jacent, car celui-ci est déterminé à la compilation==*. Dans ce cas, **le mot-clé `var` est obligatoire**. De plus, rappelez-vous qu'**il est impossible de créer des méthodes avec des valeurs de retour implicitement typées**. Par conséquent, la méthode suivante ne compilerait pas :
 
+>[!tip] Ce problème n'est pas présent si on utilise un `tuple` au lieu d'un type anonyme !
+
 ```cs
 static var GetProjectedSubset(ProductInfo[] products)
 {
@@ -1564,7 +1627,7 @@ static var GetProjectedSubset(ProductInfo[] products)
 }
 ```
 
-**==Lorsque vous devez renvoyer des données projetées à un appelant, une solution consiste à transformer le résultat de la requête en un objet `System.Array` à l'aide de la méthode d'extension `ToArray()` ==**. Ainsi, si vous deviez mettre à jour votre expression de requête comme suit :
+**==Lorsque vous devez renvoyer des données projetées à un appelant, une solution consiste à transformer le résultat de la requête en un objet `System.Array` à l'aide de la méthode d'extension `ToArray()`==**. Ainsi, si vous deviez mettre à jour votre expression de requête comme suit :
 
 ```cs
 // La valeur de retour est maintenant un Array
@@ -1611,7 +1674,7 @@ class ProductInfoSmall
 ***==La prochaine étape consiste à projeter les résultats de la requête dans une collection d'objets `ProductInfoSmall`, au lieu de types anonymes==***. Ajoutez la méthode suivante à votre classe :
 
 ```cs
-static void GetNamesAndDescriptionstyped(ProductInfo[] products)
+static void GetNamesAndDescriptionsTyped(ProductInfo[] products)
 {
     Console.WriteLine("Names and Descriptions");
     IEnumerable<ProductInfoSmall> nameDesc =
@@ -1672,11 +1735,11 @@ static void GetUnenumerateCount(ProductInfo[] products)
     var result = query.TryGetNonEnumeratedCount(out int count);
     if (result)
     {
-        Console.WriteLine($"Total count: {count}");
+        Console.WriteLine($"Total Count: {count}");
     }
     else
     {
-        Console.WriteLine("Try Gut Count Failed");
+        Console.WriteLine("Try Get Count Failed");
     }
 }
 ```
@@ -1694,11 +1757,11 @@ static void GetUnenumerateCount(ProductInfo[] products)
         .TryGetNonEnumeratedCount(out int newCount);
     if (newResult)
     {
-        Console.WriteLine($"Total count: {newCount}");
+        Console.WriteLine($"Total Count: {newCount}");
     }
     else
     {
-        Console.WriteLine("Try Gut Count Failed");
+        Console.WriteLine("Try Get Count Failed");
     }
 
     static IEnumerable<ProductInfo> GetProduct(ProductInfo[] products)
@@ -1766,6 +1829,8 @@ var subset = from p in products orderby p.Name ascending select p;
 var subset = from p in products orderby p.Name descending select p;
 ```
 
+>[!tip] quand on utilise les méthodes d'extensions, Il faut utilisé `OrderDescending()` ou `OrderByDescending()`
+
 ## LINQ comme un meilleur outil pour les diagrammes de Venn
 
 >[!info]- C'est quoi un diagramme de Venn ?
@@ -1831,11 +1896,12 @@ static void DisplayUnion()
         from c2 in yourCars
         select c2
     );
-
-    Console.WriteLine("Here is everything:");
+    
+    Console.WriteLine("Here is all the different cars:");
+    
     foreach (string s in carUnion)
     {
-        Console.WriteLine(s); // Affiche tous les membres communs;
+        Console.WriteLine(s);
     }
 }
 ```
@@ -1851,6 +1917,9 @@ static void DisplayConcat()
         from c2 in yourCars
         select c2
     );
+    
+    Console.WriteLine("Here is everything:");
+    
     // Affiche :
     // Yugo Aztec BMW BMW Saab Aztec.
     foreach (string s in carConcat)
@@ -1882,7 +1951,7 @@ static void DisplayDiffBySelector()
     var second = new (string Name, int Age)[]
     {
         ("Claire", 30),
-        ("pat", 30),
+        ("Pat", 30),
         ("Drew", 33),
     };
 
@@ -2052,7 +2121,7 @@ static void DisplayConcatNoDupsBySelector()
 **Les requêtes LINQ peuvent également être conçues pour effectuer diverses opérations d'agrégation sur l'ensemble de résultats**. **==La méthode d'extension `Count()` est un exemple d'agrégation==**. ==D'autres possibilités incluent l'obtention d'une moyenne, d'un maximum, d'un minimum ou d'une somme de valeurs à l'aide des membres `Max()`, `Min()`, `Average()` ou `Sum()` de la classe `Enumerable`. Voici un exemple simple :==
 
 ```cs
-static void AgregateOps()
+static void AggregateOps()
 {
     double[] winterTemps = { 2.0, -21.3, 8, -4, 9, 8.2 };
 
@@ -2091,7 +2160,7 @@ static void AgregateOps()
 
 
 ```cs
-static void AgregateOpsBySelector(ProductInfo[] products)
+static void AggregateOpsBySelector(ProductInfo[] products)
 {
     // Max et Min renvoient un seul objet
     Console.WriteLine(
@@ -2115,7 +2184,7 @@ static void AgregateOpsBySelector(ProductInfo[] products)
     var aggregate = products.AggregateBy(
         keySelector: p => p.Name.Contains("Milk"),
         seed: 0,
-        (currentTotal, p) => currentTotal + p.NumberInStock
+        func: (currentTotal, p) => currentTotal + p.NumberInStock
     );
     foreach (var entry in aggregate)
     {
@@ -2128,7 +2197,7 @@ static void AgregateOpsBySelector(ProductInfo[] products)
 >[!tip] Explication de chaque paramètre de la méthode d'extension `AggregateBy`
 >- **Le `keySelector` :** Ici, on ne pointe pas juste une propriété, on crée une **logique de groupe** à la volée (`p.NumberInStock < 50`). C'est la force de LINQ.
 >- **Le `seed` :** C'est la valeur initiale. Si tu faisais une multiplication, tu mettrais `1`. Pour une somme, on met `0`.
->- **L'accumulateur (Callback) :** C'est ici que la magie opère. Pour chaque article, .NET regarde sa catégorie (Critique ou Sain) et met à jour le total correspondant.
+>- **L'accumulateur (Callback) `func` :** C'est ici que la magie opère. Pour chaque article, .NET regarde sa catégorie (Critique ou Sain) et met à jour le total correspondant.
 
 # Représentation interne des requêtes LINQ
 
@@ -2327,8 +2396,7 @@ static void QueryStringsWithAnonymousMethods()
 }
 ```
 
-==Cette itération de l'expression de requête est encore plus verbeuse, car vous créez manuellement
-les délégués `Func<>` utilisés par les méthodes `Where()`, `OrderBy()` et `Select()` de la classe `Enumerable`==. **L'avantage, c'est que la syntaxe de méthode anonyme permet de centraliser tout le traitement des délégués dans une seule définition de méthode**. Néanmoins, *==cette méthode est fonctionnellement équivalente aux méthodes `QueryStringsWithEnumerableAndLambdas()` et `QueryStringsWithOperators()` créées dans les sections précédentes.==*
+==Cette itération de l'expression de requête est encore plus verbeuse, car vous créez manuellement les délégués `Func<>` utilisés par les méthodes `Where()`, `OrderBy()` et `Select()` de la classe `Enumerable`==. **L'avantage, c'est que la syntaxe de méthode anonyme permet de centraliser tout le traitement des délégués dans une seule définition de méthode**. Néanmoins, *==cette méthode est fonctionnellement équivalente aux méthodes `QueryStringsWithEnumerableAndLambdas()` et `QueryStringsWithOperators()` créées dans les sections précédentes.==*
 
 >[!tip] Bien qu'elles soient équivalentes en termes de **résultat**, il y a une micro-différence de performance :
 >
@@ -2357,9 +2425,9 @@ class VeryComplexQueryExpression
             "System Shock 2",
         };
 
-        // Construit les délégués Func<> Nécessaires.
+        // Construit les délégués Func<> nécessaires.
         Func<string, bool> searchFilter = new Func<string, bool>(Filter);
-        Func<string, string> ItemToProcess = new Func<string, string>(
+        Func<string, string> itemToProcess = new Func<string, string>(
             ProcessItem
         );
 
@@ -2368,7 +2436,7 @@ class VeryComplexQueryExpression
         // quand on ne modifie pas la donnée.
         var subset = currentVideoGames
             .Where(searchFilter)
-            .OrderBy(ItemToProcess);
+            .OrderBy(itemToProcess);
 
         // Affiche le résultat
         foreach (string game in subset)

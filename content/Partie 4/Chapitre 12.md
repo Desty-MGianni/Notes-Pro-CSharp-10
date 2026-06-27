@@ -33,6 +33,7 @@ Une fois l'objet délégué créé et doté des informations nécessaires, il pe
 ## Définition d'un type délégué en C#
 
 >[!warning] Cette sous-section n'est plus la manière privilégié pour déclarer des délégués. (Gemini)
+>
 >**En C# moderne, on utilisera 95% du temps d'autre syntaxes qui seront abordé plus loin dans ce chapitre.**
 >
 >Il reste néanmoins trois scénarios où déclarer son propre délégué est préférable :
@@ -918,7 +919,7 @@ Comme vous pouvez le constater, **l'utilisation du délégué `Action<>` vous é
 
 **Le délégué générique `Func<>` peut pointer vers des méthodes qui** (comme `Action<>`) **acceptent jusqu'à 16 paramètres et une valeur de retour personnalisée**. Pour illustrer cela, ajoutez la méthode suivante au fichier *Program.cs* :
 
-> [!Tip] La Grande Ligne de Faille : `void` vs `Return Type` (généré par Gemini)
+> [!tip] La Grande Ligne de Faille : `void` vs `Return Type` (Gemini)
 > 
 > En C#, la différence entre une procédure (`void`) et une fonction (avec retour) n'est pas qu'une question de style, c'est une contrainte matérielle et logique qui dicte tout le système de types.
 >
