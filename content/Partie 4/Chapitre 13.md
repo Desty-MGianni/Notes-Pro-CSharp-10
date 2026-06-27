@@ -2413,8 +2413,8 @@ class VeryComplexQueryExpression
 {
     public static void QueryStringsWithRawDelegate()
     {
-        Console.Title = "Using Raw Delegate";
-        Console.WriteLine("***** Using Raw Delegate *****\n");
+        Console.Title = "Using Raw Delegates";
+        Console.WriteLine("***** Using Raw Delegates *****\n");
 
         string[] currentVideoGames =
         {
