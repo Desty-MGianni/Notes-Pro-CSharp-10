@@ -49,7 +49,7 @@ Chaque processus contient un « thread » initial qui sert de point d'entrée à
 >>[!info]- Précision sémantique
 >>Le processus reste en vie tant qu'au moins **un** "Foreground Thread" (généralement le thread principal) est en cours d'exécution.
 
-Comme vous l'aurez deviné, **les développeurs créent généralement des threads supplémentaires pour améliorer la réactivité globale du programme**. ==Les processus multithread donnent l'illusion que de nombreuses activités se déroulent simultanément==. Par exemple, **==une application peut créer un thread de travail pour effectuer une tâche gourmande en ressources==** (comme l'impression d'un fichier texte volumineux). **==Pendant que ce thread secondaire travaille, le thread principal reste réactif aux entrées utilisateur, ce qui permet au processus global d'offrir des performances potentiellement supérieures==**. *==Cependant, ce n'est pas toujours le cas==* : ==l'utilisation d'un trop grand nombre de threads dans un seul processus peut en réalité *dégrader* les performances, car le processeur doit alterner entre les threads actifs du processus (ce qui prend du temps).==
+Comme vous l'aurez deviné, **les développeurs créent généralement des threads supplémentaires pour améliorer la réactivité globale du programme**. ==Les processus multithread donnent l'illusion que de nombreuses activités se déroulent simultanément==. Par exemple, **==une application peut créer un thread de travail pour effectuer une tâche gourmande en ressources==** (comme l'impression d'un fichier texte volumineux). **==Pendant que ce thread secondaire travaille, le thread principal reste réactif aux entrées utilisateur, ce qui permet au processus global d'offrir des performances potentiellement supérieures==**. *==Cependant, ce n'est pas toujours le cas==* : **l'utilisation d'un trop grand nombre de threads dans un seul processus peut en réalité *dégrader* les performances, car le processeur doit alterner entre les threads actifs du processus (ce qui prend du temps).**
 
 ***==Sur certaines machines, le multithreading est généralement une illusion fournie par le système d'exploitation==***. **Les machines qui hébergent un seul processeur** (==non hyperthreadé==) **ne peuvent pas gérer littéralement plusieurs threads simultanément**. **==En réalité, un seul processeur exécute un thread pendant une unité de temps==** (appelée *tranche de temps*), **==en fonction notamment du niveau de priorité du thread==**. **Lorsqu'une tranche de temps est écoulée, le thread en cours est suspendu pour permettre à un autre thread de s'exécuter**. ***==Pour qu'un thread conserve en mémoire son état avant d'être interrompu, chaque thread dispose de la possibilité d'écrire dans le stockage local de thread (TLS) et d'une pile d'appels distincte==***, comme illustré dans l'image suivante
 
@@ -93,7 +93,7 @@ Bien que les processus et les threads ne soient pas nouveaux, **la manière d'in
 | `Handle`          | Cette propriété renvoie le handle (représenté par un `IntPtr`) associé au processus par le système d'exploitation. Cela peut s'avérer utile lors du développement d'applications .NET qui doivent communiquer avec du code non managé (voir [[Chapitre 9#Rappel sur le Code Non Managé (*Unmanaged Code*)\|Chapitre 9]]). |
 | `Id`              | Cette propriété récupère l'identifiant du processus (PID) associé.                                                                                                                                                                                                                                                        |
 | `MachineName`     | Cette propriété récupère le nom de l'ordinateur sur lequel le processus associé s'exécute.                                                                                                                                                                                                                                |
-| `MainWindowTitle` | `MainWindowTitle` récupère le titre de la fenêtre principale du processus (si le processus<br>n'a pas de fenêtre principale, vous recevez une chaîne vide).                                                                                                                                                               |
+| `MainWindowTitle` | `MainWindowTitle` récupère le titre de la fenêtre principale du processus (si le processus n'a pas de fenêtre principale, vous recevez une chaîne vide).                                                                                                                                                                  |
 | `Modules`         | Cette propriété donne accès au type fortement typé `ProcessModuleCollection`, qui représente l'ensemble des modules (*.dll* ou *.exe*) chargés dans le processus actuel.                                                                                                                                                  |
 | `ProcessName`     | Cette propriété reçoit le nom du processus (qui, comme vous le supposez, est le nom de l'application elle-même).                                                                                                                                                                                                          |
 | `Responding`      | Cette propriété reçoit une valeur indiquant si l'interface utilisateur du processus<br>répond aux entrées de l'utilisateur (ou est actuellement « bloquée »).                                                                                                                                                             |
@@ -136,7 +136,7 @@ static void ListAllRunningProcesses()
 
 **La méthode statique `Process.GetProcesses()` renvoie un tableau d'objets `Process` représentant les processus en cours d'exécution sur la machine cible** (**==la notation `"."` représente l'ordinateur local==**). ==Une fois le tableau d'objets `Process` obtenu, vous pouvez appeler n'importe quel membre listé dans le [[#Tableau 14-2 Sélection de propriété du type `Process`|Tableau 14-2]] ainsi que le [[#Tableau 14-3 Sélection de méthode du type `Process`|Tableau 14-3]]==. Ici, vous affichez simplement le PID et le nom de chaque processus, triés par PID. Mettez à jour les instructions de niveau supérieur comme suit :
 
->[!info] La méthode `GetProcess()` Possède une surcharge sans paramètre, référant à la machine locale (`"."`).
+>[!tip] La méthode `GetProcess()` Possède une surcharge sans paramètre, référant à la machine locale (`"."`).
 
 ```cs
 using System.Diagnostics;
@@ -219,6 +219,10 @@ static void GetSpecificProcess()
 >Apple utilise un noyau appelé **Darwin** (basé sur Mach et BSD). ***==Pour des raisons de sécurité et de performance, Apple restreint l'accès aux métadonnées des threads==***. Pour obtenir le `StartTime` d'un thread sur Mac, il faut appeler des API privées ou très complexes du noyau (XNU)
 >
 >**Microsoft a jugé que l'effort n'en valait pas la chandelle :** Comme ces API changent souvent avec les versions de macOS (pour renforcer la sécurité), maintenir ce code dans .NET serait un cauchemar technique.
+>>[!Attention]  
+>>certaines propriétés non supportées ne lèvent pas de `PlatformNotSupportedException` mais retournent silencieusement une valeur par défaut (`0`, `DateTime.MinValue`...). 
+>>
+>>Il faut toujours vérifier le comportement sur macOS avec `RuntimeInformation.IsOSPlatform(OSPlatform.OSX)` avant d'utiliser des données de `ProcessThread` en production.
 
 **L’ensemble des threads est représenté par la collection fortement typée `ProcessThreadCollection`, qui contient un certain nombre d’objets `ProcessThread` individuels**. Pour illustrer cela, ajoutez la fonction d’assistance statique suivante à votre application :
 
@@ -237,7 +241,7 @@ static void EnumThreadForPid(int pID)
     }
 
     // Affiche les statistiques de chaque thread du processus spécifié.
-    Console.WriteLine($"here are the threads used by: {theProc.ProcessName}");
+    Console.WriteLine($"Here are the threads used by: {theProc.ProcessName}");
     ProcessThreadCollection theThreads = theProc.Threads;
 
     foreach (ProcessThread pt in theThreads)
@@ -252,36 +256,53 @@ static void EnumThreadForPid(int pID)
 
 Comme vous pouvez le constater, **la propriété `Threads` du type `System.Diagnostics.Process` donne accès à la classe `ProcessThreadCollection`**. ==Ici, vous affichez l'ID, l'heure de début et le niveau de priorité de chaque thread du processus spécifié par le client==. À présent, mettez à jour les instructions de niveau supérieur de votre programme afin de inviter l'utilisateur à saisir un PID à examiner, comme suit :
 
->[!warning] Comme précisé au début de la sous-section, cette exemple de code ne fonctionne pas sur macOS.
+>[!warning]- Comme précisé au début de la sous-section, cette exemple de code ne fonctionne pas sur macOS. (voir plus)
+>>[!tip] Comment restreindre les fonctionnalité selon le système d'exploitation ?
+>>
+>> 1)  **L'utilisation de l'attribut `SupportedOsPlatform()` au niveau de la méthode**
+>> ```cs
+>> [SupportedOSPlatform("windows")]
+>> [SupportedOSPlatform("linux")] 
+>> static void PrintThreadInfo(ProcessThread pt) 
+>> { 
+>> 	// Pas de if nécessaire ! string info = $"-> Thread ID: {pt.Id} Start Time: {pt.StartTime:t}"; 
+>> }
+>> ```
+>>
+>>  La particularité de ceci est que la vérification doit s'effectué à un niveau au dessus, avant d'appeler la méthode.
+>>  
+>> 2) **L'appel à la méthode `RuntimeInformation.IsOSPlatform()`**
+>>
+>>```cs
+>>if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) 
+>>	!! RuntimeInformation.IsOsPlatform(OSPlatform.Windows
+>>) { ... }
+>>```
+>>
+>> la méthode `IsOSPlatform` prend un argument de type d'énumération `OSPlatform`.
+>>
+>> 3) **L'appel aux méthodes `OperatingSystem.IsXXX`**
+>> 
+>>```cs
+>>if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+>>{...}
+>>```
+>>> [!info] 
+>>> Les méthodes `OperatingSystem.IsXXX` sont des wrapper officiel .NET de `RuntimeInformation.IsOsPlatform(OsPlatform.XXX)`
+>>
+>> **Si on utilise "l'inverse", ou que l'on ajoute une étape d'abstraction** (avec un wrapper par exemple), *roslyn* **ne saura pas faire le lien et donc affichera quand même les avertissements.**
 
 ```cs
-static void EnumThreadForPid(int pID)
-{
-    Process theProc = null;
-    try
-    {
-        theProc = Process.GetProcessById(pID);
-    }
-    catch (ArgumentException ex)
-    {
-        Console.WriteLine(ex.Message);
-        return;
-    }
+...
+// Demande à l'utilisateur un PID et affiche l'ensemble des threads actifs.
+Console.WriteLine("***** Enter PID of process to investigate *****");
+Console.Write("PID: ");
+string pID = Console.ReadLine();
+int theProcID = int.Parse(pID);
 
-    // Affiche les statistiques de chaque thread du processus spécifié.
-    Console.WriteLine($"here are the threads used by: {theProc.ProcessName}");
-    ProcessThreadCollection theThreads = theProc.Threads;
-
-    foreach (ProcessThread pt in theThreads)
-    {
-        string info =
-            $@"-> Thread ID: {pt.Id}	Start Time: {pt.StartTime.ToShortTimeString()}	Priority: {pt.PriorityLevel}";
-        Console.WriteLine(info);
-    }
-    Console.WriteLine("****************************\n");
-}
+EnumThreadsForPid(theProcID);
+Console.ReadLine();
 ```
-
 
 Lorsque vous exécutez votre programme, vous pouvez désormais saisir l'identifiant de processus (PID) de n'importe quel processus sur votre machine et afficher les threads utilisés par ce processus. ==La sortie suivante présente une liste partielle des threads utilisés par le PID $3804$ sur ma machine, qui héberge Edge :==
 
@@ -317,7 +338,7 @@ Here are the threads used by: msedge
 
 >[!warning] Sur macOS, Seulement `Id` est utilisable ! (et `BasePriority`, qui n'est pas recensé dans le tableau)
 
-***==Avant de poursuivre votre lecture, sachez que le type `ProcessThread` n'est pas l'entité utilisée pour créer, suspendre ou arrêter des threads sous la plateforme .NET Core. `ProcessThread` sert plutôt à obtenir des informations de diagnostic sur les threads  actifs au sein d'un processus en cours d'exécution==***. **Vous découvrirez comment créer des applications multithread à l'aide de l'espace de noms `System.Threading` au [[Chapitre 15|Chapitre 15]].**
+***==Avant de poursuivre votre lecture, sachez que le type `ProcessThread` n'est pas l'entité utilisée pour créer, suspendre ou arrêter des threads sous la plateforme .NET Core. `ProcessThread` sert plutôt à obtenir des informations de diagnostic sur les threads  actifs au sein d'un processus en cours d'exécution==***. **Vous découvrirez comment créer des applications multithread à l'aide de l'espace de noms `System.Threading` au [[Chapitre 15#L’espace de noms `System.Threading`|Chapitre 15]].**
 
 ## Analyse de l’ensemble des modules d’un processus
 
@@ -457,10 +478,10 @@ static void StartAndKillProcess()
     // Lance Edge et va sur YouTube !
     try
     {
-        proc = Process.Start(
-            "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-            "www.youtube.com"
-        );
+		proc = Process.Start(
+			"open",
+			"-a \"Brave Browser\" https://www.youtube.com"
+		);
     }
     catch (InvalidOperationException ex)
     {
@@ -532,10 +553,9 @@ public sealed class ProcessStartInfo : object
 >- `Password`
 >- `CreateNewProcessGroup`
 
-Pour illustrer comment optimiser le démarrage de votre processus, voici une version modifiée de
-`StartAndKillProcess()`, qui chargera Microsoft Edge et accédera à www.youtube.com, en utilisant l'association Windows MsEdge :
+Pour illustrer comment optimiser le démarrage de votre processus, voici une version modifiée de `StartAndKillProcess()`, qui chargera Microsoft Edge et accédera à www.youtube.com, en utilisant l'association Windows MsEdge :
 
-**Pour Windows:
+**Pour Windows:**
 
 ```cs
 static void StartAndKillProcess()
@@ -754,7 +774,7 @@ static void DisplayDADStats()
     Console.WriteLine(
         $"Base directory of this domain: {defaultAD.BaseDirectory}"
     );
-    Console.WriteLine("Setup Information for this domain:");
+    Console.WriteLine("Setup information for this domain:");
     Console.WriteLine(
         $"\t Application Base: {defaultAD.SetupInformation.ApplicationBase}"
     );
@@ -774,17 +794,16 @@ ID of domain in process: 1
 Is this the default domain?: True
 Base directory of this domain: ... /DefaultAppDomainApp/bin/Debug/net10.0/
 Setup Information for this domain:
-        Application Base: ... /DefaultAppDomainApp/bin/Debug/net10.0/
-	    Target Framework: .NETCoreApp,Version=v10.0
+	Application Base: ... /DefaultAppDomainApp/bin/Debug/net10.0/
+	Target Framework: .NETCoreApp,Version=v10.0
 ```
 
-**Notez que le nom du domaine d'application par défaut sera identique au nom de l'exécutable
-qu'il contient** (*DefaultAppDomainApp.dll,* dans cet exemple). Notez également que **la valeur du répertoire de base , qui sera utilisée pour rechercher les assemblies privés requis en externe, correspond à l'emplacement actuel de l'exécutable déployé.**
+**Notez que le nom du domaine d'application par défaut sera identique au nom de l'exécutable qu'il contient** (*DefaultAppDomainApp.dll,* dans cet exemple). Notez également que **la valeur du répertoire de base , qui sera utilisée pour rechercher les assemblies privés requis en externe, correspond à l'emplacement actuel de l'exécutable déployé.**
 
 ## Énumérer des assemblys chargés
 >[!success] Fonctionne parfaitement sur macOS
 
-**Il est également possible de découvrir tous les assemblies .NET Core chargés dans un domaine d'application donné à l'aide de la méthode `GetAssemblies()` au niveau de l'instance**. Cette méthode renvoie un tableau d'objets `Assembly` (voir [[Chapitre 17|Chapitre 17]]). Pour ce faire, vous devez avoir ajouté l'espace de noms `System.Reflection` à votre fichier de code (comme indiqué précédemment dans cette section).
+**Il est également possible de découvrir tous les assemblies .NET Core chargés dans un domaine d'application donné à l'aide de la méthode `GetAssemblies()` au niveau de l'instance**. Cette méthode renvoie un tableau d'objets `Assembly` (voir [[Chapitre 17#Comprendre la réflexion|Chapitre 17]]). Pour ce faire, vous devez avoir ajouté l'espace de noms `System.Reflection` à votre fichier de code (comme indiqué précédemment dans cette section).
 
 À titre d'exemple, définissez une nouvelle méthode nommée `ListAllAssembliesInAppDomain()` dans le fichier *Program.cs*. Cette méthode auxiliaire récupère tous les assemblies chargés et affiche le nom convivial et la version de chacun.
 
@@ -798,7 +817,7 @@ static void ListAllAssembliesInAppDomain()
     // chargées dans le domaine d'application par défaut.
     Assembly[] loadedAssemblies = defaultAD.GetAssemblies();
     Console.WriteLine(
-        $"***** Here are the assemblies loaded in {defaultAD.FriendlyName}"
+        $"***** Here are the assemblies loaded in {defaultAD.FriendlyName} *****"
     );
 
     foreach (Assembly a in loadedAssemblies)
@@ -951,7 +970,7 @@ La première ligne utilise la méthode statique `Path.Combine` pour construire l
 >[!note] 
 >Vous vous demandez peut-être ==pourquoi vous avez créé une référence à un assembly qui sera chargé dynamiquement==. Ceci est afin de garantir que, lors de la compilation du projet, l'assembly *ClassLibrary1* soit également compilé et se trouve dans le même répertoire que *DefaultAppDomainApp*. **Il s'agit simplement d'une commodité pour cet exemple. Il n'est pas nécessaire de référencer un assembly que vous chargerez dynamiquement.**
 
-**Ensuite, le code crée un nouvel `AssemblyLoadContext` nommé `NewContext1`** (premier paramètre de la méthode) **et ne prend pas en charge le déchargement** (deuxième paramètre). **==Ce `LoadContext` sert à charger l'assembly *ClassLibrary1*, puis à créer une instance de la classe `Car`==**. **Si une partie de ce code vous est inconnue, elle sera expliquée plus en détail au [[Chapitre 18|Chapitre 18]]**. Le processus est répété avec un nouvel `AssemblyLoadContext`, puis les assemblies et les classes sont comparés. Lorsque vous exécuterez cette nouvelle méthode, vous verrez le résultat suivant :
+**Ensuite, le code crée un nouvel `AssemblyLoadContext` nommé `NewContext1`** (premier paramètre de la méthode) **et ne prend pas en charge le déchargement** (deuxième paramètre). **==Ce `LoadContext` sert à charger l'assembly *ClassLibrary1*, puis à créer une instance de la classe `Car`==**. **Si une partie de ce code vous est inconnue, elle sera expliquée plus en détail au [[Chapitre 17#Comprendre la liaison tardive|Chapitre 17]]**. Le processus est répété avec un nouvel `AssemblyLoadContext`, puis les assemblies et les classes sont comparés. Lorsque vous exécuterez cette nouvelle méthode, vous verrez le résultat suivant :
 
 ```
 *** Loading Additional Assemblies in Different Contexts ***
@@ -982,7 +1001,7 @@ static void LoadAdditionalAssembliesSameContexts()
     var c2 = cl2.CreateInstance("ClassLibrary1.Car");
 
     Console.WriteLine(
-        "*** Loading Additional Assemblies in Different Contexts ***"
+        "*** Loading Additional Assemblies in Same Context ***"
     );
 
     Console.WriteLine($"Assembly1.Equals(Assembly2) {cl1.Equals(cl2)}");
