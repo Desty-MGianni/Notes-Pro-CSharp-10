@@ -1027,6 +1027,28 @@ Class1 == Class2 False
 
 À ce stade, vous devriez avoir une bien meilleure idée de la manière dont un assembly .NET Core est hébergé par le runtime. Si les pages précédentes vous ont semblé un peu trop techniques, rassurez-vous. **==Dans la plupart des cas, .NET Core gère automatiquement les détails des processus, des domaines d'application et des contextes de chargement==**. **Ces informations constituent une base solide pour comprendre la programmation multithread sur la plateforme .NET Core.**
 
+Un *AppDomain* est une **isolation logique à l'intérieur d'un seul processus**. En .NET Core/.NET 5+, il n'y en a plus **q'un seul par processus**
+
+Un *processus* c'est une **instance d'un programme en cours d'exécution**, avec sa propre mémoire isolée. Ce n'est pas exactement une assembly : une assembly c'est le fichier `.dll`/`.exe` sur disque, le processus c'est ce fichier **chargé et exécuté** par l'OS. Un processus peut charger plusieurs assemblies.
+
+Un *thread* est une **unité d'exécution** gérée par l'OS. Plusieurs threads peuvent tourner sur un seul cœur (via le scheduling de l'OS), et un seul thread peut utiliser plusieurs cœurs via le JIT. ***==La relation threads/cœurs est uniquement gérée que par l'OS.==***
+
+Enfin, un *context d'exécution* représente le **"bagage"** qu'un thread transporte avec lui. Quand un thread démarre ou qu'une continuation `async` reprend, il a besoin de savoir dans quel contexte il s'exécute. Ce contexte contient :
+
+- **SecurityContext** : les permissions de l'utilisateur courant
+- **SynchronizationContext** : sur quel thread reprendre après un `await` (crucial en UI)
+- **Culture/Locale** : langue et format de dates
+- **`AsyncLocal<T>`** : données locales à un flux async
+
+## Hiérarchie
+```
+OS
+└── Process (programme en mémoire, isolation totale)
+    └── AppDomain (isolation logique, 1 seul en .NET moderne)
+        └── Thread (unité d'exécution)
+            └── Execution Context
+```
+
 # Résumé du chapitre 
 
 L'objectif de ce chapitre était d'**examiner précisément comment une application .NET Core est hébergée par la plateforme .NET Core**. Comme vous l'avez constaté, ==la notion traditionnelle de processus a été modifiée en interne pour répondre aux besoins du CoreCLR==. **Un processus unique (manipulable par programmation via le type `System.Diagnostics.Process`) est désormais composé d'un domaine d'application, qui représente des limites isolées et indépendantes au sein d'un processus**.

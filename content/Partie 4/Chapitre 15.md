@@ -12,37 +12,63 @@ Personne n'apprécie de travailler avec une application lente à l'exécution. D
 
 **Ce chapitre commence par définir la nature générale d'une « application multithread »**. Ensuite, vous découvrirez **l'espace de noms de gestion des threads d'origine, disponible depuis .NET 1.0, et plus précisément `System.Threading`**. Ici, ==vous examinerez différents types== (`Thread`, `ThreadStart`, etc.) ==qui vous permettent de créer explicitement des threads d'exécution supplémentaires et de synchroniser vos ressources partagées, ce qui contribue à garantir le partage de données non volatile entre plusieurs threads.==
 
-**La suite de ce chapitre examinera trois techniques plus récentes que les développeurs .NET Core
-peuvent utiliser pour créer des logiciels multithreadés** : **==la bibliothèque parallèle de tâches==** (TPL), **==Parallel LINQ==** (PLINQ) **==et les mots-clés asynchrones intrinsèques de C#==** (`async` et `await`), **===relativement nouveaux depuis C# 6==**. Comme vous le verrez, ***==ces fonctionnalités peuvent considérablement simplifier la création d'applications logicielles multithreadées réactives.==***
+**La suite de ce chapitre examinera trois techniques plus récentes que les développeurs .NET Core peuvent utiliser pour créer des logiciels multithreadés** : **==la bibliothèque parallèle de tâches==** (TPL), **==Parallel LINQ==** (PLINQ) **==et les mots-clés asynchrones intrinsèques de C#==** (`async` et `await`), **===relativement nouveaux depuis C# 6==**. Comme vous le verrez, ***==ces fonctionnalités peuvent considérablement simplifier la création d'applications logicielles multithreadées réactives.==***
 
->[!warning]- Multithreading & .NET moderne sur macOS (Avec Gemini)
->
->Ce chapitre sur le multithreading et l'asynchronisme est **quasi-universel**. Le code fonctionnera de la même manière sur Mac que sur Windows grâce aux abstractions de .NET Core / .NET 5+.
->
->### Évolutions Modernes (.NET 9+)
->
->- **Le mot-clé `lock` optimisé** : En C# 13, la nouvelle classe `System.Threading.Lock` est utilisé comme objet de verrouillage. Le compilateur l'utilise pour surpasser les performances de l'ancien `Monitor`.
->- **Priorité au "Slim"** : Privilégiez systématiquement `SemaphoreSlim` au `Semaphore` classique. Sur macOS, il évite des appels système coûteux au noyau BSD.
->- **Async-First** : La synchronisation moderne se fait via `SemaphoreSlim` ou `Task` plutôt que via des threads manuels, car ils ne bloquent pas les ressources du système.
->- **Réduction de l'overhead d'abstraction** : Le compilateur JIT de .NET 10 est bien plus efficace pour optimiser les appels virtuels et les boucles `foreach`, réduisant drastiquement le coût lié à l'utilisation des interfaces et des délégués.
->- **Allocations sur la pile (Stack Allocation)** : Pour les petits tableaux et objets de types valeurs, .NET 10 favorise désormais l'allocation sur la pile plutôt que sur le tas (heap), ce qui soulage le Garbage Collector et booste la performance.
->
->### Spécificités macOS vs Windows
->
->- **Ordonnancement (Scheduling)** : Les `ThreadPriority` sont des suggestions. Le noyau macOS (BSD) gère les priorités différemment ; les changements peuvent être moins visibles que sous Windows.
->- **Mutex Nommés** : Les mutex système globaux (utilisés pour les instances d'applications uniques) sont capricieux sur Mac. Préférez un **verrou sur fichier** pour une compatibilité totale.
->- **Précision du Temps** :
->    - `Stopwatch` : Fiable via `ElapsedMilliseconds`, mais les "ticks" bruts varient selon le matériel Apple Silicon/Intel.
->    - `Timers` : Souvent plus réactifs sur Mac pour les faibles délais, mais moins constants sous une charge CPU extrême.
->
->### Éléments obsolètes (À ignorer sur Mac)
->
->- **`Thread.Abort()`** : Ne fonctionne pas (lance une exception). Utilisez uniquement `CancellationToken`.
->- **ApartmentState (STA/MTA)** : Concept purement lié à l'architecture COM de Windows. Inutile sur macOS.
->- **`Thread.Suspend/Resume`** : Obsolètes, dangereux et à bannir de votre code moderne.
->
->---
->**À retenir** : *Le chapitre 14 (AppDomains) est un vestige de Windows. Le chapitre 15 est votre **fondation réelle** pour le cloud, le mobile et le desktop moderne.*
+> [!important]- Chapitre 15 – Multithreading, Parallel & Async : Pertinence Moderne (Gemini & Claude)
+> 
+> Ce chapitre est votre **fondation réelle** pour le cloud, le mobile et le desktop moderne. Le code fonctionnera de la même manière sur macOS que sur Windows grâce aux abstractions de .NET Core / .NET 5+. Contrairement au [[Chapitre 14]], ce chapitre est quasi-universel.
+> 
+> ---
+> 
+> ### Concepts fondamentaux toujours valides
+> 
+> - **Thread / ThreadPool** : les concepts de base n'ont pas changé. Les comprendre reste essentiel même si on les utilise rarement directement.
+> - **Task Parallel Library (TPL)** : `Task`, `Task<T>`, `Task.Run()`, `Task.WhenAll()`, `Task.WhenAny()` restent la base de tout code async. Rien n'a changé conceptuellement.
+> - **`async`/`await`** : toujours le pattern dominant. Les règles du livre restent exactes : async tout en haut, éviter `async void` sauf pour les event handlers.
+> - **`Parallel.For` / `Parallel.ForEach`** : toujours valides pour le parallélisme CPU-bound.
+> - **Primitives de synchronisation** (`lock`, `Monitor`, `Mutex`, `SemaphoreSlim`) : toujours d'actualité et inchangées dans leur concept.
+> 
+> ---
+> 
+> ### Évolutions depuis .NET 6
+> 
+> - **`Parallel.ForEachAsync`** (.NET 6) : pattern recommandé pour le parallélisme async. Remplace les patterns manuels avec `Task.WhenAll` sur des collections.
+> - **`PeriodicTimer`** (.NET 6) : remplace `Timer` pour les boucles async périodiques. Conçu pour fonctionner nativement avec `await`.
+> - **`Task.WaitAsync(CancellationToken)`** (.NET 6) : permet d'annuler l'*attente* d'une Task sans annuler la Task elle-même.
+> - **`Task.WhenEach`** (.NET 9) : itère sur des Tasks via `IAsyncEnumerable<Task<T>>` au fur et à mesure qu'elles se complètent, sans attendre toutes les Tasks comme `WhenAll`.
+> - **`lock` optimisé** (C# 13 / .NET 9) : la nouvelle classe `System.Threading.Lock` est désormais utilisée comme objet de verrouillage. Le compilateur la reconnaît et surpasse les performances de l'ancien `Monitor`.
+> - **Correction des deadlocks `sync-over-async`** (.NET 10) : le ThreadPool a été amélioré pour éviter les deadlocks classiques causés par `Task.Wait()` ou `.Result` dans du code async. Ce pattern était dangereux avant .NET 10.
+> - **Runtime-Async** (.NET 10 expérimental, stabilisation prévue .NET 11) : changement architectural majeur. Actuellement, Roslyn transforme chaque méthode `async` en une `IAsyncStateMachine` boxée sur le heap. Runtime-Async déplace cette gestion au niveau du runtime, éliminant ce boxing. Résultats mesurés : jusqu'à **66% de réduction du temps d'exécution** et **60% de réduction des allocations mémoire** sur des chaînes d'appels async profondes. À noter : les fast-paths pour les Tasks déjà complètes (`Task.FromResult`) sont légèrement moins performants avec Runtime-Async.
+> 
+> ---
+> 
+> ### Bonnes pratiques modernes
+> 
+> - **Async-First** : la synchronisation moderne se fait via `SemaphoreSlim` ou `Task` plutôt que via des threads manuels. Ils ne bloquent pas les ressources système.
+> - **Priorité au "Slim"** : préférer systématiquement `SemaphoreSlim` au `Semaphore` classique. Sur macOS, il évite des appels système coûteux au noyau BSD.
+> - **`System.Threading.Channels`** : non couvert dans le livre mais devenu le pattern moderne pour les scénarios producteur/consommateur, en remplacement de `BlockingCollection<T>`.
+> - **Réduction de l'overhead d'abstraction** : le JIT de .NET 10 optimise bien mieux les appels virtuels et les boucles `foreach`, réduisant le coût des interfaces et délégués.
+> - **Stack Allocation** : pour les petits tableaux et objets de types valeurs, .NET 10 favorise l'allocation sur la pile plutôt que sur le heap, soulageant le GC.
+> 
+> ---
+> 
+> ### Spécificités macOS vs Windows
+> 
+> - **Ordonnancement (Scheduling)** : les `ThreadPriority` sont des *suggestions*. Le noyau macOS (BSD) gère les priorités différemment ; les changements peuvent être moins visibles que sous Windows.
+> - **Mutex Nommés** : les mutex système globaux (utilisés pour les instances d'applications uniques) sont capricieux sur macOS. Préférer un verrou sur fichier pour une compatibilité totale.
+> - **Précision du temps** :
+>   - `Stopwatch` : fiable via `ElapsedMilliseconds`, mais les "ticks" bruts varient selon le matériel Apple Silicon/Intel.
+>   - `Timers` : souvent plus réactifs sur macOS pour les faibles délais, mais moins constants sous une charge CPU extrême.
+> 
+> ---
+> 
+> ### Éléments obsolètes ou Windows-only
+> 
+> - **`Thread.Abort()`** : ne fonctionne pas sur .NET Core+ (lève une exception). Utiliser exclusivement `CancellationToken`.
+> - **`ApartmentState` (STA/MTA)** : concept purement lié à l'architecture COM de Windows. Inutile et sans effet sur macOS.
+> - **`Thread.Suspend()` / `Thread.Resume()`** : obsolètes, dangereux, à bannir du code moderne sur toutes plateformes.
+> - **`BackgroundWorker`** : complètement obsolète. Remplacé par `async`/`await`.
+> - **Threads créés manuellement (`new Thread()`)** : acceptable pour comprendre les bases, mais en pratique toujours remplacé par `Task.Run()` ou `Parallel`.
 
 # La relation Processus/Domaine d'application/Contexte/Thread
 
@@ -59,7 +85,7 @@ static void ExtractExecutingThread()
 }
 ```
 
-***===Rappelons qu'avec .NET Core, il n'existe qu'un seul AppDomain==***. Bien qu'il soit impossible de créer des AppDomains supplémentaires, **l'AppDomain d'une application peut contenir plusieurs threads exécutés simultanément**. **==Pour obtenir une référence à l'AppDomain hébergeant l'application, appelez la méthode statique `Thread.GetDomain()`==**, comme ceci :
+***==Rappelons qu'avec .NET Core, il n'existe qu'un seul AppDomain==***. Bien qu'il soit impossible de créer des AppDomains supplémentaires, **l'AppDomain d'une application peut contenir plusieurs threads exécutés simultanément**. **==Pour obtenir une référence à l'AppDomain hébergeant l'application, appelez la méthode statique `Thread.GetDomain()`==**, comme ceci :
 
 ```cs
 static void ExtractAppDomainHostingThread()
