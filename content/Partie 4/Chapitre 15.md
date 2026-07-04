@@ -309,9 +309,9 @@ Pour créer par programmation des threads supplémentaires afin d'exécuter une 
 4. Définissez les caractéristiques initiales du thread (`Name`, `Priority`, etc.).
 5. Appelez la méthode `Thread.Start()`. Cela démarrera le thread à la méthode référencée par le délégué créé à l'étape 2 dès que possible.
 
-Comme indiqué à l'étape 2, **vous pouvez utiliser deux types de délégués distincts pour « pointer » vers la méthode que le thread secondaire exécutera**. **==Le délégué `ThreadStart` peut pointer vers n'importe quelle méthode ne prenant aucun argument et ne retournant aucune valeur==**. Ce délégué peut s'avérer ***==utile lorsque la méthode est conçue pour s'exécuter simplement en arrière-plan sans interaction supplémentaire.==**
+Comme indiqué à l'étape 2, **vous pouvez utiliser deux types de délégués distincts pour « pointer » vers la méthode que le thread secondaire exécutera**. **==Le délégué `ThreadStart` peut pointer vers n'importe quelle méthode ne prenant aucun argument et ne retournant aucune valeur==**. ***==Ce délégué peut s'avérer utile lorsque la méthode est conçue pour s'exécuter simplement en arrière-plan sans interaction supplémentaire.==***
 
-*==La limitation de `ThreadStart` est qu'il est impossible de lui transmettre des paramètres de traitement==*. Cependant, **le type de délégué `ParameterizedThreadStart` accepte un unique paramètre de type `System.Object`**. Étant donné que tout objet peut être représenté par un `System.Object`, **==vous pouvez transmettre un nombre quelconque de paramètres via une classe ou une structure personnalisée==**. ==Notez toutefois que les délégués `ThreadStart` et `ParameterizedThreadStart` ne peuvent pointer que vers des méthodes qui renvoient `void`.
+*==La limitation de `ThreadStart` est qu'il est impossible de lui transmettre des paramètres de traitement==*. Cependant, **le type de délégué `ParameterizedThreadStart` accepte un unique paramètre de type `System.Object`**. Étant donné que tout objet peut être représenté par un `System.Object`, **==vous pouvez transmettre un nombre quelconque de paramètres via une classe ou une structure personnalisée==**. **Notez toutefois que les délégués `ThreadStart` et `ParameterizedThreadStart` ne peuvent pointer que vers des méthodes qui renvoient `void`.**
 
 >[!tip] Toutes ces étapes peuvent être écrite en une ou deux lignes:
 >```cs
@@ -368,7 +368,7 @@ Thread primaryThread = Thread.CurrentThread;
 primaryThread.Name = "Primary";
 
 // Affiche les information du thread.
-Console.WriteLine($"-> {Thread.CurrentThread.Name} is executing Main()");
+Console.WriteLine($"-> {primaryThread.Name} is executing Main()");
 
 // Créer une classe de travail.
 Printer p = new Printer();
@@ -504,6 +504,25 @@ void Add(object data)
 }
 ```
 
+>[!warning] Le code précédent permet à `Add` de manipuler `_waitHandle`, ce qui n'est pas une bonne pratique
+>C'est en réalité une **closure** : `Add()` capture `_waitHandle` depuis le scope parent via les top-level statements. C'est exactement le même mécanisme que les lambdas qui capturent des variables externes, juste moins visible ici.
+>
+> Le bon design consiste à passer un objet `AutoResetEvent` explicitement via les paramètres
+> 
+> ```cs
+> namespace AddWithThreads;
+>
+>class AddParams(int numb1, int numb2, AutoResetEvent waitHandle)
+>{
+>    public int a = numb1,
+>        b = numb2;
+>
+>    public AutoResetEvent WaitHandle = waitHandle;
+>}
+>```
+>
+> Ensuite, dans la méthode `Add()`, on référence `ap.WaitHandler.Set()` au lieu de `_waitHandle`. Enfin, dans les déclarations de haut niveau, on passe l'objet `AutoResetEvent` dans le constructeur de `AddParams`.
+
 ## Threads de premier plan et threads d'arrière-plan
 
 Maintenant que vous avez vu comment créer par programmation de nouveaux threads d'exécution à l'aide de l'espace de noms `System.Threading`, formulons la distinction entre les threads de premier plan et les threads d'arrière-plan :
@@ -528,10 +547,10 @@ Maintenant que vous avez vu comment créer par programmation de nouveaux threads
 > **B. L'abandon de la gestion manuelle**  
 >Dans le passé, on passait un thread en `IsBackground = true` pour s'assurer que l'application se ferme proprement. Aujourd'hui, on préfère utiliser un **`CancellationToken`**. Au lieu de laisser l'OS tuer le thread brutalement, on demande gentiment au thread de s'arrêter lui-même avant la fermeture.
 
-Créez une nouvelle application console nommée `BackgroundThreads` et copiez le fichier `Printer.cs` dans le nouveau projet. Mettez à jour l'espace de noms de la classe `Printer` en `BackgroundThreads`, comme ceci :
+Créez une nouvelle application console nommée *BackgroundThreads* et copiez le fichier `Printer.cs` dans le nouveau projet. Mettez à jour l'espace de noms de la classe `Printer` en `BackgroundThreads`, comme ceci :
 
 ```cs
-namespace Backgroundthreads;
+namespace BackgroundThreads;
 
 public class Printer
 {
@@ -542,7 +561,7 @@ public class Printer
 Mettez à jour le fichier *Program.cs* pour qu'il corresponde à ce qui suit :
 
 ```cs
-using Backgroundthreads;
+using BackgroundThreads;
 
 Console.Title = "Background Threads";
 Console.WriteLine("***** Background Threads *****\n");
@@ -1079,7 +1098,7 @@ De plus, **vous devrez utiliser les délégués `System.Func<T>` et `System.Acti
 Dans cet exemple, vous verrez comment réaliser cette même tâche à l'aide d'une interface utilisateur graphique. Vous pourrez ainsi examiner l'utilisation des « délégués anonymes » pour permettre à des threads secondaires de mettre à jour le thread principal de l'interface utilisateur (également appelé thread d'interface utilisateur).
 
 >[!note] 
->Lors du développement d'une application d'interface utilisateur graphique (GUI) multithread, les threads secondaires, ne peuvent jamais accéder directement aux contrôles de l'interface utilisateur. En effet, les contrôles (boutons, zones de texte, étiquettes, barres de progression, etc.) sont liés au thread qui les a créés. L'exemple suivant, illustre une méthode permettant aux threads secondaires d'accéder aux éléments d'interface utilisateur de manière thread-safe. Vous découvrirez une approche plus simplifiée en examinant les mots-clés `async` et `await` de C#.
+>Lors du développement d'une application d'interface utilisateur graphique (GUI) multithread, les threads secondaires ne peuvent jamais accéder directement aux contrôles de l'interface utilisateur. En effet, les contrôles (boutons, zones de texte, étiquettes, barres de progression, etc.) sont liés au thread qui les a créés. L'exemple suivant, illustre une méthode permettant aux threads secondaires d'accéder aux éléments d'interface utilisateur de manière thread-safe. Vous découvrirez une approche plus simplifiée en examinant les mots-clés `async` et `await` de C#.
 
 #### WPF
 
@@ -1091,7 +1110,7 @@ dotnet sln .\Chapter15_AllProjects.sln add .\DataParallelismWithForEach
 ```
 
 >[!note] 
->**Windows Presentation Foundation (WPF) est exclusivement compatible avec Windows** dans cette version de .NET Core et sera traité en détail dans les chapitres [[Chapitre 24|24]] à [[Chapitre 28|28]]. Si vous n'avez jamais utilisé WPF ou si vous n'avez pas accès à un ordinateur Windows, tout le nécessaire pour cet exemple est listé ici. Si vous préférez suivre une solution déjà implémentée, vous trouverez DataParallelismWithForEach dans le dossier du chapitre 15 du dépôt GitHub. Le développement WPF fonctionne avec Visual Studio Code, bien qu'il ne prenne pas en charge le concepteur. Pour une expérience de développement plus riche, je vous recommande d'utiliser Visual Studio 2022 pour les exemples WPF de ce chapitre.
+>**Windows Presentation Foundation (WPF) est exclusivement compatible avec Windows** dans cette version de .NET Core et sera traité en détail dans les chapitres [[Chapitre 24|24]] à [[Chapitre 28|28]]. Si vous n'avez jamais utilisé WPF ou si vous n'avez pas accès à un ordinateur Windows, tout le nécessaire pour cet exemple est listé ici. Si vous préférez suivre une solution déjà implémentée, vous trouverez *DataParallelismWithForEach* dans le dossier du chapitre 15 du [dépôt GitHub](https://github.com/Apress/pro-c-sharp-10/tree/main/Chapter_15). Le développement WPF fonctionne avec Visual Studio Code, bien qu'il ne prenne pas en charge le concepteur. Pour une expérience de développement plus riche, je vous recommande d'utiliser Visual Studio 2022 pour les exemples WPF de ce chapitre.
 
 Au moment de la rédaction de ce document, les modèles de projet WPF ne prennent pas en charge les instructions `using` implicites globales. Mettez à jour le `PropertyGroup` principal dans le fichier *DataParallelismWithForEach.csproj* comme suit, ce qui désactive également les types référence pouvant être nuls :
 
@@ -1291,12 +1310,12 @@ Double-cliquez sur le fichier *MainWindow.axaml* dans l'Explorateur de solutions
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
-      <Button Name="cmdCancel" Grid.Column="0" Margin="10, 10, 0, 10"
-        Click="cmdCancel_Click">
+      <Button Name="CmdCancel" Grid.Column="0" Margin="10, 10, 0, 10"
+        Click="CmdCancel_Click">
         Cancel
       </Button>
 
-      <Button Name="cmdProcess" Grid.Column="2" Margin="10"
+      <Button Name="CmdProcess" Grid.Column="2" Margin="10"
         Click="cmdProcess_Click">
         Click to Flip Your Images!
       </Button>
@@ -1307,30 +1326,27 @@ Double-cliquez sur le fichier *MainWindow.axaml* dans l'Explorateur de solutions
 
 ***==Encore une fois, ne vous préoccupez pas de la signification ni du fonctionnement du balisage; vous consacrerez amplement de temps à Avalonia plus loin dans cet ouvrage==***. L’interface graphique de l’application se compose d’une zone de texte multi-ligne et d’un bouton unique (nommé `cmdProcess`). La zone de texte permet la saisie de données pendant l’exécution du traitement en arrière-plan, illustrant ainsi le caractère non bloquant de la tâche parallèle.
 
-Pour cet exemple, un package NuGet supplémentaire (`SixLabors.ImageSharp`) est requis. **Pour l'ajouter à votre projet, saisissez la ligne suivante** (sur une seule ligne) **dans l'invite de commandes** (dans le même répertoire que votre fichier de solution) ou dans la console du Gestionnaire de packages de Visual Studio :
+Pour cet exemple, un package NuGet supplémentaire (`Magick.NET`) est requis. **Pour l'ajouter à votre projet, saisissez la ligne suivante** (sur une seule ligne) **dans l'invite de commandes** (dans le même répertoire que votre fichier de solution) ou dans la console du Gestionnaire de packages de Visual Studio :
 
 ```bash
-dotnet add package SixLabors.ImageSharp
+dotnet add package Magick.NET-Q8-AnyCPU
 ```
 
 Ouvrez le fichier *MainWindow.axaml.cs* (double-cliquez dessus dans Visual Studio ; vous devrez peut-être développer la flèche à côté de *MainWindow.axaml*), et ajoutez les instructions `using` suivantes en haut du fichier :
 
 ```cs
-using SixLabors.ImageSharp; 
-using SixLabors.ImageSharp.Processing;
+using ImageMagick;
 ```
 
 >[!note] 
 >Vous devez modifier la chaîne de caractères transmise à l'appel de méthode `Directory.GetFiles()` suivant afin qu'elle pointe vers un chemin d'accès sur votre ordinateur contenant des fichiers image (par exemple, un dossier personnel de photos de famille). Pour votre commodité, j'ai inclus quelques exemples d'images (fournies avec le système d'exploitation Windows) dans le code d'exemple de ce chapitre.
 
 ```cs
-using System.IO
+using System.IO;
 using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-// Conflit de nom entre Avalonia.Image et SixLabors.ImageSharp.Image
-using SharpImage = SixLabors.ImageSharp.Image;
+using ImageMagick;
 
 namespace DataParallelismWithForEach;
 
@@ -1341,73 +1357,57 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    private void cmdCancel_Click(object? Sender, RoutedEventArgs e)
-    {
-        //Ceci sera mis à jour prochainement
-    }
+    private void CmdCancel_Click(object? sender, RoutedEventArgs e) { }
 
-    private void cmdProcess_Click(object? sender, RoutedEventArgs e)
+    private void CmdProcess_Click(object? sender, RoutedEventArgs e)
     {
         this.Title = "Starting...";
         ProcessFiles();
         this.Title = "Processing Complete";
     }
 
-
     private void ProcessFiles()
     {
-        // Charge tous les fichiers *.png et crée un nouveau dossier pour les
-        // données modifiées.
-
-        // Récupère le nom de l'assembly (ici: "DataParallelismWithForEach").
-        string? projectName = Assembly.GetExecutingAssembly().GetName().Name;
-        // Obtient le répertoire de travail (Working Directory) actuel.
-        // Attention : Ce répertoire dépend de l'endroit d'où
-        // l'application est lancée (Terminal vs IDE).
-
-        var basePath = Directory.GetCurrentDirectory();
-        var pictureDirectory = Path.Combine(basePath, projectName!, "assets");
+        var basePath = Path.GetDirectoryName(Environment.ProcessPath);
+        var inputDirectory = Path.Combine(
+            basePath!,
+            "Assets"
+        );
         var outputDirectory = Path.Combine(
-            basePath,
-            projectName!,
-            "modifiedAssets"
+            basePath!,
+            "ModifiedAssets"
         );
 
-        // Nettoie le dossier si il existe déjà.
+        // Nettoie le dossier de sortie si il existe déjà
         if (Directory.Exists(outputDirectory))
-        {
             Directory.Delete(outputDirectory, true);
-        }
-        // Recrée le dossier de sortie des images
+
+        // Recée le dossier de sortie.
         Directory.CreateDirectory(outputDirectory);
 
-        // Récupère tous les fichier .png contenu dans le dossier (récursif).
-        string[] files = Directory.GetFiles(
-            pictureDirectory,
+        var files = Directory.GetFiles(
+            inputDirectory,
             "*.png",
             SearchOption.AllDirectories
         );
 
-        // Traiter les données d'image de manière bloquante.
-        foreach (string currentFile in files)
+        // Traite toutes les images de manière bloquante
+        foreach (var currentfile in files)
         {
-            string filename = Path.GetFileName(currentFile);
+            string fileName = Path.GetFileName(currentfile);
 
             // Affiche l'ID du thread traitant l'image.
             this.Title =
-                $"Processing {filename} on thread {Environment.CurrentManagedThreadId}";
-            using (SharpImage image = SharpImage.Load(currentFile))
+                $"Processing {fileName} on thread {Environment.CurrentManagedThreadId}";
+            using (SharpImage image = SharpImage.Load(currentfile))
             {
                 image.Mutate(x => x.Flip(FlipMode.Horizontal));
-                image.Save(Path.Combine(outputDirectory, filename));
+                image.Save(Path.Combine(outputDirectory, fileName));
             }
         }
     }
 }
 ```
-
->[!note]
- Il y a un conflit de noms entre `Avalonia.Controls.Image` (UI) et `SixLabors.ImageSharp.Image` (Data). Une solution élégante est d'utiliser un alias `using SharpImage = ...` pour lever l'ambiguïté.
 
 >[!tip] **Si le programme crash, c'est une bonne nouvelle !**
 >La gestion du thread principal par macOS est différent par rapport à Windows. Ici, le système d'exploitation envoie des signaux à ton application pour savoir si elle est toujours vivante. Comme ton thread est "coincé" dans la boucle `foreach`, il ne répond pas.
@@ -1415,6 +1415,15 @@ public partial class MainWindow : Window
 >macOS considère que l'application est corrompue ou bloquée et envoie un signal `SIGABRT` (Abort) pour tuer le processus. C'est le fameux crash "Thread 0 crashed".
 >
 > **La solution pour résoudre les crashs est d'utiliser de threads secondaires.** **==Cette section du chapitre permet d'apprendre la méthode plus automatique pour créer des threads secondaire==** (*==au lieu de les créer manuellement==*).
+
+>[!tip] Pour éviter de copier manuellement le dossier `assets` à chaque déploiements
+>```xml
+><ItemGroup>
+>    <None Update="assets\**\*">
+>        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+>    </None>
+></ItemGroup>
+>```
 
 #### Commun
 
@@ -1483,25 +1492,20 @@ Maintenant, si vous exécutez le programme, le TPL répartira bien la charge de 
 
 #### Avalonia
 
-En **Avalonia**, contrairement au WPF classique, on n'accède pas au `Dispatcher` via une propriété de la classe `Control`, mais via la classe ***==statique==*** `Dispatcher.UIThread` située dans l'espace de noms `Avalonia.Threading`.
+En **Avalonia**, contrairement au WPF classique, on n'accède pas au `Dispatcher` via une propriété de la classe `Control`, mais **==via la classe statique `Dispatcher.UIThread` située dans l'espace de noms `Avalonia.Threading`==**.
 
-Cet objet gère la file d'attente des travaux du thread principal. Il possède une méthode nommée **`Post()`** (ou `InvokeAsync()`) qui prend un délégué (souvent une expression lambda) en entrée. Vous devez appeler cette méthode lorsque vous travaillez avec des threads secondaires (comme dans une `Task` ou un `Parallel.ForEach`) pour demander au thread UI de mettre à jour l'interface utilisateur. Bien qu'il soit possible de déclarer un délégué explicitement, l'utilisation d'une **expression lambda** est la norme moderne pour garantir que l'application ne plante pas avec une erreur de type `Abort()` sur macOS.
+**Cet objet gère la file d'attente des travaux du thread principal**. ==Il possède une méthode nommée **`Post()`** (ou `InvokeAsync()`) qui prend un délégué== (souvent une expression lambda) en entrée. **Vous devez appeler cette méthode lorsque vous travaillez avec des threads secondaires (comme dans une `Task` ou un `Parallel.ForEach`) pour demander au thread UI de mettre à jour l'interface utilisateur**. Bien qu'il soit possible de déclarer un délégué explicitement, ***==l'utilisation d'une expression lambda est la norme moderne pour garantir que l'application ne plante pas avec une erreur de type `Abort()` sur macOS.==***
 
 ```cs
 Dispatcher.UIThread.Post(() =>
 {
 	this.Title = $"Processing {filename}";
 });
-using (SharpImage image = SharpImage.Load(currentFile))
-{
-	image.Mutate(x => x.Flip(FlipMode.Horizontal));
-	image.Save(Path.Combine(outputDirectory, filename));
-}
 
-// Simule une charge te travail plus importante
-// (pour voir les bonds en performances)
-Thread.Sleep(2000);
-
+using var image = new MagickImage(currentfile);
+// Flip Horizontal.
+image.Flop();
+image.Write(Path.Combine(outputDirectory, fileName));
 ```
 
 ## La classe `Task`
@@ -1613,68 +1617,59 @@ private void ProcessFiles()
 ```cs
 private void ProcessFiles()
 {
-	// Charge tous les fichiers *.png et crée un nouveau dossier pour les
-	// données modifiées.
-	string? projectName = Assembly.GetExecutingAssembly().GetName().Name;
-	var basePath = Directory.GetCurrentDirectory();
-	var pictureDirectory = Path.Combine(basePath, projectName!, "assets");
-	var outputDirectory = Path.Combine(
-		basePath,
-		projectName!,
-		"modifiedAssets"
-	);
+	var basePath = Path.GetDirectoryName(Environment.ProcessPath);
+	var inputDirectory = Path.Combine(basePath!, "Assets");
+	var outputDirectory = Path.Combine(basePath!, "ModifiedAssets");
 
-	// Utilise une instance de ParallelOptions
-	// por stocker le CancellationToken
-	ParallelOptions parOpts = new ParallelOptions();
-	parOpts.CancellationToken = _cancelToken.Token;
-	parOpts.MaxDegreeOfParallelism = Environment.ProcessorCount;
-
-	// Nettoie le dossier si il existe déjà.
-	if (Directory.Exists(outputDirectory))
+	ParallelOptions parOpts = new()
 	{
+		CancellationToken = _cancelToken.Token,
+		MaxDegreeOfParallelism = Environment.ProcessorCount,
+	};
+
+	// Nettoie le dossier de sortie si il existe déjà
+	if (Directory.Exists(outputDirectory))
 		Directory.Delete(outputDirectory, true);
-	}
-	// Recrée le dossier de sortie des images
+
+	// Recée le dossier de sortie.
 	Directory.CreateDirectory(outputDirectory);
 
-	// Récupère tous les fichier .png contenu dans le dossier (récursif).
-	string[] files = Directory.GetFiles(
-		pictureDirectory,
+	var files = Directory.GetFiles(
+		inputDirectory,
 		"*.png",
 		SearchOption.AllDirectories
 	);
 
 	try
 	{
-		// Traiter les données d'image en parallèle !
+		// Traite toutes les images en parallèle !
 		Parallel.ForEach(
 			files,
 			parOpts,
-			currentFile =>
+			currentfile =>
 			{
 				// Génère l'exception d'annulage.
 				parOpts.CancellationToken.ThrowIfCancellationRequested();
+				// Simule une charge de travail plus importante
 
-				string filename = Path.GetFileName(currentFile);
+				string fileName = Path.GetFileName(currentfile);
 
+				// Affiche l'ID du thread traitant l'image.
 				Dispatcher.UIThread.Post(() =>
 				{
 					this.Title =
-						$"Processing {filename} on thread {Environment.CurrentManagedThreadId}";
+						$"Processing {fileName} on thread {Environment.CurrentManagedThreadId}";
 				});
+				using var image = new MagickImage(currentfile);
+				// Flip Horizontal.
+				image.Flop();
+				image.Write(Path.Combine(outputDirectory, fileName));
 
-				using (SharpImage image = SharpImage.Load(currentFile))
-				{
-					image.Mutate(x => x.Flip(FlipMode.Horizontal));
-					image.Save(Path.Combine(outputDirectory, filename));
-				}
-
-				// Simule une charge te travail plus importante
-				// (pour voir les bonds en performances)
-				Thread.Sleep(2000);
+				// Simule une charge de travail plus importante.
+				Thread.Sleep(100);
 			}
 		);
+
 		Dispatcher.UIThread.Post(() => this.Title = "Done!");
 	}
 	catch (OperationCanceledException ex)
@@ -1791,11 +1786,8 @@ string[] FindTenMostCommon(string[] words)
 
 string FindLongestWord(string[] words)
 {
-    return (
-            from w in words
-            orderby w.Length descending
-            select w
-        ).FirstOrDefault() ?? string.Empty;
+    return words.OrderByDescending(w => w.Length).FirstOrDefault() 
+    ?? string.Empty;
 }
 
 ```
@@ -1878,7 +1870,7 @@ Les méthodes d'extension nécessaires se trouvent dans la classe `ParallelEnume
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AsParallel()`              | Indique que le reste de la requête doit être parallélisé, si possible.                                                                                                                                   |
 | `WithCancellation()`        | Indique que PLINQ doit surveiller périodiquement l'état du jeton d'annulation fourni et annuler l'exécution si une demande est formulée.                                                                 |
-| `WithDegreeOfParallelism()` | Spécifie le nombre maximal de processeurs que PLINQ doit utiliser pour<br>paralléliser la requête                                                                                                        |
+| `WithDegreeOfParallelism()` | Spécifie le nombre maximal de processeurs que PLINQ doit utiliser pour paralléliser la requête                                                                                                           |
 | `ForAll()`                  | Permet de traiter les résultats en parallèle sans les fusionner au préalable avec le thread consommateur, comme ce serait le cas lors de l'énumération d'un résultat LINQ à l'aide du mot-clé `foreach`. |
 
 Pour voir PLINQ en action, créez une application console nommée *PLINQDataProcessingWithCancellation*. **Au démarrage du traitement, le programme lancera une nouvelle tâche qui exécutera une requête LINQ analysant un grand tableau d'entiers, à la recherche des éléments pour lesquels $x \div 3 == 0$ est `true`**. Voici une ==version non parallèle== de la requête :
