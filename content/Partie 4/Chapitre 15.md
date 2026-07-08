@@ -1942,10 +1942,10 @@ do
     Console.WriteLine("Processing");
     Task.Factory.StartNew(ProcessIntData);
 
-    Console.Write(" Enter Q to quit: ");
+    Console.Write("Enter Q to quit: ");
     string answer = Console.ReadLine();
     // Est ce que l'utilisateur veut partir ?
-    if (answer.Equals('Q', StringComparison.OrdinalIgnoreCase))
+    if (answer.Equals("Q", StringComparison.OrdinalIgnoreCase))
     {
         _cancelToken.Cancel();
         break;
@@ -2003,11 +2003,11 @@ J'ai abordé de nombreux sujets dans ce chapitre (plutôt long). Il est certain 
 
 **Le mot-clé `async` de C# permet de spécifier qu'une méthode, une expression lambda ou une méthode anonyme doit être appelée de manière asynchrone**. En effet, **==en marquant simplement une méthode avec le modificateur `async`, le runtime .NET Core créera un nouveau thread d'exécution pour traiter la tâche==**. De plus, **lors de l'appel d'une méthode asynchrone, le mot-clé `await` suspendra automatiquement le thread courant jusqu'à la fin de la tâche, permettant ainsi au thread appelant de poursuivre son exécution.**
 
-Pour illustrer cela, créez une application console nommée `FunWithCSharpAsync` et ajoutez une méthode nommée `DoWork()`, qui force le thread appelant à attendre cinq secondes. Voici le résultat :
+Pour illustrer cela, créez une application console nommée *FunWithCSharpAsync* et ajoutez une méthode nommée `DoWork()`, qui force le thread appelant à attendre cinq secondes. Voici le résultat :
 
 ```cs
 Console.Title = "Fun with Async";
-Console.WriteLine(" Fun with Async ===>");
+Console.WriteLine("Fun with Async ===>");
 Console.WriteLine(DoWork());
 Console.WriteLine("Completed");
 Console.ReadLine();
@@ -2041,7 +2041,7 @@ static async Task<string> DoWorkASync()
 }
 ```
 
-***==Si vous utilisez une méthode `Main()` comme point d'entrée===** (au lieu d'instructions de niveau supérieur), ***==vous devez marquer la méthode comme `async`, une fonctionnalité introduite dans C# 7.1.==***
+***==Si vous utilisez une méthode `Main()` comme point d'entrée==*** (au lieu d'instructions de niveau supérieur), ***==vous devez marquer la méthode comme `async`, une fonctionnalité introduite dans C# 7.1.==***
 
 ```cs
 static async Task Main(string[] args)
@@ -2077,13 +2077,11 @@ Après avoir traduit cette nouvelle implémentation de `DoWorkAsync()` dans un l
 
 ## `SynchronizationContext` et `async`/`await`
 
-
 **La définition officielle de `SynchronizationContext` est celle d'une classe de base fournissant un contexte multithread sans synchronisation**. Bien que cette définition initiale soit peu explicite, ==la [documentation](https://learn.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-10.0) officielle== précise :
 
 ***Le but du modèle de synchronisation implémenté par cette classe est de permettre aux opérations internes asynchrones/synchrones du Common Language Runtime de fonctionner correctement avec différents modèles de synchronisation.***
 
-Cette affirmation, combinée à vos connaissances sur le multithreading, éclaire le sujet. **Rappelons que
-les applications GUI** (WinForms, WPF, Avalonia) **n'autorisent pas les threads secondaires à accéder directement aux contrôles; ils doivent déléguer cet accès**. ***==Nous avons déjà vu l'objet `Dispatcher` dans l'exemple WPF/Avalonia==***. **Pour les applications console n'utilisant pas WPF/Avalonia, cette restriction ne s'applique pas**. Ce sont là les différents modèles de synchronisation auxquels il est fait référence. ==Dans cette optique, examinons plus en détail le `SynchronizationContext`.==
+Cette affirmation, combinée à vos connaissances sur le multithreading, éclaire le sujet. **Rappelons que les applications GUI** (WinForms, WPF, Avalonia) **n'autorisent pas les threads secondaires à accéder directement aux contrôles; ils doivent déléguer cet accès**. ***==Nous avons déjà vu l'objet `Dispatcher` dans l'exemple WPF/Avalonia==***. **Pour les applications console n'utilisant pas WPF/Avalonia, cette restriction ne s'applique pas**. Ce sont là les différents modèles de synchronisation auxquels il est fait référence. ==Dans cette optique, examinons plus en détail le `SynchronizationContext`.==
 
 **Le `SynchronizationContext` est un type qui fournit une méthode `Post` virtuelle, prenant un délégué à exécuter de manière asynchrone**. **==Ceci offre aux frameworks un modèle pour gérer correctement les requêtes asynchrones==** (dispatch pour Avalonia/WPF/WinForms, exécution directe pour les applications non GUI, etc.). **Il permet de mettre en file d'attente une unité de travail dans un contexte et de comptabiliser les opérations asynchrones en cours. **
 
@@ -2116,6 +2114,7 @@ string message = await DoWorkASync();
 Console.WriteLine($"0 - {message}");
 string message1 = await DoWorkASync().ConfigureAwait(false);
 Console.WriteLine($"1 - {message1}");
+Console.ReadLine();
 ```
 
 Le bloc de code original utilise le `SynchronizationContext` fourni par le framework (ici, le runtime .NET Core). Il est équivalent à l'appel de `ConfigureAwait(true)`. Le second exemple ignore le contexte actuel et le planificateur. 
@@ -2141,6 +2140,41 @@ string message = DoWork();
 >[!note]
 >Les gestionnaires d'événements pour les contrôles d'interface graphique (tels qu'un gestionnaire de `Click` sur un bouton) ainsi que les méthodes d'action dans les applications de style MVC qui utilisent les mots-clés `async`/`await` ne suivent pas cette convention d'appellation (par convention — veuillez excuser la redondance !).
 
+## Utilisation du parallélisme avec `async`/`await` (Claude)
+### La méthode `Task.WhenAll`
+
+Pour un **nombre fixe et connu** de tâches :
+
+```csharp
+// Tu sais exactement combien de tâches tu lances
+string[] results = await Task.WhenAll(
+    DoWorkAsync(),
+    DoWorkAsync(),
+    DoWorkAsync()
+);
+```
+
+### La méthode `Parallel.ForEachAsync`
+
+Pour une **collection de taille variable** :
+
+```csharp
+// Tu ne sais pas combien d'éléments tu as à l'avance
+string[] files = Directory.GetFiles(inputDirectory, "*.png");
+await Parallel.ForEachAsync(files, async (file, token) =>
+{
+    await ProcessFileAsync(file);
+});
+```
+
+##### Tableau 15-8: La distinction clé entre les deux méthodes
+
+|                          | `Task.WhenAll`               | `Parallel.ForEachAsync`                     |
+| ------------------------ | ---------------------------- | ------------------------------------------- |
+| Nombre de tâches         | Fixe, connu à la compilation | Variable, connu seulement à l'exécution     |
+| Contrôle du parallélisme | Tout en même temps           | `MaxDegreeOfParallelism` configurable       |
+| Usage typique            | Quelques appels API précis   | Traiter une collection de fichiers, URLs... |
+| Résultats                | `T[]` directement            | Pas de retour direct                        |
 ## Méthodes `async` ne renvoyant aucune donnée
 
 Actuellement, votre méthode `DoWorkAsync()` renvoie un `Task<string>`, qui contient des « données réelles » pour l’appelant et qui seront obtenues de manière transparente via le mot-clé `await`. Cependant, **comment créer une méthode asynchrone qui ne renvoie rien ?** ==Bien qu’il existe deux manières de procéder, il n’y a en réalité qu’une seule bonne façon de faire==. Tout d’abord, examinons les problèmes liés à la définition d’une méthode asynchrone `void`.
@@ -2367,7 +2401,7 @@ Done with the first task!
 ```
 
 >[!info] 
->Les ordinateurs actuels sont si rapide et .NET est tellement optimisé maintenant que les deux tâche de 1s finissend presque au même instant (à la nanoseconde). Le temps que `WhenAny` se réveille, les deux message sont déja dans la console
+>Les ordinateurs actuels sont si rapide et .NET est tellement optimisé maintenant que les deux tâche de 1s finissent presque au même instant (à la nanoseconde). Le temps que `WhenAny` se réveille, les deux message sont déja dans la console
 
 **Chacune de ces méthodes fonctionne également avec un tableau de tâches**. Pour illustrer cela, créez une nouvelle méthode nommée `MultipleAwaitsTake2Async()`. Dans cette méthode, créez une `List<Task>`, ajoutez-y les trois tâches, puis appelez `Task.WhenAll()` ou `Task.WhenAny()`.
 
@@ -2536,7 +2570,7 @@ static async Task MethodWithProblems(int firstParam, int secondParam)
         // Appelle une méthode qui dure longtemps
         Thread.Sleep(4_000);
         Console.WriteLine("First Complete");
-        // Appelle une autre méthode qui dure longtems qui échoue
+        // Appelle une autre méthode qui dure longtemps qui échoue
         // parce que le second paramètre est hors de portée.
         Console.WriteLine("Something bad happened");
     });
@@ -2587,7 +2621,7 @@ dotnet add PictureHandlerWithAsyncAwait package System.Drawing.Common
 ```
 dotnet new Avalonia.app -n PictureHandlerWithAsyncAwait
 dotnet sln Chapter15_AllProjects.sln add PictureHandlerWithAsyncAwait
-dotnet add PictureHandlerWithAsyncAwait package SixLabors.ImageSharp
+dotnet add PictureHandlerWithAsyncAwait package Magick.NET-Q8-AnyCPU
 ```
 
 #### Commun
@@ -2621,11 +2655,9 @@ Dans le fichier *MainWindow.axaml.cs*, assurez-vous que les instructions `using`
 ```cs
 using System.IO;
 using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-// Conflit de nom entre Avalonia.Image et SixLabors.ImageSharp.Image
-using SharpImage = SixLabors.ImageSharp.Image;
+using ImageMagick;
 ```
 
 #### Commun
@@ -2640,7 +2672,7 @@ Ensuite, ajoutez une variable de classe pour `CancellationToken` et ajoutez le g
 ```cs
 private CancellationTokenSource _cancelToken = null;
 
-private void cmdCancel_Click(object sender, RoutedEventArgs e)
+private void CmdCancel_Click(object sender, RoutedEventArgs e)
 {
   _cancelToken.Cancel();
 }
@@ -2651,43 +2683,36 @@ private void cmdCancel_Click(object sender, RoutedEventArgs e)
 >[!tip] La gestion des exception est un petit peu différente par rapport au livre (affichage plus propre des annulation dans le terminal).
 
 ```cs
-private async void cmdProcess_Click(object sender, RoutedEventArgs e)
+private async void CmdProcess_Click(object? sender, RoutedEventArgs e)
 {
+	// Réinitialiser le token pour permettre un nouveau cycle
 	_cancelToken = new CancellationTokenSource();
 
-	string projectName = Assembly.GetExecutingAssembly().GetName().Name;
+	var basePath = Path.GetDirectoryName(Environment.ProcessPath);
+	var inputDirectory = Path.Combine(basePath!, "Assets");
+	var outputDirectory = Path.Combine(basePath!, "ModifiedAssets");
 
-	var basePath = Directory.GetCurrentDirectory();
-	var pictureDirectory = Path.Combine(basePath, projectName!, "assets");
-	var outputDirectory = Path.Combine(
-		basePath,
-		projectName,
-		"modifiedAssets"
-	);
-
-	// Nettoie le dossier si il existe déjà.
+	// Nettoie le dossier de sortie si il existe déjà
 	if (Directory.Exists(outputDirectory))
-	{
 		Directory.Delete(outputDirectory, true);
-	}
-	// Recrée le dossier de sortie des images
+
+	// Recée le dossier de sortie.
 	Directory.CreateDirectory(outputDirectory);
 
-	// Récupère tous les fichier .png contenu dans le dossier (récursif).
-	string[] files = Directory.GetFiles(
-		pictureDirectory,
+	var files = Directory.GetFiles(
+		inputDirectory,
 		"*.png",
 		SearchOption.AllDirectories
 	);
 
 	try
 	{
-		foreach (string currentFile in files)
+		foreach (string currFile in files)
 		{
 			try
 			{
 				await ProcessFileAsync(
-					currentFile,
+					currentfile,
 					outputDirectory,
 					_cancelToken.Token
 				);
@@ -2707,9 +2732,11 @@ private async void cmdProcess_Click(object sender, RoutedEventArgs e)
 		Console.WriteLine(ex.Message);
 		throw;
 	}
-
-	_cancelToken = null;
-	this.Title = "Processing complete";
+	finally
+	{
+		_cancelToken = null;
+		this.Title = "Processing complete";
+	}
 }
 ```
 
@@ -2726,40 +2753,38 @@ La dernière méthode à ajouter est la méthode `ProcessFileAsync()`.
 
 ```cs
 private async Task ProcessFileAsync(
-	string currentFile,
+	string currentfile,
 	string outputDirectory,
 	CancellationToken token
 )
 {
-	string filename = Path.GetFileName(currentFile);
-
-	using (SharpImage image = SharpImage.Load(currentFile))
+	string filename = Path.GetFileName(currentfile);
+	using var image = new MagickImage(currentfile);
+	try
 	{
-		try
-		{
-			await Task.Run(
-				() =>
+		await Task.Run(
+			() =>
+			{
+				Dispatcher.UIThread.Post(() =>
 				{
-					Dispatcher.UIThread.Post(() =>
-					{
-						this.Title = $"Processing {filename}";
-					});
+					this.Title = $"Processing {filename}";
+				});
 
-					image.Mutate(x => x.Flip(FlipMode.Horizontal));
-					image.Save(Path.Combine(outputDirectory, filename));
+				// Flip horizontal
+				image.Flop();
+				image.Write(Path.Combine(outputDirectory, filename));
 
-					// Simule une charge te travail plus importante
-					// (pour voir les bonds en performances)
-					Thread.Sleep(2000);
-				},
-				// On transmet le token dans la tâche (garder la chaîne)
-				token
-			);
-		}
-		catch (OperationCanceledException)
-		{
-			throw;
-		}
+				// Simule une charge de traval plus importante.
+				Thread.Sleep(1_500);
+			},
+			// On transmet le CancellationToken dasn la tâche
+			// (garder la chaîne)
+			token
+		);
+	}
+	catch (OperationCanceledException)
+	{
+		throw;
 	}
 }
 ```
@@ -2783,8 +2808,8 @@ _ = await DoWorkAsync().WaitAsync(TimeSpan.FromSeconds(10), tokenSource.Token);
 
 ```cs
 CancellationTokenSource tokenSource = new CancellationTokenSource();
-MethodReturningTaskOfVoidAsync().Wait(tokenSource.Token);
-MethodReturningTaskOfVoidAsync().Wait(10000,tokenSource.Token);
+MethodReturningVoidTaskAsync().Wait(tokenSource.Token);
+MethodReturningVoidTaskAsync().Wait(10000,tokenSource.Token);
 ```
 
 Vous pouvez également utiliser `JoinableTaskFactory` et la nouvelle méthode `WaitAsync()` lors d'un appel depuis du code synchrone :
@@ -2834,7 +2859,7 @@ await foreach (var number in GenerateSequence())
 
 ## La méthode `Parallel.ForEachAsync()` (Nouveauté C# 10.0)
 
-**Nouveauté de C# 10 : la classe `Parallel` possède une nouvelle méthode `ForEachAsync()`, asynchrone** (comme son nom l’indique), **qui fournit également une méthode asynchrone pour le corps de la requête**. ==Dans le projet *DataParallelismWithForEach*, créez une nouvelle méthode asynchrone nommée `ProcessFilesAsync()` et copiez le code de la méthode `ProcessFiles()`.
+**Nouveauté de C# 10 : la classe `Parallel` possède une nouvelle méthode `ForEachAsync()`, asynchrone** (comme son nom l’indique), **qui fournit également une méthode asynchrone pour le corps de la requête**. ==Dans le projet *DataParallelismWithForEach*, créez une nouvelle méthode asynchrone nommée `ProcessFilesAsync()` et copiez le code de la méthode `ProcessFiles()`==.
 
 **Une fois le code copié, remplacez l’appel précédent à `Parallel.ForEach()` par `await Parallel.ForEach()`**. ==Les deux premiers paramètres (`files`, `parOpts`) sont identiques dans les deux appels==. ***==La différence réside dans le corps de la requête, qui prend deux paramètres : le fichier courant et le jeton d’annulation.==***
 
@@ -2861,68 +2886,59 @@ La méthode complète est présentée ici :
 ```cs
 private async Task ProcessFilesAsync()
 {
-	// Charge tous les fichiers *.png et crée un nouveau dossier pour les
-	// données modifiées.
-	string? projectName = Assembly.GetExecutingAssembly().GetName().Name;
-	var basePath = Directory.GetCurrentDirectory();
-	var pictureDirectory = Path.Combine(basePath, projectName!, "assets");
-	var outputDirectory = Path.Combine(
-		basePath,
-		projectName!,
-		"modifiedAssets"
-	);
+	var basePath = Path.GetDirectoryName(Environment.ProcessPath);
+	var inputDirectory = Path.Combine(basePath!, "Assets");
+	var outputDirectory = Path.Combine(basePath!, "ModifiedAssets");
 
-	// Nettoie le dossier si il existe déjà.
-	if (Directory.Exists(outputDirectory))
+	ParallelOptions parOpts = new()
 	{
+		CancellationToken = _cancelToken.Token,
+		MaxDegreeOfParallelism = Environment.ProcessorCount,
+	};
+
+	// Nettoie le dossier de sortie si il existe déjà
+	if (Directory.Exists(outputDirectory))
 		Directory.Delete(outputDirectory, true);
-	}
-	// Recrée le dossier de sortie des images
+
+	// Recée le dossier de sortie.
 	Directory.CreateDirectory(outputDirectory);
-	
-	// Récupère tous les fichier .png contenu dans le dossier (récursif).
-	string[] files = Directory.GetFiles(
-		pictureDirectory,
+
+	var files = Directory.GetFiles(
+		inputDirectory,
 		"*.png",
 		SearchOption.AllDirectories
 	);
-	
-	// Utilise une instance de ParallelOptions
-	// por stocker le CancellationToken
-	ParallelOptions parOpts = new ParallelOptions();
-	parOpts.CancellationToken = _cancelToken.Token;
-	parOpts.MaxDegreeOfParallelism = Environment.ProcessorCount;
 
 	try
 	{
-		// Traiter les données d'image en parallèle !
+		// Traite toutes les images en parallèle !
 		await Parallel.ForEachAsync(
 			files,
 			parOpts,
-			async (currentFile, token) =>
+			async (currentfile, token) =>
 			{
 				// Génère l'exception d'annulage.
 				token.ThrowIfCancellationRequested();
+				// Simule une charge de travail plus importante
 
-				string filename = Path.GetFileName(currentFile);
+				string fileName = Path.GetFileName(currentfile);
 
+				// Affiche l'ID du thread traitant l'image.
 				Dispatcher.UIThread.Post(() =>
 				{
 					this.Title =
-						$"Processing {filename} on thread {Environment.CurrentManagedThreadId}";
+						$"Processing {fileName} on thread {Environment.CurrentManagedThreadId}";
 				});
+				using var image = new MagickImage(currentfile);
+				// Flip Horizontal.
+				image.Flop();
+				image.Write(Path.Combine(outputDirectory, fileName));
 
-				using (SharpImage image = SharpImage.Load(currentFile))
-				{
-					image.Mutate(x => x.Flip(FlipMode.Horizontal));
-					image.Save(Path.Combine(outputDirectory, filename));
-				}
-
-				// Simule une charge te travail plus importante
-				// (pour voir les bonds en performances)
-				Thread.Sleep(2000);
+				// Simule une charge de travail plus importante.
+				Thread.Sleep(100);
 			}
 		);
+
 		Dispatcher.UIThread.Post(() => this.Title = "Done!");
 	}
 	catch (OperationCanceledException ex)
