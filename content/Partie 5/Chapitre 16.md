@@ -174,8 +174,7 @@ using The3DHexagon = My3DShapes.Hexagon;
 The3DHexagon h1 = new The3DHexagon();
 ```
 
-Il existe une autre syntaxe (**==plus courante==**) qui permet de créer un alias pour un espace de noms
-au lieu d'un type. Par exemple, vous pouvez créer un alias pour l'espace de noms `CustomNamespaces.My3DShapes` et créer une instance de l'hexagone 3D comme suit :
+Il existe une autre syntaxe (**==plus courante==**) qui permet de créer un alias pour un espace de noms au lieu d'un type. Par exemple, vous pouvez créer un alias pour l'espace de noms `CustomNamespaces.My3DShapes` et créer une instance de l'hexagone 3D comme suit :
 
 ```cs
 using ThreeD = CustomNamespaces.My3DShapes;
@@ -208,7 +207,7 @@ namespace CustomNamespaces
 }
 ```
 
-La deuxième option, utilisant C# 10 et supérieur utilise un espace de noms de portée fichier suivi d'un espace de noms de portée bloc pour l'espace de noms imbriqué :
+~~La deuxième option, utilisant C# 10 et supérieur utilise un espace de noms de portée fichier suivi d'un espace de noms de portée bloc pour l'espace de noms imbriqué :~~
 
 >[!danger] L'auteur à fait une erreur: Cette option n'est pas légale en C# !
 >```cs
