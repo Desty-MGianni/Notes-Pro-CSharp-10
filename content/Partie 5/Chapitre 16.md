@@ -329,9 +329,7 @@ Cela ouvrira le programme d'installation de Visual Studio avec les outils sélec
 
 ## En-tête du fichier système d'exploitation
 
-L'en-tête du fichier système d'exploitation indique que l'assembly peut être chargé et manipulé par
-le système d'exploitation cible (ici, Windows). Ces données d'en-tête identifient également le type d'
-application (console, interface graphique ou bibliothèque de code *.dll*) hébergée par le système d'exploitation.
+L'en-tête du fichier système d'exploitation indique que l'assembly peut être chargé et manipulé par le système d'exploitation cible (ici, Windows). Ces données d'en-tête identifient également le type d' application (console, interface graphique ou bibliothèque de code *.dll*) hébergée par le système d'exploitation.
 
 Ouvrez le fichier *CarLibrary.dll* (==dans le dépôt du livre ou créé plus loin dans ce chapitre==) à l'aide de l'utilitaire *dumpbin.exe*/*objdump* (via le terminal) avec l'option `headers` :
 
@@ -411,7 +409,7 @@ The Import Tables:
 
 ## Code CIL, métadonnées de type et manifeste d'assembly
 
-**Un assembly contient du code CIL, un langage intermédiaire indépendant de la plateforme et du processeur**. À l'exécution, **==le CIL interne est compilé à la volée à l'aide d'un compilateur JIT (Just-In-Time), selon les instructions spécifiques à la plateforme et au processeur**==. **Grâce à cette conception, les assemblies .NET peuvent s'exécuter sur diverses architectures, appareils et systèmes d'exploitation**. (Bien qu'il soit possible de mener une vie productive sans maîtriser les détails du langage de programmation CIL, le [[Chapitre 18|Chapitre 18]] propose une introduction à sa syntaxe et à sa sémantique.)
+**Un assembly contient du code CIL, un langage intermédiaire indépendant de la plateforme et du processeur**. À l'exécution, **==le CIL interne est compilé à la volée à l'aide d'un compilateur JIT (Just-In-Time), selon les instructions spécifiques à la plateforme et au processeur==**. **Grâce à cette conception, les assemblies .NET peuvent s'exécuter sur diverses architectures, appareils et systèmes d'exploitation**. (Bien qu'il soit possible de mener une vie productive sans maîtriser les détails du langage de programmation CIL, le [[Chapitre 18#Examen des directives, attributs et opcodes CIL|Chapitre 18]] propose une introduction à sa syntaxe et à sa sémantique.)
 
 **Un assembly contient également des métadonnées qui décrivent entièrement le format des types qu'il contient, ainsi que celui des types externes référencés par cet assembly**. ==Le runtime .NET utilise ces métadonnées pour localiser les types== (et leurs membres) ==dans le binaire, les organiser en mémoire et faciliter les appels de méthodes distantes==. ***==Vous découvrirez les détails du format des métadonnées .NET au [[Chapitre 17|Chapitre 17]] lors de votre étude des services de réflexion.==***
 
@@ -423,7 +421,7 @@ The Import Tables:
 
 # Bibliothèques de classes vs. Applications console
 
-**Jusqu'à présent, les exemples de ce livre étaient presque exclusivement des applications console .NET.** Si vous êtes développeur .NET Framework, ces exemples sont similaires aux applications console .NET, la principale différence résidant dans le processus de configuration (qui sera abordé ultérieurement) et, bien sûr, dans le fait qu'elles s'exécutent sur .NET Core. **Les applications console possèdent un point d'entrée unique (une méthode `Main()` spécifique ou des instructions de niveau supérieur), peuvent interagir avec la console et peuvent être lancées directement depuis le système d'exploitation**. ==Autre différence: les applications console .NET sont lancées à l'aide de l'hôte d'applications .NET (*dotnet.exe / dotnet*).
+**Jusqu'à présent, les exemples de ce livre étaient presque exclusivement des applications console .NET.** Si vous êtes développeur .NET Framework, ces exemples sont similaires aux applications console .NET, la principale différence résidant dans le processus de configuration (qui sera abordé ultérieurement) et, bien sûr, dans le fait qu'elles s'exécutent sur .NET Core. **Les applications console possèdent un point d'entrée unique (une méthode `Main()` spécifique ou des instructions de niveau supérieur), peuvent interagir avec la console et peuvent être lancées directement depuis le système d'exploitation**. ==Autre différence: les applications console .NET sont lancées à l'aide de l'hôte d'applications .NET (*dotnet.exe / dotnet*)==.
 
 **Les bibliothèques de classes, quant à elles, n'ont pas de point d'entrée et ne peuvent donc pas être lancées directement**. ***==Elles servent à encapsuler la logique, les types personnalisés, etc., et sont référencées par d'autres bibliothèques de classes et/ou applications console==***. Autrement dit, **les bibliothèques de classes servent à contenir les éléments abordés dans la section  "[[#Le rôle des assemblages .NET]]".**
 
@@ -431,7 +429,9 @@ The Import Tables:
 
 ***==Les bibliothèques de classes .NET (y compris .NET Core/.NET 5/.NET 6) s'exécutent sur .NET Core==***, *==et les bibliothèques de classes .NET Framework s'exécutent sur .NET Framework==*. **Bien que cela soit assez simple, un problème se pose**. Imaginez que votre organisation dispose d'une importante base de code .NET Framework, fruit de plusieurs années de développement (potentiellement) de votre équipe. Il existe probablement une quantité importante de code partagé, utilisé par les applications que vous avez développées au fil des ans. Il peut s'agir de la journalisation centralisée, de la génération de rapports ou de fonctionnalités spécifiques à un domaine.
 
-Vous (et votre organisation) souhaitez maintenant migrer vers le nouveau .NET pour tous les nouveaux développements. Qu'en est-il de tout ce code partagé ? **L'effort de réécriture de tout votre code existant en assemblies .NET 6 pourrait être considérable, et tant que toutes vos applications n'auront pas été migrées vers .NET 6, vous devrez prendre en charge deux versions (une dans .NET Framework et une dans .NET 6)**. *==Cela paralyserait complètement la productivité==*. **==Heureusement, les concepteurs de .NET (Core) ont anticipé ce cas de figure==**. **.NET Standard est un nouveau type de projet de bibliothèque de classes introduit avec .NET Core 1.0 et pouvant être référencé par les applications .NET Framework ainsi que par les applications .NET (Core)**. Cependant, *==avant de vous emballer, sachez qu'il y a un hic avec .NET 5 et .NET 6. Nous y reviendrons plus en détail==*.
+Vous (et votre organisation) souhaitez maintenant migrer vers le nouveau .NET pour tous les nouveaux développements. Qu'en est-il de tout ce code partagé ? **L'effort de réécriture de tout votre code existant en assemblies .NET 6 pourrait être considérable, et tant que toutes vos applications n'auront pas été migrées vers .NET 6, vous devrez prendre en charge deux versions (une dans .NET Framework et une dans .NET 6)**. *==Cela paralyserait complètement la productivité==*. 
+
+**==Heureusement, les concepteurs de .NET (Core) ont anticipé ce cas de figure==**. **.NET Standard est un nouveau type de projet de bibliothèque de classes introduit avec .NET Core 1.0 et pouvant être référencé par les applications .NET Framework ainsi que par les applications .NET (Core)**. Cependant, *==avant de vous emballer, sachez qu'il y a un hic avec .NET 5 et .NET 6. Nous y reviendrons plus en détail==*.
 
 **Chaque version de .NET Standard définit un ensemble commun d'API que toutes les versions de .NET doivent prendre en charge** (.NET, .NET Core, Xamarin, etc.) **pour être conformes à la norme**. Par exemple, ==si vous créez une bibliothèque de classes en tant que projet .NET Standard 2.0, elle peut être référencée par .NET 4.61+ et .NET Core 2.0+ (ainsi que par différentes versions de Xamarin, Mono, Universal Windows Platform et Unity).==
 
@@ -463,7 +463,7 @@ dotnet add FunWithConfiguration package Microsoft.Extensions.Configuration.Binde
 dotnet add FunWithConfiguration package Microsoft.Extensions.Configuration.Json
 ```
 
-**Cela ajoute une référence au sous-système de configuration, au sous-système de configuration .NET basé sur un fichier JSON, et aux extensions de liaison pour la configuration dans votre projet**. Commencez par ajouter un nouveau fichier JSON à votre projet, nommé *appsettings.json*. Mettez à jour le fichier projet pour vous assurer que le fichier est toujours copié dans le répertoire de sortie lors de la compilation du projet.
+**Cela ajoute une référence au sous-système de configuration, au sous-système de configuration .NET basé sur un fichier JSON, et aux extensions de liaison pour la configuration dans votre projet**. Commencez par ajouter un nouveau fichier JSON à votre projet, nommé *appsettings.json*. ==Mettez à jour le fichier projet pour vous assurer que le fichier est toujours copié dans le répertoire de sortie lors de la compilation du projet.==
 
 >[!info]- Explication plus détaillées
 >Dans notre code, on va utiliser l'interface `IConfiguration`. Cette interface fait partie de la BCL (Librairie de Classe de Base), mais son implémentation spécifique (comme la lecture du JSON) nécessite des packages externes. l'interface est présente dans le SDK, mais elle est  "vide" : elle définit comment accéder aux données, mais pas où les trouver. 
@@ -561,7 +561,10 @@ catch (InvalidOperationException ex)
 ```
 
 >[!note]
->La méthode GetValue() est conçue pour fonctionner avec des types primitifs. Pour les types complexes, utilisez les méthodes `Bind()` ou `Get()`/`Get<T>()`, décrites dans la section "[[#Utilisation des objets (MaJ C 10.0)|Utilisation des objets]]"
+>La méthode `GetValue()` est conçue pour fonctionner avec des types primitifs. Pour les types complexes, utilisez les méthodes `Bind()` ou `Get()`/`Get<T>()`, décrites dans la section "[[#Utilisation des objets (MaJ C 10.0)|Utilisation des objets]]"
+
+>[!warning] **Breaking change .NET 10**  
+>`GetValue<T>()` ne lève plus d'`InvalidOperationException` quand la clé est absente ou null pour les types valeurs. Il retourne désormais `default(T)` (`0` pour `int`, `false` pour `bool`...). Le comportement du livre (exception) était valide jusqu'à .NET 9. Utiliser `GetRequiredSection()` si une exception est souhaitée en cas de clé manquante.
 
 ## Plusieurs fichiers de configuration
 
@@ -650,7 +653,7 @@ Console.WriteLine($"{c.Make} named {c.PetName}");
 ```cs
 var notFoundCar = new Car { Color = "Red" };
 config.GetSection("Car2").Bind(notFoundCar);
-Console.Write($"My car object is a {c.Color} ");
+Console.Write($"My car object is a {notFoundCar.Color} ");
 Console.WriteLine($"{notFoundCar.Make} named {notFoundCar.PetName}");
 ```
 
@@ -682,7 +685,7 @@ var notFoundCarFromGet2 = config.GetSection("Car2").Get<Car>();
 Console.WriteLine($"The not found car is null? {notFoundCarFromGet2 == null}");
 ```
 
-**Les méthodes `Bind()` et `Get()`/`Get<T>()` utilisent la réflexion** (traitée dans le chapitre suivant) **pour faire correspondre les noms des propriétés publiques de la classe aux noms de la section de configuration, ==sans tenir compte de la casse.==** Par exemple, ***==si vous mettez à jour *appsettings.development.json* comme suit (notez le changement de casse de la propriété `petName`), le code précédent fonctionnera toujours :==***
+**Les méthodes `Bind()` et `Get()`/`Get<T>()` utilisent la réflexion** (traitée dans le chapitre suivant) **pour faire correspondre les noms des propriétés publiques de la classe aux noms de la section de configuration, ==sans tenir compte de la casse.==** Par exemple, ==si vous mettez à jour *appsettings.development.json* comme suit (notez le changement de casse de la propriété `petName`), le code précédent fonctionnera toujours :==
 
 ```json
 {
@@ -695,7 +698,7 @@ Console.WriteLine($"The not found car is null? {notFoundCarFromGet2 == null}");
 }
 ```
 
-**Si une propriété de la configuration n'existe pas dans la classe** (ou ***==si son nom est orthographié différemment==***), **alors cette valeur de configuration particulière est ignorée (par défaut)**. Si vous mettez à jour le JSON comme suit, les propriétés `Make` et `Color` sont renseignées, mais la propriété `PetName` de l'objet Car ne l'est pas :
+**Si une propriété de la configuration n'existe pas dans la classe** (ou ***==si son nom est orthographié différemment==***), **alors cette valeur de configuration particulière est ignorée (par défaut)**. Si vous mettez à jour le JSON comme suit, les propriétés `Make` et `Color` sont renseignées, mais la propriété `PetName` de l'objet `Car` ne l'est pas :
 
 ```json
 {
@@ -732,8 +735,7 @@ catch (InvalidOperationException ex)
     Console.WriteLine($"An exception occured: {ex.Message}");
 }
 /*
-Error message: 'ErrorOnUnknownConfiguration' was set on the provided BinderOptions, but the
-following properties were not found on the instance of Car: 'PetNameForCar'
+Message d'erreur: 'ErrorOnUnknownConfiguration' was set on the provided BinderOptions, but the following properties were not found on the instance of Car: 'PetNameForCar'
 */
 ```
 
@@ -1027,7 +1029,6 @@ Comme expliqué dans le chapitre suivant, **les métadonnées d'un assembly sont
 >
 >- **Default access modifier :** Une classe déclarée sans modificateur (ex: `class Car {}`) est toujours **internal** par défaut. C'est une sécurité : on ne rend public que ce qui est nécessaire.
 >- **Visibilité :** Un type `internal` reste invisible pour le projet client qui ajoute une référence à votre DLL.
-><br>
 >
 >---
 >
@@ -1041,7 +1042,7 @@ Comme expliqué dans le chapitre suivant, **les métadonnées d'un assembly sont
 >file class HiddenTechnique { ... }
 >```
 >
->Une classe `file` n'est visible **que dans le fichier .cs où elle est écrite**. Même les autres classes du même projet (du même assembly) ne peuvent pas la voir. C'est encore plus restrictif qu'internal.
+>Une classe `file` n'est visible **que dans le fichier .cs où elle est écrite**. Même les autres classes du même projet (du même assembly) ne peuvent pas la voir. C'est encore plus restrictif que `internal`.
 >
 > ### Les "Internal Visible To" simplifiés
 >
@@ -1210,7 +1211,7 @@ internal class MyInternalClass { }
 
 ### Utilisation d'un attribut d'assembly
 
-Le [[Chapitre 17|Chapitre 17]] traitera des attributs en détail, mais pour l'instant, ouvrez la classe *Car.cs* du projet *CarLibrary* et ajoutez l'attribut et l'instruction `using` suivants :
+Le [[Chapitre 17#Comprendre le rôle des attributs .NET|Chapitre 17]] traitera des attributs en détail, mais pour l'instant, ouvrez la classe *Car.cs* du projet *CarLibrary* et ajoutez l'attribut et l'instruction `using` suivants :
 
 ```cs
 using System.Runtime.CompilerServices;
@@ -1231,7 +1232,7 @@ namespace CarLibrary;
 Vous pouvez maintenant mettre à jour le projet *CSharpCarClient* en ajoutant le code suivant aux instructions de niveau supérieur :
 
 ```cs
-var InternalClassInstance = new MyInternalClass();
+var internalClassInstance = new MyInternalClass();
 ```
 
 Cela fonctionne parfaitement. Essayez maintenant de faire la même chose dans la méthode `Main` de *VisualBasicCarClient*.
@@ -1267,7 +1268,7 @@ Cela fonctionne parfaitement. Essayez maintenant de faire la même chose dans la
 
 **Pour voir cela en pratique, nous allons transformer** *CarLibrary* **en package NuGet, puis l'utiliser depuis les deux applications clientes.**
 
-Les propriétés du package NuGet sont accessibles depuis les pages de propriétés du projet. Faites un clic droit sur le projet CarLibrary et sélectionnez Propriétés. Accédez à la page Package et consultez les valeurs que nous avons saisies précédemment pour personnaliser l'assembly. D'autres propriétés peuvent être définies pour le package NuGet (par exemple, l'acceptation du contrat de licence et les informations du projet telles que l'URL et l'emplacement du dépôt).
+Les propriétés du package NuGet sont accessibles depuis les pages de propriétés du projet. Faites un clic droit sur le projet *CarLibrary* et sélectionnez Propriétés. Accédez à la page Package et consultez les valeurs que nous avons saisies précédemment pour personnaliser l'assembly. D'autres propriétés peuvent être définies pour le package NuGet (par exemple, l'acceptation du contrat de licence et les informations du projet telles que l'URL et l'emplacement du dépôt).
 
 >[!note]
 >Toutes les valeurs de l'interface utilisateur de la page « Package » de Visual Studio peuvent être saisies manuellement dans le fichier projet, mais il est nécessaire de connaître les mots clés. Il est conseillé d'utiliser Visual Studio au moins une fois pour tout renseigner, puis vous pourrez modifier le fichier projet manuellement. Vous trouverez également toutes les propriétés autorisées dans la [documentation](https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-the-dotnet-cli?toc=/dotnet/fundamentals/toc.json&bc=/dotnet/breadcrumb/toc.json) .NET.
@@ -1336,7 +1337,7 @@ Vous vous demandez peut-être d'où proviennent les packages ajoutés dans les e
 
 La liste de fichiers précédente affiche deux sources. La première pointe vers NuGet.org, le plus grand dépôt de packages NuGet au monde. ==La seconde se trouve sur votre disque local et est utilisée par Visual Studio comme cache de packages.==
 
->Comme affiché dans l'exemple, sur mon mac, je n'ai pas la seconde source.
+>Comme affiché dans l'exemple, sur mon mac, je n'ai pas la seconde source. (Peut-être lier au fait que je n'utilise pas VS ou VSCode)
 
 **Il est important de noter que les fichiers *NuGet.Config* sont cumulatifs par défaut**. ***==Pour ajouter des sources supplémentaires sans modifier la liste pour l'ensemble du système, vous pouvez ajouter d'autres fichiers==*** *NuGet.Config*. **Chaque fichier est valide pour le répertoire dans lequel il est placé ainsi que pour tout sous-répertoire**. Ajoutez un nouveau fichier nommé *NuGet.Config* **==dans le répertoire de la solution==** (*==pas dans le dossier du projet==*) et mettez à jour son contenu comme suit :
 
@@ -1365,7 +1366,7 @@ La liste de fichiers précédente affiche deux sources. La première pointe vers
 >[!note]
 >Si vous utilisez Visual Studio, vous devrez redémarrer l'IDE pour que les paramètres mis à jour du fichier *nuget.config* soient pris en compte.
 
-**Supprimez les références dans projets** *CSharpCarClient* **et** *VisualBasicCarClient*, **puis ajoutez les références aux packages comme ceci (depuis le répertoire de la solution) :**
+**Supprimez les références dans les projets** *CSharpCarClient* **et** *VisualBasicCarClient*, **puis ajoutez les références aux packages comme ceci (depuis le répertoire de la solution) :**
 
 ```bash
 dotnet add CSharpCarClient package CarLibrary
@@ -1376,7 +1377,7 @@ dotnet add VisualBasicCarClient package CarLibrary
 
 Définissez maintenant l'un des clients comme projet de démarrage et exécutez l'application : elle fonctionnera comme auparavant.
 
-==Mettez ensuite à jour le numéro de version de *CarLibrary* à `1.0.4` et recompilez-le==. Dans le répertoire `Publish`, **vous trouverez désormais deux packages NuGet** *CarLibrary*. **Si vous exécutez à nouveau les commandes d'ajout de package, le projet sera mis à jour pour utiliser la nouvelle version. Si vous préférez l'ancienne version, la commande d'ajout de package permet d'ajouter des numéros de version pour un package spécifique.**
+==Mettez ensuite à jour le numéro de version de *CarLibrary* à `1.0.4` et re-packager le==. Dans le répertoire `Publish`, **vous trouverez désormais deux packages NuGet** *CarLibrary*. **Si vous exécutez à nouveau les commandes d'ajout de package, le projet sera mis à jour pour utiliser la nouvelle version. Si vous préférez l'ancienne version, la commande d'ajout de package permet d'ajouter des numéros de version pour un package spécifique.**
 
 # Publication d'applications console (MaJ .NET 5/6)
 
@@ -1458,16 +1459,18 @@ Comme vous pouvez vous y attendre, les applications .NET peuvent également êtr
 
 **Lorsqu'aucun identifiant d'exécution n'est spécifié, le déploiement dépendant du framework est le comportement par défaut de la commande `dotnet publish`**. Pour empaqueter votre application et les fichiers requis, il vous suffit d'exécuter la commande suivante dans l'interface de ligne de commande :
 
-`dotnet publish`
+```bash
+dotnet publish
+```
 
 >[!note] 
->**Avant .NET 8**: La commande `publish` utilise la configuration par défaut de votre projet, qui est généralement `Debug`
+>**Avant .NET 8**: La commande `publish` utilise la configuration par défaut de notre projet, qui est généralement `Debug`
 >
 >**Après .NET 8**: Microsoft a décidé que `publish` devait logiquement produire une version prête pour la production. Par conséquent, **`dotnet publish` utilise désormais `Release` par défaut**.
 
 >[!warning] Le petit piège depuis .NET 8/9
 >
->Bien que ce soit le comportement par défaut, le SDK moderne est devenu "intelligent". Si tu as déjà défini un **RID** (comme `osx-arm64`) dans ton fichier `.csproj`, la commande `dotnet publish` pourrait décider toute seule de passer en mode **autonome**.
+>Bien que ce soit le comportement par défaut, le SDK moderne est devenu "intelligent". Si on défini déjà un **RID** (comme `osx-arm64`) dans un fichier `.csproj`, la commande `dotnet publish` pourrait décider toute seule de passer en mode **autonome**.
 
 **Cela place votre application et ses fichiers de support** (six fichiers au total) **dans le répertoire `bin\Debug\netVersion\publish`**. ==En examinant les fichiers ajoutés à ce répertoire, vous verrez deux fichiers *.dll*== (*CarLibrary.dll* et *CSharpCarClient.dll*) ==qui contiennent tout le code de l'application==. 
 
@@ -1507,32 +1510,33 @@ dotnet publish -r osx-arm64 -o selfcontained --self-contained true
 >l’option `--self-contained true` n’est plus nécessaire. Si un identificateur d’exécution est spécifié, la commande de publication utilisera le processus autonome.
 >
 >**Depuis .NET 8 (et donc en .NET 10) :**  
-Microsoft a fait marche arrière. Désormais, même si tu spécifies un RID, le comportement par défaut est resté **Framework-dependent** (dépendant du framework).
+Microsoft a fait marche arrière. Désormais, même si on spécifies un RID, le comportement par défaut est resté **Framework-dependent** (dépendant du framework).
 
 **Cela place votre application et ses fichiers de support** ($226$ fichiers au total) **dans le répertoire autonome**. **==Si vous avez copié ces fichiers sur un autre ordinateur dont l'identifiant d'exécution correspond, vous pouvez exécuter l'application même si le runtime .NET 6 n'est pas installé.==**
 
 >[!tip]- Le fait d'avoir 2 fois les mêmes fichier est le comportement normal de la commande. (Gemini)
->1. Le dossier `osx-arm64/` : L'aire de préparation
 >
->C'est le résultat de la commande **`dotnet build`** (appelée automatiquement par publish).
+> 1. Le dossier `osx-arm64/` : L'aire de préparation
 >
->- Pour fonctionner en mode autonome (`self-contained`), le compilateur doit d'abord rassembler toutes les DLL du runtime .NET dans le dossier de sortie pour vérifier que tout est compatible.
->- C'est ton **environnement de développement** pour cette architecture spécifique.
+>	C'est le résultat de la commande **`dotnet build`** (appelée automatiquement par publish).
 >
->2. Le dossier `publish/` : Le colis de livraison
+>	- Pour fonctionner en mode autonome (`self-contained`), le compilateur doit d'abord rassembler toutes les DLL du runtime .NET dans le dossier de sortie pour vérifier que tout est compatible.
+>	- C'est ton **environnement de développement** pour cette architecture spécifique.
 >
->C'est le résultat spécifique de la commande **`dotnet publish`**.
+> 2. Le dossier `publish/` : Le colis de livraison
 >
->- Le SDK **copie** les fichiers depuis le dossier parent vers le dossier `publish`.
->- **Pourquoi copier au lieu de simplement utiliser le dossier parent ?** Parce que l'étape de publication peut inclure des transformations que le dossier de build ne doit pas subir :
->    - Le **Trimming** (suppression du code mort dans les DLL).
->    - La **Compression**.
->    - La signature des fichiers pour l'App Store.
->    - Le regroupement en **SingleFile**.
+>	C'est le résultat spécifique de la commande **`dotnet publish`**.
 >
->3. Est-ce "normal" en .NET 10 ?
+>	- Le SDK **copie** les fichiers depuis le dossier parent vers le dossier `publish`.
+>	- **Pourquoi copier au lieu de simplement utiliser le dossier parent ?** Parce que l'étape de publication peut inclure des transformations que le dossier de build ne doit pas subir :
+>		- Le **Trimming** (suppression du code mort dans les DLL).
+>		- La **Compression**.
+>		- La signature des fichiers pour l'App Store.
+>		- Le regroupement en **SingleFile**.
 >
->Oui, c'est le fonctionnement historique du SDK. .NET privilégie la **sécurité du déploiement** (avoir un dossier `publish` parfaitement propre et isolé) au détriment de l'espace disque pendant la phase de build.
+> 3. Est-ce "normal" en .NET 10 ?
+>
+>	Oui, c'est le fonctionnement historique du SDK. .NET privilégie la **sécurité du déploiement** (avoir un dossier `publish` parfaitement propre et isolé) au détriment de l'espace disque pendant la phase de build.
 >
 >---
 >*Pou arrêter d'avoir ces 200+ fichiers en double qui polluent ton arborescence `bin`, voir la section suivante*
@@ -1558,19 +1562,19 @@ dotnet publish -r osx-arm64 -o singlefile --self-contained true -p:PublishSingle
 **Vous avez maintenant un seul fichier contenant tout, mais il est encore assez volumineux**. ==Une option pour réduire sa taille est la compression==. La sortie peut être compressée pour gagner de l'espace, *==mais cela risque d'affecter encore plus le temps de démarrage de votre application==*. Pour activer la compression, utilisez la commande suivante (sur une seule ligne) :
 
 ```bash
-dotnet publish -r osx-arm64 -o singlefile --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true:
+dotnet publish -r osx-arm64 -o singlefilecompressed --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true:
 ```
 
 **L'équipe .NET a travaillé sur le trimming des fichiers lors du processus de publication ces dernières années**. ***==Avec .NET 6, cette fonctionnalité est désormais disponible et prête à l'emploi==***. **==Le processus d'optimisation des fichiers détermine ce qui peut être supprimé du runtime en fonction de ce que votre application utilise==**. Si ce processus est maintenant opérationnel, c'est notamment parce que **l'équipe a annoté le runtime lui-même afin de supprimer les faux avertissements qui étaient fréquents dans .NET 5**. Nouveauté de .NET 6 : **le processus d'optimisation ne se contente pas de rechercher les assemblies pouvant être supprimés ; il recherche également les membres inutilisés**. Utilisez la commande suivante pour optimiser le fichier de sortie unique (sur une seule ligne) :
 
 ```bash
-dotnet publish -r osx-arm64 -o singlefile --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true
+dotnet publish -r osx-arm64 -o singlefilecompressedandtrimmed --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true
 ```
 
 **La dernière étape de ce processus consiste à publier votre application prête à l'emploi**. **==Cela peut améliorer le temps de démarrage, car une partie de la compilation JIT est effectuée à l'avance (AOT) lors de la publication.==**
 
 ```bash
-dotnet publish -r osx-arm64 -o singlefile --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true -p:PublishReadyToRun=true
+dotnet publish -r osx-arm64 -o singlefilefinal --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true -p:PublishReadyToRun=true
 ```
 
 >[!info] l'option `PublishAot` est encore plus radical car il convertit tout en code machine.
@@ -1617,11 +1621,11 @@ Jusqu'à présent dans ce livre, **tous les assemblies que vous avez créés ét
 
 **Plus précisément, lorsqu'une version du runtime est lancée, l'hôte du runtime fournit un ensemble de chemins de sondage qu'il utilisera pour trouver les dépendances d'une application**. **==Il existe cinq propriétés de sondage==** (chacune d'entre elles optionnelle), comme indiqué dans le [[#Tableau 16-2|Tableau 16-2]].
 
->[!warning] Ce qui a changé (La nuance moderne)
+>[!warning] Ce qui a changé (La nuance moderne) par Gemini
 >
 >- **Priorité au fichier `.deps.json`** : Sous .NET 10, le runtime fait beaucoup moins de "devinettes". Au lieu de scanner des dossiers au hasard (ce qui ralentit le démarrage), il lit le fichier JSON pour savoir exactement où se trouve `CarLibrary.dll`.
->- **Le "Shared Framework"** : Sur ton Mac, si tu n'es pas en mode `self-contained`, le chemin de sondage pointe prioritairement vers `/usr/local/share/dotnet/shared/`. C'est là que vivent les DLL communes à toutes les applications.
->- **Sécurité accrue** : .NET restreint désormais les chemins de sondage pour éviter qu'une DLL malveillante placée dans un dossier temporaire ne soit chargée à la place de la tienne.
+>- **Le "Shared Framework"** : Sur un Mac, si on n'es pas en mode `self-contained`, le chemin de sondage pointe prioritairement vers `/usr/local/share/dotnet/shared/`. C'est là que vivent les DLL communes à toutes les applications.
+>- **Sécurité accrue** : .NET restreint désormais les chemins de sondage pour éviter qu'une DLL malveillante placée dans un dossier temporaire ne soit chargée à la place de la notre.
 
 >[!tip]- Le processus de localilsation
 >1. **Dossier local :** Il cherche d'abord `CarLibrary.dll` juste à côté de l'exécutable.
@@ -1645,7 +1649,7 @@ Console.Title = "Fun with Probing Paths";
 Console.WriteLine("*** Fun with Probing Paths ***");
 Console.WriteLine($"TRUSTED_PLATFORM_ASSEMBLIES: ");
 
-// Utilisez ':' pour les peteformes différentes de Windows
+// NOTE: On split sur le caractère ';' pour windows et ':'  pour le reste
 var list = AppContext
     .GetData("TRUSTED_PLATFORM_ASSEMBLIES")
     .ToString()
@@ -1680,7 +1684,7 @@ Lorsque vous exécutez cette application, la plupart des valeurs proviennent de 
 **À mesure que votre application gagne en complexité, la liste des fichiers dans `TRUSTED_PLATFORM_ASSEMBLIES` s'allonge**. Par exemple, ==si vous ajoutez une référence au package `Microsoft.EntityFrameworkCore`, la liste des assemblies requis s'allonge==. Pour le démontrer, saisissez la commande suivante dans la console du Gestionnaire de packages (dans le même répertoire que le fichier *.csproj) :
 
 ```bash
-dotnet add FunWithProbingPath package Microsoft.EntityFrameworkCore
+dotnet add FunWithProbingPaths package Microsoft.EntityFrameworkCore
 ```
 
 **Une fois le package ajouté, relancez l'application et constatez le nombre accru de fichiers listés.** **==Bien que vous n'ayez ajouté qu'une seule nouvelle référence, le package `Microsoft.EntityFrameworkCore` possède des dépendances, qui sont ajoutées à la liste des fichiers de confiance.==**
