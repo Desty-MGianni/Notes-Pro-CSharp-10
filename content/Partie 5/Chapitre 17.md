@@ -12,7 +12,7 @@ Les sections suivantes abordent plusieurs sujets étroitement liés, qui reposen
 **==Ce chapitre vous présentera également le mot-clé `dynamic` de C# et vous expliquera comment les appels faiblement typés sont mappés à l'objet en mémoire approprié grâce au Dynamic Language Runtime (DLR)==**. Après avoir assimilé les services fournis par le DLR, **vous verrez des exemples d'utilisation des types dynamiques pour simplifier les appels de méthodes à liaison tardive** (via les services de réflexion) **et faciliter la communication avec les bibliothèques COM existantes.**
 
 >[!note]
->Ne confondez pas le mot-clé `dynamic` de C# avec le concept d'assembly dynamique (voir [[Chapitre 18|Chapitre 18]]). Bien que vous puissiez utiliser le mot-clé `dynamic` lors de la création d'un assembly dynamique, il s'agit en définitive de deux concepts indépendants.
+>Ne confondez pas le mot-clé `dynamic` de C# avec le concept d'assembly dynamique (voir [[Chapitre 18#Comprendre les assemblies dynamiques|Chapitre 18]]). Bien que vous puissiez utiliser le mot-clé `dynamic` lors de la création d'un assembly dynamique, il s'agit en définitive de deux concepts indépendants.
 
 # L’importance des métadonnées de type
 
@@ -65,7 +65,7 @@ Comme vous pouvez le constater, **les métadonnées de type .NET sont verbeuses*
 
 ## Affichage des métadonnées (partielles) de l'énumération `EngineStateEnum`
 
-**Chaque type défini dans l'assembly courant est documenté à l'aide d'un jeton `TypeDef #n`** (`TypeDef` signifiant  *définition de type*). **==Si le type décrit utilise un type défini dans un assembly .NET distinct, le type référencé est documenté à l'aide d'un jeton `TypeRef #n`==** (`TypeRef` signifiant *référence de type*). **Un jeton `TypeRef` est un pointeur vers la définition complète des métadonnées du type référencé dans un assembly externe**. **==En résumé, les métadonnées .NET sont un ensemble de tables qui identifient clairement toutes les définitions de type (`TypeDef`s) et les types référencés (`TypeRef`s), et qui peuvent toutes être consultées à l'aide==*** d'*ildasm.exe*.
+**Chaque type défini dans l'assembly courant est documenté à l'aide d'un jeton `TypeDef #n`** (`TypeDef` signifiant  *définition de type*). **==Si le type décrit utilise un type défini dans un assembly .NET distinct, le type référencé est documenté à l'aide d'un jeton `TypeRef #n`==** (`TypeRef` signifiant *référence de type*). **Un jeton `TypeRef` est un pointeur vers la définition complète des métadonnées du type référencé dans un assembly externe**. **==En résumé, les métadonnées .NET sont un ensemble de tables qui identifient clairement toutes les définitions de type (`TypeDef`s) et les types référencés (`TypeRef`s), et qui peuvent toutes être consultées à l'aide==** d'*ildasm.exe*.
 
 Concernant *CarLibrary.dll*, un `TypeDef` correspond à la description des métadonnées de `CarLibrary`. L'énumération `EngineStateEnum` (votre numéro peut différer; **==la numérotation des `TypeDef` dépend de l'ordre de traitement du fichier par le compilateur C#==**).
 
@@ -204,7 +204,7 @@ Le fichier *CarLibrary.il* permet également de consulter les métadonnées .NET
 
 ## Documentation des assemblies référencés
 
-**Outre le jeton `Assembly` et l'ensemble des blocs `TypeDef` et `TypeRef`, les métadonnées .NET utilisent également les jetons `AssemblyRef #n` pour documenter chaque assembly externe**. Étant donné que ==chaque assembly .NET référence l'assembly de la bibliothèque de classes de base `System.Runtime`, vous trouverez un `AssemblyRef` pour `System.Runtime`, comme illustré dans le code suivant :
+**Outre le jeton `Assembly` et l'ensemble des blocs `TypeDef` et `TypeRef`, les métadonnées .NET utilisent également les jetons `AssemblyRef #n` pour documenter chaque assembly externe**. Étant donné que ==chaque assembly .NET référence l'assembly de la bibliothèque de classes de base `System.Runtime`, vous trouverez un `AssemblyRef` pour `System.Runtime`, comme illustré dans le code suivant :==
 
 ```CIL
 // AssemblyRef #1 (23000001)
@@ -277,13 +277,13 @@ Pour comprendre comment exploiter l'espace de noms `System.Reflection` afin de l
 
 ##### Tableau 17-2: Sélection de membres de `System.Type`
 
-| Membre                                                                                                                                                                                                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IsAbstract`<br>`IsArray`<br>`IsClass`<br>`IsCOMObject`<br>`IsEnum`<br>`IsGenericTypeDefinition`<br>`IsGenericParameter`<br>`IsInterface`<br>`IsPrimitive`<br>`IsNestedPrivate`<br>`IsNestedPublic`<br>`IsSealed`<br>`IsValueType` | Ces propriétés (entre autres) vous permettent de découvrir un certain nombre de<br>caractéristiques fondamentales du type auquel vous faites référence (par exemple, s'il s'agit d'une entité abstraite, d'un<br>tableau, d'une classe imbriquée, etc.).                                                                                                                                                                                                                                                                                                             |
-| `GetConstructors()`<br>`GetEvents()`<br>`GetFields()`<br>`GetInterfaces()`<br>`GetMembers()`<br>`GetMethods()`<br>`GetNestedTypes()`<br>`GetProperties()`                                                                          | Ces méthodes (entre autres) vous permettent d'obtenir un tableau représentant<br>les éléments (interface, méthode, propriété, etc.) qui vous intéressent. Chaque<br>méthode renvoie un tableau associé (par exemple, `GetFields()` renvoie un tableau `FieldInfo`, `GetMethods()` renvoie un tableau `MethodInfo`, etc.). **Notez que chacune de ces méthodes possède une forme singulière (par exemple, `GetMethod()`, `GetProperty()`, etc.) qui vous permet de récupérer un élément spécifique par son nom, plutôt qu'un tableau de tous les éléments associés.** |
-| `FindMembers()`                                                                                                                                                                                                                    | Cette méthode renvoie un tableau `MemberInfo` en fonction des critères de recherche.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `GetType()`                                                                                                                                                                                                                        | Cette méthode statique renvoie une instance de `Type` à partir d'un nom de type sous forme de chaîne.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `InvokeMember()`                                                                                                                                                                                                                   | Cette méthode permet la « liaison tardive » d'un élément donné. Vous en apprendrez davantage sur la liaison tardive plus loin dans ce chapitre.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Membre                                                                                                                                                                                                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IsAbstract`<br>`IsArray`<br>`IsClass`<br>`IsCOMObject`<br>`IsEnum`<br>`IsGenericTypeDefinition`<br>`IsGenericParameter`<br>`IsInterface`<br>`IsPrimitive`<br>`IsNestedPrivate`<br>`IsNestedPublic`<br>`IsSealed`<br>`IsValueType` | Ces propriétés (entre autres) vous permettent de découvrir un certain nombre de caractéristiques fondamentales du type auquel vous faites référence (par exemple, s'il s'agit d'une entité abstraite, d'un tableau, d'une classe imbriquée, etc.).                                                                                                                                                                                                                                                                                                             |
+| `GetConstructors()`<br>`GetEvents()`<br>`GetFields()`<br>`GetInterfaces()`<br>`GetMembers()`<br>`GetMethods()`<br>`GetNestedTypes()`<br>`GetProperties()`                                                                          | Ces méthodes (entre autres) vous permettent d'obtenir un tableau représentant les éléments (interface, méthode, propriété, etc.) qui vous intéressent. Chaque méthode renvoie un tableau associé (par exemple, `GetFields()` renvoie un tableau `FieldInfo`, `GetMethods()` renvoie un tableau `MethodInfo`, etc.). **Notez que chacune de ces méthodes possède une forme singulière (par exemple, `GetMethod()`, `GetProperty()`, etc.) qui vous permet de récupérer un élément spécifique par son nom, plutôt qu'un tableau de tous les éléments associés.** |
+| `FindMembers()`                                                                                                                                                                                                                    | Cette méthode renvoie un tableau `MemberInfo` en fonction des critères de recherche.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `GetType()`                                                                                                                                                                                                                        | Cette méthode statique renvoie une instance de `Type` à partir d'un nom de type sous forme de chaîne.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `InvokeMember()`                                                                                                                                                                                                                   | Cette méthode permet la « liaison tardive » d'un élément donné. Vous en apprendrez davantage sur la liaison tardive plus loin dans ce chapitre.                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## Obtenir une référence de type avec `System.Object.GetType()`
 
@@ -504,7 +504,7 @@ do
         {
             t = typeof(System.Console);
         }
-        Console.WriteLine("");
+        Console.WriteLine();
         ListVariousStats(t);
         ListFields(t);
         ListProps(t);
@@ -513,7 +513,7 @@ do
     }
     catch
     {
-        Console.WriteLine("Sorry, cant find the type");
+        Console.WriteLine("Sorry, can't find the type");
     }
 } while (true);
 
@@ -579,7 +579,7 @@ is type a class type? True
 
 ==Remarquez la présence de plusieurs occurrences de `Abs`==. Cela s'explique par la présence d'***==au moins une surcharge pour la méthode `Abs()`==***. **Le code sera prochainement complété pour afficher les paramètres et les types de retour.**
 
->[!warning] Attention lors de la publication de ce programme
+>[!warning]- Attention lors de la publication de ce programme
 >
 >Si vous essayer de publier ce programme (comme lors du [[Chapitre 16#Publication d'applications console (MaJ .NET 5/6)|Chapitre 16]]), le code ne fonctionnera pas !
 >
@@ -600,6 +600,63 @@ is type a class type? True
 >
 >1. Désactiver le trimming : `<PublishTrimmed>false</PublishTrimmed>`
 >2. Ou "préserver" des bibliothèques entières (mais cela augmentera la taille du fichier)
+
+>[!info]- Note sur `System.Void` (Claude)
+>
+> **Dans les exemples de types à tester pour l'application *MyTypeViewer*, l'auteur du livre fourni le type `System.Void` !**
+> 
+> Or, dans une des annotations du [[Chapitre 12#Les délégués génériques `Action<>` et `Func<>`|Chapitre 12]], **on explique que `void` n'est pas un type en C# et que donc on ne peut pas déclarer de variable de ce type**. Est ce que l'annotation était érronée ?
+>
+> **En réalité, Les deux affirmations sont correctes et complémentaires.**
+> ### `void` en tant que mot-clé C#
+>
+>Dans le code C#, `void` n'est **pas un type** utilisable comme tel :
+>
+>```cs
+>void x; // ❌ Ne compile pas
+>var x = typeof(void); // ❌ Ne compile pas non plus... en apparence
+>```
+>
+>On ne peux pas déclarer de variable de type `void`, ni l'utiliser comme type générique.
+>
+>### `System.Void` en tant que type dans le CLR
+>
+`System.Void` est un **vrai type dans le CLR** au niveau des métadonnées. Il existe précisément pour que la réflexion puisse décrire les méthodes qui ne retournent rien :
+>
+>```cs
+>MethodInfo method = typeof(Car).GetMethod("TurboBoost");
+>Console.WriteLine(method.ReturnType); // Affiche "System.Void"
+>```
+>
+>Le CLR a besoin d'un type concret pour représenter "pas de retour" dans ses métadonnées, donc `System.Void` existe à ce niveau.
+>
+> ### Peut on créer une variable de type `System.Void`
+> 
+> Non ! Et pour une raison très précise : 
+> 
+> `System.Void` est une `struct` mais elle est **explicitement interdite** par le compilateur C# dans ce contexte.
+>
+>```csharp
+>var x = new System.Void(); // ❌ Erreur CS0673
+>```
+>
+>#### Pourquoi cette restriction existe
+>
+>Le compilateur C# a une règle hardcodée qui interdit l'instanciation de `System.Void`. C'est une décision délibérale car `System.Void` n'a **aucun sens sémantique** en dehors des métadonnées du CLR. Elle existe uniquement pour que la réflexion puisse dire "cette méthode ne retourne rien", pas pour être manipulée comme un vrai objet.
+>
+>#### Ce que l'on peux faire par contre
+>
+>```csharp
+>Type t = typeof(void);              // ✅ Obtenir le Type
+>Console.WriteLine(t.FullName);      // Affiche "System.Void"
+>Console.WriteLine(t.IsValueType);   // Affiche "True" (c'est une struct)
+>```
+>
+>---
+>
+>**Analogie**
+>
+>*C'est similaire aux types comme `System.ArgIterator` ou `System.TypedReference` : ils existent dans le CLR pour des raisons internes mais le compilateur C# interdit de les utiliser librement car ils n'ont pas de sens dans du code normal.*
 
 ## Réflexions sur les types statiques
 
@@ -629,7 +686,7 @@ if (
 >
 >### Pourquoi `typeof` est la solution "magique" ici ?
 >
->Comme nous l'avons vu pour votre question sur la publication (Publish) :
+>Comme nous l'avons vu pour votre question sur la publication d'une app :
 >
 >- `Type.GetType(string)` est **dynamique** : Le compilateur ne sait pas ce que vous allez taper. Il ne peut pas garantir que le type sera là.
 >- `typeof(System.Console)` est **statique** (résolu à la compilation) : Cela force le programme à charger l'assembly `System.Console.dll` dès le départ. Une fois l'assembly chargé en mémoire, le programme "connaît" enfin ce type.
@@ -642,8 +699,8 @@ if (
 System.Collections.Generic.List`1
 ```
 
-**Ici, la valeur numérique $1$ est utilisée, car `List<T>` ne possède qu'un seul paramètre de type**. **==En revanche, pour analyser `Dictionary<TKey, TValue>`, indiquez la valeur $2$==** :
-`
+**Ici, la valeur numérique `1` est utilisée, car `List<T>` ne possède qu'un seul paramètre de type**. **==En revanche, pour analyser `Dictionary<TKey, TValue>`, indiquez la valeur `2`==** :
+
 ```
 System.Collections.Generic.Dictionary`2
 ```
@@ -770,7 +827,8 @@ void DisplayTypesInAsm(Assembly asm)
 
 >[!warning] **Il faut utiliser le DLL C#** (CIL) **et non le résultat d'un `dotnet publish` car la réflection à besoin des métadonnées contenue dans le CIL.**
 
->[!tip] Rappel, ici, on cherche à charger du code sans que le programme ne connaisse l'assembly ! (Il ne faut pas faire `dotnet add package` par exemple)
+>[!tip] Rappel
+>Ici on cherche à charger du code sans que le programme ne connaisse l'assembly ! (Il ne faut pas faire `dotnet add package` par exemple)
 
 >[!warning] la méthode `Assembly.LoadFrom()` dépend du *working directory*. C'est ce que l'auteur induit quand il liste les chemin d'accès ou il faut copier *CarLibrary.dll*.
 
@@ -924,7 +982,7 @@ static void CreateUsingLateBinding(Assembly asm)
 Avant d'exécuter cette application, ***==vous devrez placer manuellement une copie de==*** *CarLibrary.dll* ***==dans le dossier du projet (ou le dossier `bin\Debug\net6.0` si vous utilisez Visual Studio) de cette nouvelle application==***.
 
 >[!note]
->N’ajoutez pas de référence à *CarLibrary.dll* pour cet exemple ! Tout l’intérêt de la liaison tardive est que vous essayez de créer un objet qui n’est pas connu au moment de la compilation.
+>**N’ajoutez pas de référence à *CarLibrary.dll* pour cet exemple !** Tout l’intérêt de la liaison tardive est que vous essayez de créer un objet qui n’est pas connu au moment de la compilation.
 
 **Notez que la méthode `Activator.CreateInstance()` renvoie un `System.Object` plutôt qu'un `MiniVan` fortement typé**. Par conséquent, *==si vous appliquez l'opérateur point à la variable `obj`, vous ne verrez aucun membre de la classe `MiniVan`==*. À première vue, vous pourriez penser qu'il est possible de résoudre ce problème avec une conversion explicite, comme ceci :
 
@@ -957,7 +1015,7 @@ static void CreateUsingLateBinding(Assembly asm)
         // Récupère l'information pour TurboBoost.
         MethodInfo mi = miniVan.GetMethod("TurboBoost");
 
-        // Appelle la méthode ('null' pour aucun pramètre)
+        // Appelle la méthode ('null' pour aucun paramètre)
         mi.Invoke(obj, null);
     }
     catch (Exception ex)
@@ -1041,12 +1099,12 @@ Sachez que **lorsque vous appliquez des attributs dans votre code, les métadonn
 
 **Outre les outils de développement, de nombreuses méthodes des bibliothèques de classes de base .NET sont préprogrammées pour analyser des attributs spécifiques**. **==Le [[Chapitre 19|Chapitre 19]] présente la sérialisation XML et JSON, toutes deux utilisant des attributs pour contrôler le processus de sérialisation.==**
 
-Enfin, **vous pouvez créer des applications programmées pour interagir avec vos propres attributs personnalisés, ainsi qu'avec tout attribut des bibliothèques de classes de base .NET**. ==Vous pouvez ainsi créer un ensemble de « mots clés » interprétés par un ensemble spécifique d'assemblies.
+Enfin, **vous pouvez créer des applications programmées pour interagir avec vos propres attributs personnalisés, ainsi qu'avec tout attribut des bibliothèques de classes de base .NET**. ==Vous pouvez ainsi créer un ensemble de « mots clés » interprétés par un ensemble spécifique d'assemblies.==
 
 ## Utilisation des attributs en C#
 
 Pour illustrer l'application des attributs en C#, créez un projet d'application console nommé
-*ApplyingAttributes* et ajoutez une référence au package NuGet `System.Text.Json`. Mettez à jour le fichier *Program.cs* en y incluant les directives `using``globales suivantes :
+*ApplyingAttributes* et ajoutez une référence au package NuGet `System.Text.Json`. Mettez à jour le fichier *Program.cs* en y incluant les directives `global using` suivantes :
 
 ```cs
 global using System.Text.Json.Serialization;
@@ -1081,7 +1139,7 @@ public class MotorCycle
 namespace ApplyingAttributes;
 
 [
-    XmlRoot(Namespace = "http;//www.MyCompany.com"),
+    XmlRoot(Namespace = "http://www.MyCompany.com"),
     Obsolete("Use another vehicle!")
 ]
 public class HorseAndBuggy
@@ -1164,13 +1222,13 @@ HorseAndBuggy mule = new HorseAndBuggy();
 
 ![[Figure 17.2.png|Survoler les types obsolètes dans la fenêtre de l'éditeur Visual Studio]]
 
-Les images suivantes montrent les résultats de l'attribut `Obsolete` dans Visual Studio Code.
+Les images suivantes montrent les résultats de l'attribut `Obsolete` dans **Visual Studio Code**:
 
 ![[Figure 17.3.png|Les attributs en action dans Visual Studio Code]]
 
 ![[Figure 17.4.png|Survoler les types obsolètes dans l'éditeur Visual Studio Code]]
 
-Enfin, les images suivante montrent aussi les même résultat de l'attribut `Obsolete` dans Neovim
+Enfin, les images suivante montrent aussi les même résultat de l'attribut `Obsolete` dans **Neovim:**
 
 ![[Figure 17.3.5.png|Attribut en action dans neovim]]
 
@@ -1187,9 +1245,12 @@ Ensuite, **==examinons comment créer vos propres attributs personnalisés et un
 
 # Création d'attributs personnalisés
 
-**La première étape consiste à créer une nouvelle classe dérivée de `System.Attribute`**. ==Dans la continuité du thème automobile abordé dans cet ouvrage, supposons que vous ayez créé un nouveau projet de bibliothèque de classes C# nommé *AttributedCarLibrary*.
+**La première étape consiste à créer une nouvelle classe dérivée de `System.Attribute`**. Dans la continuité du thème automobile abordé dans cet ouvrage, supposons que vous ayez créé un nouveau projet de bibliothèque de classes C# nommé *AttributedCarLibrary*.
 
 Cet assembly définira plusieurs véhicules, chacun étant décrit par un attribut personnalisé nommé `VehicleDescriptionAttribute`, comme suit :
+
+>[!important] Le code de l'auteur ne suit pas complètement les lignes directrices de Microsoft par soucis de simplicité.
+>*Roslyn* fourni un extrait de code qui suit les [guidelines Microsoft](http://go.microsoft.com/fwlink/?LinkId=85236).
 
 ```cs
 namespace AttributedCarLibrary;
@@ -1210,8 +1271,6 @@ Comme vous pouvez le constater, **`VehicleDescriptionAttribute` conserve une don
 
 >[!note]
 >**Pour des raisons de sécurité, il est recommandé, selon les bonnes pratiques .NET, de concevoir tous les attributs personnalisés comme scellés (`sealed`)**.
->
->En effet, *Roslyn* proposent un extrait de code nommé `Attribute` qui génère automatiquement une nouvelle classe dérivée de `System.Attribute` dans votre fenêtre de code.
 
 ## Application d'attributs personnalisés
 
@@ -1313,7 +1372,9 @@ public sealed class VehicleDescriptionAttribute : Attribute
 **Il est également possible d'appliquer des attributs à tous les types d'un assembly donné à l'aide de la balise `[assembly:]`**. **==Par exemple, supposons que vous souhaitiez garantir que chaque membre public de chaque type public défini dans votre assembly est conforme à la spécification CLS==**. Pour ce faire, **ajoutez simplement l'attribut au niveau de l'assembly suivant en haut de n'importe quel fichier de code source C#, comme ceci** (en dehors de toute déclaration d'espace de noms) :
 
 ```cs
-[asssembly: CLSCompliant]
+// Le livre affiche une erreur car CLSCompliant requient un argument bool!
+//     -> qui est fixé dans le repo GitHub du Livre.
+[asssembly: CLSCompliant(true)]
 namespace AttributedCarLibrary;
 ```
 
@@ -1353,7 +1414,7 @@ Comme indiqué au [[Chapitre 16#Utilisation d'un attribut d'assembly|Chapitre 16
 >[!note]
 >Au moment de la rédaction de ce document, une discussion est en cours sur le dépôt GitHub de msBuild concernant l'ajout de la prise en charge des paramètres non-chaînes de caractères. Cela permettrait d'ajouter l'attribut `CLSCompliant` directement dans le fichier projet, et non plus dans un fichier *.cs.
 
-**Définissez certaines propriétés** (telles que `Auteurs` et `Description`) en cliquant avec le bouton droit sur le projet dans l'Explorateur de solutions, en sélectionnant Propriétés, puis en cliquant sur `Package`. **Ajoutez également l'attribut `InternalsVisibleToAttribute`, comme vous l'avez fait au [[Chapitre 16#Utilisation du fichier projet|Chapitre 16]]. Votre fichier projet devrait maintenant ressembler à ceci :
+**Définissez certaines propriétés** (telles que `Auteurs` et `Description`) en cliquant avec le bouton droit sur le projet dans l'Explorateur de solutions, en sélectionnant Propriétés, puis en cliquant sur `Package`. **Ajoutez également l'attribut `InternalsVisibleToAttribute`, comme vous l'avez fait au** [[Chapitre 16#Utilisation du fichier projet|Chapitre 16]]. Votre fichier projet devrait maintenant ressembler à ceci :
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -1370,8 +1431,7 @@ Comme indiqué au [[Chapitre 16#Utilisation d'un attribut d'assembly|Chapitre 16
 </Project>
 ```
 
-Après avoir compilé votre projet, accédez au répertoire `\obj\Debug\net10.0` et recherchez le fichier
-*AttributedCarLibrary.AssemblyInfo.cs*. Ouvrez-le ; vous y verrez ces propriétés sous forme d’attributs (malheureusement, le format n’est pas très lisible).
+Après avoir compilé votre projet, accédez au répertoire `\obj\Debug\net10.0` et recherchez le fichier *AttributedCarLibrary.AssemblyInfo.cs*. Ouvrez-le ; vous y verrez ces propriétés sous forme d’attributs (malheureusement, le format n’est pas très lisible).
 
 ```cs
 using System;
@@ -1388,7 +1448,7 @@ using System.Reflection;
 
 >[!tip]- Pourquoi `VersionAttribute` génère "+..." en plus de la version ?
 >
->Depuis .NET 8, le SDK inclut par défaut une fonctionnalité appelée **Source Link**. Son but est de lier un binaire (.dll) à son code source exact sur GitHub ou GitLab.
+>Depuis .NET 8, le SDK inclut par défaut une fonctionnalité appelée **Source Link**. Son but est de lier un binaire (*.dll*) à son code source exact sur GitHub ou GitLab.
 >
 >- Si vous déployez une application et qu'un bug survient, le `AssemblyInformationalVersion` vous permet de savoir exactement **quelle version du code** a généré ce binaire, même si vous avez oublié de changer le numéro `1.0.0`
 >
@@ -1425,7 +1485,7 @@ Mettez à jour le fichier *Program.cs* avec le code suivant :
 ```cs
 using AttributedCarLibrary;
 
-Console.Title = "Value of VehicleDEscriptionAttribute";
+Console.Title = "Value of VehicleDescriptionAttribute";
 Console.WriteLine("***** Value of VehicleDEscriptionAttribute *****\n");
 
 ReflectOnAttributesUsingEarlyBinding();
