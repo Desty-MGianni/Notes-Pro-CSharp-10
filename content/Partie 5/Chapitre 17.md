@@ -1594,7 +1594,7 @@ Même si vous avez vu de nombreux exemples de ces techniques en action, ==vous v
 
 Dans les sections suivantes, je vous présenterai un exemple illustrant le processus de création d'une application extensible grâce aux fonctionnalités d'assemblies externes. Pour vous guider, cette application extensible comprend les assemblies suivants :
 
-- *CommonSnappableTypes.dll* : Cet assembly contient les définitions de types qui seront utilisées par chaque composant logiciel enfichable et directement référencées par l'application Windows Forms/Avalonia.
+- *CommonSnappableTypes.dll* : Cet assembly contient les définitions de types qui seront utilisées par chaque composant logiciel enfichable et directement référencées par l'application WPF/Avalonia.
 
 - *CSharpSnapIn.dll* : Un composant logiciel enfichable écrit en C#, qui exploite les types de *CommonSnappableTypes.dll*.
 
@@ -1905,7 +1905,7 @@ Voici l'explication de ce mystère architectural :
 
 # Le rôle du mot-clé `dynamic` en C#
 
->[!tip] Permet de fonctionner comme le Python ou le JavaScript
+>[!tip] Permet à C# de fonctionner comme le Python ou le JavaScript
 
 **Au** [[Chapitre 3#Comprendre les variables locales implicitement typées|Chapitre 3]], **vous avez découvert le mot-clé `var`, qui permet de définir des variables locales de telle sorte que leur type de données sous-jacent soit déterminé à la compilation, en fonction de l'affectation initiale** (rappelons que on parle alors de typage implicite). ==Une fois cette affectation initiale effectuée, vous disposez d'une variable fortement typée, et toute tentative d'affectation d'une valeur incompatible entraînera une erreur de compilation.==
 
@@ -1977,7 +1977,7 @@ s2 is of type: System.String
 s3 is of type: System.String
 ```
 
-==Qu'est-ce qui distingue fondamentalement une variable dynamique d'une variable déclarée implicitement ou via une référence d'objet système ?== *Elle n'est pas *fortement typée*. Autrement dit, **les données dynamiques ne sont pas *statiquement typées***. ***==Pour le compilateur C#, une donnée déclarée avec le mot-clé `dynamic` peut se voir attribuer n'importe quelle valeur initiale et être réaffectée à n'importe quelle nouvelle valeur==*** (potentiellement sans rapport) ***==durant sa durée de vie==***. Prenons l'exemple de la méthode suivante et de son résultat :
+==Qu'est-ce qui distingue fondamentalement une variable dynamique d'une variable déclarée implicitement ou via une référence d'objet système ?== *Elle n'est pas fortement typée*. Autrement dit, **les données dynamiques ne sont pas *statiquement typées***. ***==Pour le compilateur C#, une donnée déclarée avec le mot-clé `dynamic` peut se voir attribuer n'importe quelle valeur initiale et être réaffectée à n'importe quelle nouvelle valeur==*** (potentiellement sans rapport) ***==durant sa durée de vie==***. Prenons l'exemple de la méthode suivante et de son résultat :
 
 ```cs
 static void ChangeDynamicDataType()
@@ -2033,9 +2033,9 @@ Unhandled Exception: Microsoft.CSharp.RuntimeBinder.RuntimeBinderException:
  
  **Une autre différence notable entre l'appel de membres sur des données dynamiques et des données fortement typées, est que lorsque vous appliquez l'opérateur point à une donnée dynamique, l'IntelliSense** (*roslyn*) **ne s'affiche pas**. L'IDE vous permet de saisir n'importe quel nom de membre. ***==Cele signifie que vous devez être extrêmement vigilant lorsque vous écrivez du code C# sur de tels points de données. Toute faute d'orthographe ou erreur de majuscule dans le nom d'un membre provoquera une erreur d'exécution, plus précisément une instance de la classe `RuntimeBinderException`.
 
-**e'exception `RuntimeBinderException` représente l'erreur qui sera levée si vous tentez d'appeler un membre sur un type de données dynamique qui n'existe pas** (comme dans le cas des méthodes `toupper()` et `Foo()`). **La ​​même erreur sera levée si vous spécifiez des données de paramètre incorrectes pour un membre qui existe.**
+**L'exception `RuntimeBinderException` représente l'erreur qui sera levée si vous tentez d'appeler un membre sur un type de données dynamique qui n'existe pas** (comme dans le cas des méthodes `toupper()` et `Foo()`). **La ​​même erreur sera levée si vous spécifiez des données de paramètre incorrectes pour un membre qui existe.**
 
-**==Étant donné la grande volatilité des données dynamiques, lorsque vous appelez des membres d'une variable déclarée avec le mot-clé `dynamic` de C#, vous pouvez encapsuler les appels dans un bloc `try/catch` approprié et gérer l'erreur de manière propre**==, comme ceci :
+**==Étant donné la grande volatilité des données dynamiques, lorsque vous appelez des membres d'une variable déclarée avec le mot-clé `dynamic` de C#, vous pouvez encapsuler les appels dans un bloc `try/catch` approprié et gérer l'erreur de manière propre==**, comme ceci :
 
 ```cs
 static void InvokeMembersOnDynamicData()
@@ -2069,7 +2069,7 @@ Bien sûr, le processus consistant à encapsuler tous les appels de méthodes dy
 Rappelons que *==les données implicitement typées==* (déclarées avec le mot-clé `var`) *==ne sont possibles que pour les variables locales dans une portée membre==*. *==Le mot-clé `var` ne peut jamais être utilisé comme valeur de retour, paramètre ou membre d'une classe/structure==*. ***==Ce n'est pas le cas du mot-clé `dynamic`==***. Prenons l'exemple de la définition de classe suivante :
 
 ```cs
- namespace DynamicKeyword;
+namespace DynamicKeyword;
 
 class VeryDynamicClass
 {
@@ -2148,7 +2148,7 @@ Voici pourquoi le DLR est devenu un concept secondaire aujourd'hui :
 >
 > ### La fin de l'ère des "Langages Dynamiques" sur .NET
 >
->Le DLR a été créé à la fin des années 2000 dans un but précis : permettre à des langages dynamiques comme **IronPython** ou **IronRuby** de tourner efficacement sur le runtime .NET, et permettre à C# d'interagir avec eux [1].
+>Le DLR a été créé à la fin des années 2000 dans un but précis : permettre à des langages dynamiques comme **IronPython** ou **IronRuby** de tourner efficacement sur le runtime .NET, et permettre à C# d'interagir avec eux.
 >
 >- **Le constat actuel :** Ces projets sont aujourd'hui quasi abandonnés ou très marginaux. Plus personne ne développe de nouvelles applications en combinant C# et IronPython.
 >
@@ -2169,7 +2169,7 @@ Voici pourquoi le DLR est devenu un concept secondaire aujourd'hui :
 Maintenant que vous comprenez mieux ce que sont les « données dynamiques », voyons comment elles sont traitées. **Depuis la sortie de .NET 4.0, le Common Language Runtime (CLR) a été complété par un environnement d’exécution associé appelé Dynamic Language Runtime**. Le concept d’« environnement d’exécution dynamique » n’est certainement pas nouveau. En effet, ==de nombreux langages de programmation tels que JavaScript, LISP, Ruby et Python l’utilisent depuis des années==. **En résumé, un environnement d’exécution dynamique permet à un langage dynamique de découvrir les types entièrement à l’exécution, sans vérification à la compilation.**
 
 >[!note]
->Bien qu'une grande partie du DLR ait été portée vers .NET Core (à partir de la version 3.0), la parité des fonctionnalités entre le DLR dans .NET 6 et .NET 4.8 n'a pas été atteinte.
+>Bien qu'une grande partie du DLR ait été portée vers .NET Core (à partir de la version 3.0), la parité des fonctionnalités entre le DLR dans .NET 6 et .NET Framework 4.8 n'a pas été atteinte.
 
 Si vous avez une expérience des langages fortement typés (y compris C#, sans types dynamiques), la notion d'un tel environnement d'exécution peut sembler peu attrayante. Après tout, ***==on préfère généralement recevoir des erreurs à la compilation plutôt qu'à l'exécution, autant que possible==***. Néanmoins, **les langages/environnements d'exécution dynamiques offrent des fonctionnalités intéressantes**, notamment :
 
@@ -2205,12 +2205,15 @@ d.SuperMethod(12);
 
 # Simplification des appels tardifs grâce aux types dynamiques
 
->[!warning] Le cas de la Réflexion / Liaison tardive : Remplacé par le C# moderne (Gemini)
+>[!tip] Le cas de la Réflexion / Liaison tardive : L'approche moderne (.NET 10)
 >
->- **Ce que dit le livre :** `dynamic` réduit le code de liaison tardive (évite les `MethodInfo.Invoke`).
->- **La réalité moderne :** C'est vrai, mais cela a un coût massif en performance (le DLR - _Dynamic Language Runtime_ - alloue beaucoup de mémoire). Dans le C# moderne, pour éviter la réflexion verbeuse, on utilise :
->    1. Des **interfaces partagées** (comme votre exercice de Plug-in), ce qui rend `dynamic` inutile.
->    2. L'attribut **`[UnsafeAccessor]`** (introduit en .NET 8), qui permet d'accéder à des membres privés à vitesse native sans l'infrastructure lourde de `dynamic`]
+>- **Ce que dit le livre :** `dynamic` simplifie le code de liaison tardive et évite la verbosité de `MethodInfo.Invoke` ainsi que la création d'un `object[] args` 
+>- **La réalité moderne :** ==Le livre a raison==. `dynamic` est ~5x plus rapide et consomme ~5x moins de mémoire que la réflexion classique grâce au cache du DLR. ==Cependant, le C# moderne offre des alternatives encore plus puissantes pour atteindre une vitesse 100 % native :==
+>    1. **Interfaces partagées :** La solution reine. Rend la réflexion et `dynamic` totalement inutiles.
+>    2. **Les Délégués (`CreateDelegate`) :** Si la DLL est externe, on extrait le `MethodInfo` une seule fois pour le transformer en délégué fortement typé. Les appels suivants sont exécutés à vitesse native (0.3 ns, 0 allocation).
+>    3. **L'attribut `[UnsafeAccessor]` & `[UnsafeAccessorType]` (Nouveauté .NET 10) :** Permet d'appeler directement des membres (privés ou de types masqués) sans payer le coût d'analyse des métadonnées de la réflexion. C'est l'arme absolue pour le chargement de plugins à la volée.
+>
+>⚠️ **Règle d'or pour les performances :** Ne jamais charger une DLL (`Assembly.LoadFrom`) ou chercher une méthode (`GetMethod`) dans une boucle. On paie ce coût lourd **une seule fois au démarrage**, puis on utilise un Délégué ou un UnsafeAccessor pour le reste de l'exécution.
 
 ==L'utilisation du mot-clé `dynamic` peut s'avérer utile lors de l'utilisation de services de réflexion, en particulier lors d'appels de méthodes à liaison tardive==. Plus tôt dans ce chapitre, **==vous avez vu quelques exemples d'utilisation de ce type d'appel de méthode, notamment lors de la création d'une application extensible==**. **Vous avez alors appris à utiliser la méthode `Activator.CreateInstance()` pour créer un objet dont vous ne connaissez aucune information à la compilation** (hormis son nom d'affichage). Vous pouvez ensuite utiliser les types de l'espace de noms `System.Reflection` pour appeler des membres via la liaison tardive. Rappelez-vous l'exemple précédent :
 
@@ -2347,7 +2350,217 @@ static void AddWithDynamic()
 }
 ```
 
-Pas mal du tout ! Si vous appelez les deux méthodes, vous obtiendrez un résultat identique. ~~Cependant, l'utilisation du mot-clé `dynamic` vous a permis de gagner un temps précieux~~. Grâce aux données définies dynamiquement, vous n'avez plus besoin de regrouper manuellement les arguments sous forme de tableau d'objets, d'interroger les métadonnées de l'assembly ni de définir d'autres détails de ce type. Si vous développez une application qui utilise intensivement le chargement dynamique/la liaison tardive, je suis certain que vous comprenez l'importance de ces gains de code au fil du temps.
+Pas mal du tout ! Si vous appelez les deux méthodes, vous obtiendrez un résultat identique. Cependant, l'utilisation du mot-clé `dynamic` vous a permis de gagner un temps précieux. Grâce aux données définies dynamiquement, vous n'avez plus besoin de regrouper manuellement les arguments sous forme de tableau d'objets, d'interroger les métadonnées de l'assembly ni de définir d'autres détails de ce type. Si vous développez une application qui utilise intensivement le chargement dynamique/la liaison tardive, je suis certain que vous comprenez l'importance de ces gains de code au fil du temps.
+
+# Comparaison et analyse de l'exécution entre les différentes technique de liaisons tardives
+
+Pour effectuer ce benchmark, il faut ajouté le package *BenchmarkDotNet* au projet et crée une classe marquée avec l'attribut `[MemoryDiagnoser]`.
+
+```bash
+dotnet add package BenchmarkDotNet
+```
+
+Contrairement au code du projet montré précédemment, il faut ajouté le fichier *MathLIbrary.dll* dans le dossier `bin/...` pour que `BenchmarkDotNet` puissent le trouver.
+
+```xml
+<ItemGroup>
+<!-- Copie automatiquement la DLL dans le dossier de sortie (bin) à chaque build -->
+  <None Include="MathLibrary.dll">
+	<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+## Benchmark de toute la chaîne de liaison tardive
+
+**Ce test permet de voir la différence entre les deux méthodes vues dans la section précédentes ainsi que les améliorations moderne de .NET dont une qui n'as pas été cité : L'utilisation d'un délégué pour lier tardivement la méthode `Add`.**
+
+```cs
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using BenchmarkDotNet.Attributes;
+
+namespace LateBindingWithDynamic;
+
+[MemoryDiagnoser]
+public class FullChainBenchmark
+{
+    private string _dllPath = null;
+
+    // Déclaration requise pour le test Unsafe
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Add")]
+    private static extern int UnsafeAdd(
+        [UnsafeAccessorType("MathLibrary.SimpleMath, MathLibrary")]
+            object target,
+        int a,
+        int b
+    );
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        // On récupère juste le chemin, sans charger la DLL
+        _dllPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "MathLibrary.dll"
+        );
+    }
+
+    [Benchmark(Baseline = true)]
+    public int FullChain_Reflection()
+    {
+        var asm = Assembly.LoadFrom(_dllPath);
+        var math = asm.GetType("MathLibrary.SimpleMath");
+        object obj = Activator.CreateInstance(math);
+        var mi = math.GetMethod("Add", [typeof(int), typeof(int)]);
+
+        object[] args = [10, 70];
+        return (int)mi.Invoke(obj, args);
+    }
+
+    [Benchmark]
+    public int FullChain_Dynamic()
+    {
+        var asm = Assembly.LoadFrom(_dllPath);
+        var math = asm.GetType("MathLibrary.SimpleMath");
+
+        // Le DLR va devoir ré-analyser l'objet à chaque fois
+        dynamic obj = Activator.CreateInstance(math);
+        return obj.Add(10, 70);
+    }
+
+    [Benchmark]
+    public int FullChain_Delegate()
+    {
+        var asm = Assembly.LoadFrom(_dllPath);
+        var math = asm.GetType("MathLibrary.SimpleMath");
+        object obj = Activator.CreateInstance(math);
+
+        // On crée le délégué à la volée
+        var mi = math.GetMethod("Add", [typeof(int), typeof(int)]);
+        var mathDelegate = mi.CreateDelegate<Func<int, int, int>>(obj);
+
+        return mathDelegate(10, 70);
+    }
+
+    [Benchmark]
+    public int FullChain_UnsafeAccessor()
+    {
+        var asm = Assembly.LoadFrom(_dllPath);
+        var math = asm.GetType("MathLibrary.SimpleMath");
+        object obj = Activator.CreateInstance(math);
+
+        // Pas besoin de chercher le MethodInfo !
+        return UnsafeAdd(obj, 10, 70);
+    }
+}
+
+```
+
+>La structure de `BenchmarkDotNet` est proche de `munit` pour le C
+
+##### Tableau 17-4: Benchmark de la chaîne complète
+
+| Method                     |     Mean | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+| -------------------------- | -------: | --------: | --------: | ----: | ------: | -----: | --------: | ----------: |
+| `FullChain_Reflection`     | 1.462 μs | 0.0220 μs | 0.0205 μs |  1.00 |    0.02 | 0.0515 |     440 B |        1.00 |
+| `FullChain_Dynamic`        | 1.368 μs | 0.0107 μs | 0.0101 μs |  0.94 |    0.01 | 0.0248 |     208 B |        0.47 |
+| `FullChain_Delegate`       | 1.565 μs | 0.0140 μs | 0.0131 μs |  1.07 |    0.02 | 0.0458 |     392 B |        0.89 |
+| `FullChain_UnsafeAccessor` | 1.356 μs | 0.0175 μs | 0.0164 μs |  0.93 |    0.02 | 0.0210 |     184 B |        0.42 |
+
+
+**l'appel à la méthode `Assembly.LoadFrom()` est une opération très coûteuse et est l'unique raison pour ce peux de différence entre les méthodes.**
+
+**==On remarque quand même que les méthode `FullChain_Dynamic` et `FullChain_UnsafeAccessor` ont alloué moins de mémoire sur le tas que les deux autres.==**
+
+## Benchmark de l'appel à la méthode uniquement
+
+Ce test permet d'isoler les appels de méthodes en envoyant toutes les opérations de binding dans le setup global de `BenchmarkDotNet`.
+
+```cs
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using BenchmarkDotNet.Attributes;
+
+namespace LateBindingWithDynamic;
+
+[MemoryDiagnoser]
+public class LateBindingBenchmark
+{
+    private MethodInfo _methodInfo = null;
+    private object _mathInstance = null;
+    private dynamic _dynamicMathInstance = null;
+    private Func<int, int, int> _mathDelegate = null;
+
+    /*
+     * DECLARATION DE L'UNSAFE ACCESSOR (Pour liaison tardive)
+     * On cible le type par sa chaîne textuelle complète, et on remplace
+     * l'instance par "object" car le compilateur ne connaît pas le type SimpleMath.
+     *
+     * LA CORRECTION .NET 10 :
+     * 1. On applique [UnsafeAccessorType] sur le paramètre 'object'
+     * 2. On lui donne le nom complet (Assembly Qualified Name) du type masqué.
+     */
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Add")]
+    private static extern int UnsafeAdd(
+        [UnsafeAccessorType("MathLibrary.SimpleMath, MathLibrary")]
+            object target,
+        int a,
+        int b
+    );
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        // Chargement initial de la DLL
+        var asm = Assembly.LoadFrom("MathLibrary.dll");
+        var mathType =
+            asm.GetType("MathLibrary.SimpleMath")
+            ?? throw new Exception("Type not found");
+
+        // Initialisation des instances pour éviter de mesurer
+        // Activator.CreateInstance
+        _mathInstance = Activator.CreateInstance(mathType);
+        _dynamicMathInstance = _mathInstance;
+
+        // Préparation pour la réflexion classique
+        _methodInfo = mathType.GetMethod(
+            "Add",
+            [typeof(int), typeof(int)]
+        );
+        _mathDelegate = _methodInfo.CreateDelegate<Func<int, int, int>>(
+            _mathInstance
+        );
+    }
+
+    [Benchmark(Baseline = true)]
+    public int Reflection() =>
+        (int)_methodInfo.Invoke(_mathInstance, [10, 70]);
+
+    [Benchmark]
+    public int Dynamic() => _dynamicMathInstance.Add(10, 70);
+
+    [Benchmark]
+    public int Delegate() => _mathDelegate(10, 70);
+
+    [Benchmark]
+    public int UnsafeAccessor() => UnsafeAdd(_mathInstance, 10, 70);
+}
+
+```
+
+##### Tableau 17-5: Benchmark des appels de méthode
+
+| Method           | Mean       | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
+| ---------------- | ---------: | --------: | --------: | ----: | -----: | --------: | ----------: |
+| `Reflection`     | 19.9878 ns | 0.0770 ns | 0.0720 ns |  1.00 | 0.0134 |     112 B |        1.00 |
+| `Dynamic`        |  4.0426 ns | 0.0483 ns | 0.0451 ns |  0.20 | 0.0029 |      24 B |        0.21 |
+| `Delegate`       |  0.3890 ns | 0.0006 ns | 0.0006 ns |  0.02 |      - |         - |        0.00 |
+| `UnsafeAccessor` |  0.2267 ns | 0.0293 ns | 0.0274 ns |  0.01 |      - |         - |        0.00 |
+
+**==Une fois isolé, on voit une très grande disparité dans les résultats.==** ***==La différence est de l'ordre de jusqu'à $50$ fois plus performant pour `UnsafeAccessor`==***
+
+**Plus important encore est la colonne `Allocated`**. On peut voir que **les méthodes `Delegate` et `UnsafeAccessor` n'alloue pas de donnée dans le *heap***. **==Cela signifie que le CLR n'a pas besoin de faire d'appel à `GC.Collect()` pour nettoyer la mémoire!==**
 
 # Résumé du chapitre
 
@@ -2359,6 +2572,6 @@ Pas mal du tout ! Si vous appelez les deux méthodes, vous obtiendrez un résult
 
 **Le mot-clé `dynamic` permet de définir des données dont l'identité n'est connue qu'à l'exécution**. ==Lors du traitement par le Dynamic Language Runtime (DLR), l'« arbre d'expression » créé automatiquement est transmis au module de liaison du langage dynamique approprié, où la charge utile est décompressée et envoyée au membre d'objet correspondant.==
 
-~~L'utilisation des données dynamiques et du DLR simplifie considérablement les tâches complexes de programmation C#, notamment l'intégration de bibliothèques COM dans vos applications .NET.~~
+L'utilisation des données dynamiques et du DLR simplifie considérablement les tâches complexes de programmation C#, notamment l'intégration de bibliothèques COM dans vos applications .NET.
 
 ***==Bien que ces fonctionnalités puissent simplifier votre code, n'oubliez pas que les données dynamiques rendent votre code C# beaucoup moins sûr au niveau des types et plus vulnérable aux erreurs d'exécution==***. **Pesez soigneusement le pour et le contre de l'utilisation des données dynamiques dans vos projets C# et effectuez des tests en conséquence !**
