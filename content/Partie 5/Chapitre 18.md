@@ -6,15 +6,16 @@ publish: true
 # <big><big><big><b><font color =green>Comprendre le CIL et le Rôle des Assemblages Dynamiques</font></b></big></big></big>
 
 >[!warning]- Les point à étudier et à laisser dans le chapitre 
-🟢 Ce qui reste INDISPENSABLE (La théorie du CIL)
+>
+>**Ce qui reste INDISPENSABLE (La théorie du CIL)**
 >
 >Toute la première partie sur la compréhension du **CIL (Common Intermediate Language)** et de la grammaire des opcodes reste 100 % valide et essentielle pour votre culture technique.
 >
 >- **Comprendre l'architecture binaire :** Apprendre comment vos structures C# sont traduites sous forme de pile d'évaluation (Stack-based architecture) est ce qui sépare les développeurs juniors des experts.
 >- **Le débogage de bas niveau :** Savoir lire le CIL vous permet de comprendre exactement ce que fait le compilateur en arrière-plan (par exemple, comment il traduit un bloc `using` ou un enregistrement `record`).
->- **Vos outils :** C'est ici que votre maîtrise d'outils comme `ilspycmd` (ou votre configuration corrigée d'ildasm) prend tout son sens pour inspecter la réalité du binaire. [[1](https://www.reddit.com/r/csharp/comments/1cjbyii/is_this_book_too_old/)]
+>- **Vos outils :** C'est ici que votre maîtrise d'outils comme *ilspycmd* ou *'ildasm* prend tout son sens pour inspecter la réalité du binaire. 
 >
->🔴 Ce qui est OBSOLÈTE (Dynamic Assemblies & `Reflection.Emit`)
+>**Ce qui est OBSOLÈTE (Dynamic Assemblies & `Reflection.Emit`)**
 >
 >La seconde moitié du chapitre traite de la génération de code à la volée dans la mémoire RAM via l'espace de noms `System.Reflection.Emit`. **C'est cette partie qui a perdu presque toute sa pertinence pratique en .NET 10.**
 >
@@ -23,11 +24,11 @@ publish: true
 
 **Lors du développement d'une application .NET complète, vous utiliserez très certainement C#** (ou un langage managé similaire tel que Visual Basic), **compte tenu de sa productivité et de sa facilité d'utilisation intrinsèques**. Cependant, comme vous l'avez appris au début de cet ouvrage, **==le rôle d'un compilateur managé est de traduire les fichiers de code *.cs* en code CIL, métadonnées de type et manifeste d'assembly==**. ==En réalité, CIL est un langage de programmation .NET à part entière, avec sa propre syntaxe, sa sémantique et son compilateur (*ilasm.exe*).==
 
-**Dans ce chapitre, vous découvrirez le langage natif de .NET. Vous comprendrez la distinction entre une directive CIL, un attribut CIL et un opcode CIL**. **==Vous découvrirez ensuite le rôle de l'ingénierie aller-retour d'un assembly .NET Core et de divers outils de programmation CIL==**. ==Le reste du chapitre vous guidera à travers les bases de la définition des espaces de noms, des types et des membres à l'aide de la grammaire CIL==. Ce chapitre se conclura par une analyse du rôle de l'espace de noms `System.Reflection.Emit` et expliquera comment il est possible de construire un assembly (avec des instructions CIL) dynamiquement à l'exécution.
+**Dans ce chapitre, vous découvrirez le langage natif de .NET. Vous comprendrez la distinction entre une *directive* CIL, un *attribut* CIL et un *opcode* CIL**. **==Vous découvrirez ensuite le rôle de l'ingénierie aller-retour d'un assembly .NET Core et de divers outils de programmation CIL==**. ==Le reste du chapitre vous guidera à travers les bases de la définition des espaces de noms, des types et des membres à l'aide de la grammaire CIL==. Ce chapitre se conclura par une analyse du rôle de l'espace de noms `System.Reflection.Emit` et expliquera comment il est possible de construire un assembly (avec des instructions CIL) dynamiquement à l'exécution.
 
 ***==Bien sûr, rares sont les programmeurs qui auront besoin de manipuler du code CIL brut au quotidien==***. Par conséquent, ==je commencerai ce chapitre en examinant quelques raisons pour lesquelles il peut être utile de se familiariser avec la syntaxe et la sémantique de ce langage .NET de bas niveau.==
 
->[!danger] Il n'est pas nécessaire d'installer `ilasm` pour la suite de votre apprentissage 
+>[!danger]- Il n'est pas nécessaire d'installer `ilasm` pour la suite de votre apprentissage !
 >## Personne n'écrit de CIL à la main en production
 >
 >L'auteur vous montre `ilasm` pour vous prouver qu'on _peut_ techniquement se passer du C# et écrire directement en langage intermédiaire. En réalité, plus aucun développeur moderne ne fait cela. Si un framework a besoin de générer du CIL à la volée aujourd'hui, il utilise des API de bas niveau en mémoire, pas des fichiers texte compilés avec `ilasm`.
@@ -41,7 +42,15 @@ publish: true
 **Lorsque vous créez un assembly .NET à l'aide du langage managé de votre choix** (C#, VB, F#, etc.), **le compilateur associé traduit votre code source en CIL**. Comme tout langage de programmation, ==le CIL fournit de nombreux jetons structurels et d'implémentation==. Étant donné que le CIL est un langage de programmation .NET comme un autre, il n'est pas surprenant qu'il soit possible de créer vos assemblies .NET directement en utilisant le CIL et le compilateur CIL (*ilasm.exe*).
 
 >[!note]
->Comme indiqué au [[Chapitre 1#Exploration d'un assembly à l'aide de *ildasm.exe*|Chapitre 1]], ni *ildasm.exe* ni *ilasm.exe* ne sont fournis avec le .NET Runtime. Deux options s'offrent à vous pour obtenir ces outils. La première consiste à compiler le .NET Runtime à partir du code source disponible à l'adresse : https://github.com/dotnet/runtime. La seconde, plus simple, consiste à télécharger la version souhaitée depuis www.nuget.org. L'URL d'ILDasm sur NuGet est : https://www.nuget.org/packages/Microsoft.NETCore.ILDAsm/, et celle d'ILAsm.exe est : https://www.nuget.org/packages/Microsoft.NETCore.ILAsm/. Assurez-vous de sélectionner la version appropriée (pour ce livre, la version 6.0.0 ou supérieure est requise). Ajoutez les packages NuGet ILDasm et ILAsm à votre projet à l'aide de la commande suivante : 
+>Comme indiqué au [[Chapitre 1#Exploration d'un assembly à l'aide de *ildasm.exe*|Chapitre 1]], ni *ildasm.exe* ni *ilasm.exe* ne sont fournis avec le .NET Runtime. Deux options s'offrent à vous pour obtenir ces outils. La première consiste à compiler le .NET Runtime à partir du code source disponible à l'adresse : https://github.com/dotnet/runtime. La seconde, plus simple, consiste à télécharger la version souhaitée depuis www.nuget.org. 
+>
+>**L'URL d'*ILDasm* sur NuGet est** : 
+>https://www.nuget.org/packages/Microsoft.NETCore.ILDAsm/, 
+>**et celle d'*ILAsm* est** : 
+>https://www.nuget.org/packages/Microsoft.NETCore.ILAsm/. 
+>
+>Assurez-vous de sélectionner la version appropriée (pour ce livre, la version 6.0.0 ou supérieure est requise). Ajoutez les packages NuGet ILDasm et ILAsm à votre projet à l'aide de la commande suivante : 
+>
 >```bash
 >dotnet add package Microsoft.NETCore.ILDAsm --version 10.0.0
 >dotnet add package Microsoft.NETCore.ILAsm --version 10.0.0
@@ -51,7 +60,7 @@ publish: true
 
 - Désassembler un assembly .NET existant, modifier le code CIL et recompiler le code source mis à jour en un binaire .NET modifié. Par exemple, il peut être nécessaire, dans certains cas, de modifier le CIL pour assurer l'interopérabilité avec certaines fonctionnalités COM avancées.
 
-- Créer des assemblies dynamiques à l'aide de l'espace de noms `System.Reflection.Emit`. Cette API permet de générer un assembly .NET en mémoire, qui peut être, en option, enregistré sur disque. C'est une technique utile pour les développeurs d'outils qui ont besoin de générer des assemblies à la volée. 
+- Créer des assemblies dynamiques à l'aide de l'espace de noms `System.Reflection.Emit`. Cette API permet de générer un assembly .NET en mémoire qui peut être, en option, enregistré sur disque. C'est une technique utile pour les développeurs d'outils qui ont besoin de générer des assemblies à la volée. 
 
 - **Comprendre les aspects du Common Type System (CTS) qui ne sont pas pris en charge par les langages managés de haut niveau, mais qui existent au niveau du CIL**. En effet, ==le CIL est le seul langage .NET qui permet d'accéder à tous les aspects du CTS==. Par exemple, en utilisant du CIL pur, vous pouvez définir des membres et des champs globaux (ce qui est impossible en C#).
 
@@ -68,13 +77,13 @@ publish: true
 {new, public, this, base, get, set, explicit, unsafe, enum, operator, partial}
 ```
 
-**Après avoir lu les chapitres précédents, vous savez qu’il s’agit de mots-clés du langage C#.** Cependant, ***==en examinant de plus près les éléments de cet ensemble, vous constaterez peut-être que si chaque élément est bien un mot-clé C#, sa sémantique est radicalement différente.==*** ==Par exemple, le mot-clé `enum` définit un type dérivé de `System.Enum`, tandis que les mots-clés `this` et `base` permettent de référencer respectivement l’objet courant et la classe parente de l’objet. Le mot-clé `unsafe` sert à définir un bloc de code qui ne peut pas être directement surveillé par le CLR, tandis que le mot-clé `operator` permet de créer une méthode cachée== (nommée spécialement) ==qui sera appelée lors de l'application d'un opérateur C# spécifique== (tel que le signe plus).
+**Après avoir lu les chapitres précédents, vous savez qu’il s’agit de mots-clés du langage C#.** Cependant, ***==en examinant de plus près les éléments de cet ensemble, vous constaterez peut-être que si chaque élément est bien un mot-clé C#, sa sémantique est radicalement différente.==*** Par exemple, **le mot-clé `enum` définit un type dérivé de `System.Enum`, tandis que les mots-clés `this` et `base` permettent de référencer respectivement l’objet courant et la classe parente de l’objet**. ==Le mot-clé `unsafe` sert à définir un bloc de code qui ne peut pas être directement surveillé par le CLR, tandis que le mot-clé `operator` permet de créer une méthode cachée== (nommée spécialement) ==qui sera appelée lors de l'application d'un opérateur C# spécifique== (tel que le signe plus).
 
 **Contrairement à un langage de plus haut niveau comme C#, CIL ne se contente pas de définir un ensemble général de mots-clés. L'ensemble des jetons compris par le compilateur CIL est plutôt subdivisé en trois grandes catégories sémantiques.**
 
-- Directives CIL
-- Attributs CIL
-- Codes d'opération CIL (opcodes)
+- **Directives CIL**
+- **Attributs CIL**
+- **Codes d'opération CIL (opcodes)**
 
 **Chaque catégorie de jeton CIL est exprimée à l'aide d'une syntaxe particulière, et les jetons sont combinés pour construire un assembly .NET valide.**
 
@@ -95,7 +104,7 @@ publish: true
 
 **Une fois qu'un assembly .NET, un espace de noms et un jeu de types ont été définis en CIL à l'aide de diverses directives, et attributs associés, la dernière étape consiste à fournir la logique d'implémentation du type**. ==C'est le rôle des *codes d'opération*, ou *opcodes*==. ==Dans la tradition des autres langages de bas niveau, de nombreux opcodes CIL ont tendance à être cryptiques et totalement imprononçables pour le commun des mortels.== Par exemple, pour charger une variable de type chaîne de caractères en mémoire, on n'utilise pas l'opcode convivial `LoadString`, mais plutôt `ldstr`.
 
-**==Cependant, il faut reconnaître que certains opcodes CIL correspondent assez naturellement à leurs équivalents C# (par exemple, `box`, `unbox`, `throw` et `sizeof`==**)). **Comme vous le verrez, les opcodes CIL sont toujours utilisés dans la portée de l'implémentation d'un membre, et contrairement aux directives CIL, ils ne sont jamais précédés d'un point.**
+**==Cependant, il faut reconnaître que certains opcodes CIL correspondent assez naturellement à leurs équivalents C# (par exemple, `box`, `unbox`, `throw` et `sizeof`==**). **Comme vous le verrez, les opcodes CIL sont toujours utilisés dans la portée de l'implémentation d'un membre, et contrairement aux directives CIL, ils ne sont jamais précédés d'un point.**
 
 ## Distinction entre les opcodes et les mnémoniques CIL
 
@@ -110,7 +119,7 @@ int Add(int x, int y)
 
 ==L'addition de deux nombres est exprimée par l'opcode CIL $0X58$. De même, la soustraction de deux nombres est exprimée par l'opcode $0X59$, et l'allocation d'un nouvel objet sur le tas managé est réalisée par l'opcode $0X73$==. De ce fait, **il faut comprendre que le « code CIL » traité par un compilateur JIT n'est rien d'autre que des blocs de données binaires.**
 
-**Heureusement, à chaque opcode binaire du CIL correspond un mnémonique**. Par exemple, on peut utiliser `add` au lieu de $0X58$, `sub` au lieu de $0X59$ et `newobj` au lieu de $0X73$. **Compte tenu de cette distinction opcode/mnémonique, les décompilateurs CIL tels que *ildasm.exe* traduisent les opcodes binaires d'un assembly en leurs mnémoniques CIL correspondants**. Par exemple, voici le code CIL présenté par *ildasm.exe* pour la méthode `Add()` de C# précédente (==votre résultat exact peut varier selon votre version de .NET Core==) :
+**Heureusement, à chaque opcode binaire du CIL correspond un mnémonique**. Par exemple, on peut utiliser `add` au lieu de $0X58$, `sub` au lieu de $0X59$ et `newobj` au lieu de $0X73$. **Compte tenu de cette distinction opcode/mnémonique, lee décompilateurs CIL tels que *ildasm* traduisent les opcodes binaires d'un assembly en leurs mnémoniques CIL correspondants**. Par exemple, voici le code CIL présenté par ildasm.exe pour la méthode `Add()` de C# précédente (==votre résultat exact peut varier selon votre version de .NET Core==) :
 
 ```cil
 .method assembly hidebysig static int32
@@ -144,8 +153,7 @@ int Add(int x, int y)
 *==En CIL, il est impossible d'accéder directement à une donnée, qu'il s'agisse de variables locales, d'arguments de méthode ou de données de champ==*. **Il est nécessaire de charger explicitement l'élément sur la pile, puis de le dépiler pour une utilisation ultérieure** (***==gardez ce point à l'esprit, car il explique pourquoi un bloc de code CIL donné peut paraître redondant==***).
 
 >[!note]
->Rappelons que le CIL n'est pas exécuté directement, mais compilé à la demande. Lors de la compilation du code CIL, de nombreuses redondances d'implémentation sont optimisées. De plus, si vous activez l'option d'optimisation du code pour votre projet actuel (via l'onglet Générer de la fenêtre Propriétés du projet de Visual Studio ou en ajoutant `<Optimize>true</Optimize>` au groupe de propriétés principal du fichier projet), le compilateur supprimera également
-diverses redondances du CIL.
+>Rappelons que le CIL n'est pas exécuté directement, mais compilé à la demande. Lors de la compilation du code CIL, de nombreuses redondances d'implémentation sont optimisées. De plus, si vous activez l'option d'optimisation du code pour votre projet actuel (via l'onglet Générer de la fenêtre Propriétés du projet de Visual Studio ou en ajoutant `<Optimize>true</Optimize>` au groupe de propriétés principal du fichier projet), le compilateur supprimera également diverses redondances du CIL.
 
 ==Pour comprendre comment CIL exploite un modèle de traitement basé sur la pile, prenons l'exemple d'une méthode C# simple, `PrintMessage()`, qui ne prend aucun argument et ne renvoie aucune valeur==. Dans l'implémentation de cette méthode, vous afficherez simplement la valeur d'une variable de type chaîne locale sur le flux de sortie standard, comme ceci :
 
@@ -195,7 +203,7 @@ Maintenant que vous maîtrisez les bases des directives, attributs et opcodes CI
 >Le livre va faire une distinction cruciale entre deux notions de "pile" :
 >
 >1. **La Call Stack (Pile d'appels) :** Elle gère la structure de votre programme (quelle méthode a appelé quelle méthode, et où retourner quand une méthode se termine). C'est le standard de presque tous les langages.
->2. **L'Evaluation Stack (Pile d'évaluation) :** C'est **le cœur du CIL**. Contrairement au processeur de votre Mac (ARM64) qui utilise des _Registres_ (`X0`, `X1`...) pour faire des calculs, le processeur virtuel .NET utilise cette pile pour exécuter la moindre ligne de code.
+>2. **L'Evaluation Stack (Pile d'évaluation) :** C'est **le cœur du CIL**. Contrairement au processeur des ordinateurs qui utilise des _Registres_ (`X0`, `X1`...) pour faire des calculs, le processeur virtuel .NET utilise cette pile pour exécuter la moindre ligne de code.
 >
 > ## Le flux universel du CIL : Charger / Traiter / Stocker
 >
@@ -213,7 +221,7 @@ C'est pour cela que votre inspecteur de types ou votre décompilateur `ilspycmd`
 
 # Comprendre l'ingénierie aller-retour
 
-**Vous savez comment utiliser *ildasm.exe* pour visualiser le code CIL généré par le compilateur C#** (voir [[Chapitre 1#Exploration d'un assembly à l'aide de *ildasm.exe*|Chapitre 1]]). **==Une fois le code CIL à votre disposition, vous pouvez le modifier et le recompiler à l'aide du compilateur CIL==**, *ilasm.exe*. ==Formellement, cette technique est appelée *ingénierie aller-retour* et peut s'avérer utile dans certains cas, par exemple :
+**Vous savez comment utiliser *ildasm* pour visualiser le code CIL généré par le compilateur C#** (voir [[Chapitre 1#Exploration d'un assembly à l'aide de *ildasm.exe*|Chapitre 1]]). **==Une fois le code CIL à votre disposition, vous pouvez le modifier et le recompiler à l'aide du compilateur CIL==**, *ilasm*. **Formellement, cette technique est appelée** *ingénierie aller-retour* **et peut s'avérer utile dans certains cas, par exemple :**
 
 - Vous devez modifier un assembly dont vous ne possédez plus le code source.
 -  Vous utilisez un compilateur .NET imparfait qui a généré un code CIL inefficace (voire incorrect) et vous souhaitez modifier le code source.
@@ -229,9 +237,9 @@ Console.ReadLine();
 Compilez votre programme à l'aide de l'interface de ligne de commande .NET Core (`dotnet build`).
 
 >[!note]
->Rappelons-nous du [[Chapitre 1#Aperçu des assembly .NET|Chapitre 1]] que tous les assemblys .NET Core (bibliothèques de classes ou applications console) sont par défaut compilés en assemblys ayant l'extension *.dll* et exécutés à l'aide de *dotnet.exe*. Nouveauté de .NET Core 3.0 (et versions ultérieures) : le fichier *dotnet.exe* est copié dans le répertoire de sortie et renommé pour correspondre au nom de l'assembly. Ainsi, ==même si votre projet semble avoir été compilé en *RoundTrip.exe*, il a en réalité été compilé en *RoundTrip.dll*, avec *dotnet.exe* copié dans *RoundTrip.exe* ainsi que les arguments de ligne de commande nécessaires à son exécution==. Si vous publiez votre projet en un seul fichier (voir [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]]), *RoundTrip.exe* contiendra alors davantage que votre code. 
+>Rappelons-nous du [[Chapitre 1#Aperçu des assembly .NET|Chapitre 1]] que tous les assemblys .NET Core (bibliothèques de classes ou applications console) sont par défaut compilés en assemblys ayant l'extension *.dll* et exécutés à l'aide de *dotnet*. Nouveauté de .NET Core 3.0 (et versions ultérieures) : le fichier *dotnet* est copié dans le répertoire de sortie et renommé pour correspondre au nom de l'assembly. Ainsi, ==même si votre projet semble avoir été compilé en *RoundTrip.exe*, il a en réalité été compilé en *RoundTrip.dll*, avec *dotnet* copié dans *RoundTrip.exe* ainsi que les arguments de ligne de commande nécessaires à son exécution==. Si vous publiez votre projet en un seul fichier (voir [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]]), *RoundTrip.exe* contiendra alors davantage que votre code. 
 
-Ensuite, exécutez *ildasm.exe* sur *RoundTrip.dll* en utilisant la commande suivante (exécutée depuis le dossier de la solution) :
+Ensuite, exécutez *ildasm* sur *RoundTrip.dll* en utilisant la commande suivante (exécutée depuis le dossier de la solution) :
 
 ```bash
 ildasm -all -metadata -out=RoundTrip/RoundTrip.il RoundTrip/bin/Debug/net10.0/RoundTrip.dll
@@ -239,7 +247,7 @@ ildasm -all -metadata -out=RoundTrip/RoundTrip.il RoundTrip/bin/Debug/net10.0/Ro
 
 **La commande précédente a affiché la quasi-totalité du contenu de l'assembly, y compris les en-têtes de fichier, les commandes hexadécimales en tant que commentaires, toutes les métadonnées et bien plus encore**. Si vous souhaitez un fichier plus concis pour l'analyse du code IL, vous pouvez supprimer les options `-all` et `-METADATA`. **Cependant, pour ces exemples, vous avez besoin de toutes ces informations supplémentaires.**
 
->[!note] Note pour les utilisateur Windows
+>[!note]- Note pour les utilisateur Windows
 >*ildasm.exe* générera également un fichier *.res* lors de l'exportation du contenu d'un assembly vers un fichier. Ces fichiers de ressources peuvent être ignorés (et supprimés) tout au long de ce chapitre, car vous ne les utiliserez pas. Ce fichier contient notamment des informations de sécurité CLR de bas niveau.
 
 Vous pouvez maintenant consulter *RoundTrip.il* avec Visual Studio, Visual Studio Code ou l'éditeur de texte de votre choix. **Remarquez d'abord que le fichier *.il* s'ouvre en déclarant chaque assembly externe référencé par rapport auquel l'assembly courant est compilé**. ==Si votre bibliothèque de classes utilise des types supplémentaires dans d'autres assemblies référencés== (outre `System.Runtime` et `System.Console`), ==vous trouverez des directives `.assembly extern` supplémentaires.==
@@ -279,7 +287,7 @@ Ensuite, vous trouverez la définition formelle de votre assembly *RoundTrip.dll
 
 ```
 
-**Après avoir documenté les assemblies référencés en externe et défini l'assembly courant, vous trouverez une définition du type `Program`, créée à partir des instructions de niveau supérieur**. ==Notez que la directive `.class` possède divers attributs== (dont beaucoup sont facultatifs), ==tels que `extends`, illustré ici, qui indique la classe de base du type :
+**Après avoir documenté les assemblies référencés en externe et défini l'assembly courant, vous trouverez une définition du type `Program`, créée à partir des instructions de niveau supérieur**. ==Notez que la directive `.class` possède divers attributs== (dont beaucoup sont facultatifs), ==tels que `extends`, illustré ici, qui indique la classe de base du type :==
 
 ```cil
 .class private auto ansi beforefieldinit Program
@@ -313,7 +321,7 @@ IL_000b: call string [System.Console]System.Console::ReadLine()
 
 ## Le rôle des étiquettes de code CIL
 
-Vous avez certainement remarqué que **==chaque ligne de code d'implémentation est préfixée par un jeton de la forme `IL_XXX:`==** (par exemple, `IL_0000:`, `IL_0001:`, etc.). **Ces jetons sont appelés étiquettes de code et peuvent être nommés comme vous le souhaitez** (*==à condition qu'ils ne soient pas dupliqués dans la même portée de membre==*). **Lorsque vous exportez un assembly vers un fichier à l'aide** d'*ildasm.exe*, **celui-ci génère automatiquement des étiquettes de code suivant la convention de nommage `IL_XXX:`**. Vous pouvez toutefois les modifier pour utiliser un marqueur plus descriptif. Voici un exemple :
+Vous avez certainement remarqué que **==chaque ligne de code d'implémentation est préfixée par un jeton de la forme `IL_XXX:`==** (par exemple, `IL_0000:`, `IL_0001:`, etc.). **Ces jetons sont appelés étiquettes de code et peuvent être nommés comme vous le souhaitez** (*==à condition qu'ils ne soient pas dupliqués dans la même portée de membre==*). **Lorsque vous exportez un assembly vers un fichier à l'aide** d'*ildasm*, **celui-ci génère automatiquement des étiquettes de code suivant la convention de nommage `IL_XXX:`**. ***==Vous pouvez toutefois les modifier pour utiliser un marqueur plus descriptif. Voici un exemple :==***
 
 ```cil
 .method private hidebysig static void Main(string[] args) cil managed
@@ -361,9 +369,9 @@ static void Main(string[] args)
 }
 ```
 
-**Il existe deux façons de créer des assemblies .NET compilés à partir d'un fichier** *.il*. ==L'utilisation du type de projet IL offre plus de flexibilité, mais est un peu plus complexe==. **La seconde méthode utilise simplement** *ILAsm.exe* **pour créer un fichier** *.dll* **à partir du fichier IL**. Nous allons commencer par explorer l'utilisation d'*ILAsm.exe*.
+**Il existe deux façons de créer des assemblies .NET compilés à partir d'un fichier** *.il*. ==L'utilisation du type de projet IL offre plus de flexibilité, mais est un peu plus complexe==. **La seconde méthode utilise simplement** *ILAsm* **pour créer un fichier** *.dll* **à partir du fichier IL**. Nous allons commencer par explorer l'utilisation d'*ILAsm*.
 
-## Compiler du code CIL avec *ILAsm.exe*
+## Compiler du code CIL avec *ILAsm*
 
 **Commencez par créer un nouveau répertoire sur votre machine** (dans les exemples sur GitHub, je l'ai nommé `RoundTrip2`). ==Dans ce répertoire, copiez le fichier *RoundTrip.il* mis à jour==. **Copiez également le fichier** *RoundTrip.runtimeconfig.json* **situé dans le dossier `RoundTrip\bin\Debug\.net10.0`**. ==Ce fichier est nécessaire aux exécutables créés avec *ILAsm.exe* pour configurer le nom et le framework cible==. À titre de référence, le contenu du fichier est indiqué ici :
 
@@ -406,7 +414,7 @@ Effectivement, le message mis à jour s'affichera dans la fenêtre de la console
 >[!success] Le type de projet `Microsoft.NET.Sdk.IL` est devenu la méthode moderne officielle pour compiler du code CIL pur, remplaçant totalement les appels directs et instables à `ilasm.exe`.
 >### Le package est désormais disponible sur le flux officiel NuGet
 >
->- **À l'époque du livre :** Il fallait configurer un flux de développement "Myget" complexe de Microsoft pour récupérer l'extension Microsoft.NET.Sdk.IL.
+>- **À l'époque du livre :** Il fallait configurer un flux de développement "Myget" complexe de Microsoft pour récupérer l'extension `Microsoft.NET.Sdk.IL`.
 >- **Aujourd'hui (.NET 10) :** L'extension fait partie du catalogue standard [NuGet](https://www.nuget.org/packages/Microsoft.NET.Sdk.IL). Vous pouvez l'utiliser directement sans configuration de flux externe.
 >
 >### Le fichier projet utilise l'extension `.ilproj`
@@ -430,7 +438,7 @@ L'étape suivante consiste à créer le fichier de projet. Créez un fichier nom
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <MicrosoftNetCoreIlasmPackageVersion>10.0.7</MicrosoftNetCoreIlasmPackageVersion>
+    <MicrosoftNetCoreIlasmPackageVersion>10.0.8</MicrosoftNetCoreIlasmPackageVersion>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 </Project>
@@ -447,7 +455,7 @@ dotnet build
 **Outre une expérience utilisateur améliorée, le projet IL peut tirer parti de la génération d'assemblies mono-fichiers**, comme expliqué au [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]]. Mettez à jour le fichier projet comme suit :
 
 ```xml
-<Project Sdk="Microsoft.NET.Sdk.IL/10.0.7">
+<Project Sdk="Microsoft.NET.Sdk.IL/10.0.8">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -477,7 +485,7 @@ Maintenant que vous avez vu comment convertir des assemblies .NET Core en IL et 
 
 ## Spécification des assemblies référencés en externe dans CIL
 
-Dans un nouveau répertoire nommé `CILTypes`, copiez le fichier *global.json* de l'exemple précédent. Créez un nouveau fichier de projet nommé *CILTypes.ilproj* et mettez-le à jour comme suit :
+Dans un nouveau répertoire nommé *CILTypes*, copiez le fichier *global.json* de l'exemple précédent. Créez un nouveau fichier de projet nommé *CILTypes.ilproj* et mettez-le à jour comme suit :
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Il">
@@ -495,17 +503,18 @@ Ensuite, créez un nouveau fichier nommé *CILTypes.il* à l'aide de l'éditeur 
 .assembly extern System.Runtime
 {
   .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A )
-  .ver 10.0,8.0
+  .ver 10:0:8:0
 }
+
+.assembly extern System.Runtime.Extensions
 {
-  .assembly extern System.Runtime.Extensions
   .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A )
-  .ver 10.0.8.0
+  .ver 10:0:8:0
 }
 .assembly extern mscorlib
 {
   .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A )
-  .ver = 10.0.8.0
+  .ver 10:0:8:0
 }
 ```
 
@@ -529,8 +538,7 @@ Ensuite, créez un nouveau fichier nommé *CILTypes.il* à l'aide de l'éditeur 
 }
 ```
 
-Étant donné que l'assembly *CILTypes* est un assembly mono-fichier, vous terminerez sa définition
-à l'aide de la directive `.module` suivante, qui indique le nom officiel de votre binaire .NET *CILTypes.dll* :
+Étant donné que l'assembly *CILTypes* est un assembly mono-fichier, vous terminerez sa définition à l'aide de la directive `.module` suivante, qui indique le nom officiel de votre binaire .NET *CILTypes.dll* :
 
 ```cil
 .assembly CILTypes
@@ -545,10 +553,10 @@ Outres `.assembly` et `.module`, **il existe des directives CIL qui précisent d
 
 ##### Tableau 18-1: Directives supplémentaires axées sur l'assembly
 
-| Directive     | Description                                                                                                                                                                                                                                                                 |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.mresources` | **Si votre assemblage utilise des ressources internes** (telles que des bitmaps ou des tables de chaînes), **cette directive est utilisée pour identifier le nom du fichier contenant les ressources à incorporer**.                                                        |
-| `.subsystem`  | **Cette directive CIL permet de définir l'interface utilisateur dans laquelle l'assembly doit s'exécuter**. Par exemple, ==la valeur `2` indique que l'assembly doit s'exécuter dans une *application graphique*, tandis que la valeur `3` désigne un *exécutable console*. |
+| Directive     | Description                                                                                                                                                                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.mresources` | **Si votre assemblage utilise des ressources internes** (telles que des bitmaps ou des tables de chaînes), **cette directive est utilisée pour identifier le nom du fichier contenant les ressources à incorporer**.                                                          |
+| `.subsystem`  | **Cette directive CIL permet de définir l'interface utilisateur dans laquelle l'assembly doit s'exécuter**. Par exemple, ==la valeur `2` indique que l'assembly doit s'exécuter dans une *application graphique*, tandis que la valeur `3` désigne un *exécutable console*.== |
 
 ## Définition des espaces de noms en CIL
 
@@ -559,7 +567,7 @@ Maintenant que vous avez défini l'apparence de votre assembly (et les référen
 .namespace MyNamespace {}
 ```
 
-**Comme en C#, les définitions d'espaces de noms CIL peuvent être imbriquées dans d'autres espaces de noms**. ==Il n'est pas nécessaire de définir un espace de noms racine ici ; toutefois, à titre d'exemple, supposons que vous souhaitiez créer l'espace de noms racine suivant, nommé `MyCompany` :
+**Comme en C#, les définitions d'espaces de noms CIL peuvent être imbriquées dans d'autres espaces de noms**. ==Il n'est pas nécessaire de définir un espace de noms racine ici== ; toutefois, à titre d'exemple, supposons que vous souhaitiez créer l'espace de noms racine suivant, nommé `MyCompany` :
 
 ```cil
 .namespace MyCompany
@@ -568,7 +576,7 @@ Maintenant que vous avez défini l'apparence de votre assembly (et les référen
 }
 ```
 
-Comme en C#, CIL permet de définir un espace de noms imbriqué comme suit :
+ Comme en C#, CIL permet de définir un espace de noms imbriqué comme ceci : 
 
 ```cil
 // Définition d'un espace de noms imbriqué.
@@ -600,7 +608,7 @@ Comme en C#, CIL permet de définir un espace de noms imbriqué comme suit :
 }
 ```
 
-Pour définir correctement la classe parente de MyDerivedClass, vous devez spécifier le nom complet de MyBaseClass comme suit :
+Pour définir correctement la classe parente de `MyDerivedClass`, vous devez spécifier le nom complet de `MyBaseClass` comme suit :
 
 ```cil
 // Mieux !
@@ -618,12 +626,12 @@ Pour définir correctement la classe parente de MyDerivedClass, vous devez spéc
 ##### Tableau 18-2: Divers attributs utilisés conjointement avec la directive `.class`
 
 
-| Attributs                                                                                                                             | Description                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `public`, `private`, `nested assembly`, `nested famandassem`, `nested family`, `nested famorassem`, `nested public`, `nested private` | CIL définit divers attributs permettant de spécifier la visibilité d'un type donné. Comme vous pouvez le constater, le CIL brut offre de nombreuses possibilités différentes de celles offertes par C#. Consultez la documentation ECMA 335 pour plus de détails.                                           |
-| `abstract`, `sealed`                                                                                                                  | Ces deux attributs peuvent être ajoutés à une directive `.class` pour définir respectivement une classe abstraite ou une classe scellée.                                                                                                                                                                    |
-| `auto`, `sequential`, `explicit`                                                                                                      | Ces attributs servent à indiquer au CLR comment organiser les données des champs en mémoire. Pour les types de classe, l'indicateur d'organisation par défaut (auto) est approprié. Modifier cette valeur par défaut peut s'avérer utile si vous devez utiliser P/Invoke pour appeler du code C non managé. |
-| `extends`, `implements`                                                                                                               | Ces attributs vous permettent de définir la classe de base d'un type (via `extends`) ou d'implémenter une interface sur un type (via `implements`).                                                                                                                                                         |
+| Attributs                                                                                                                             | Description                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public`, `private`, `nested assembly`, `nested famandassem`, `nested family`, `nested famorassem`, `nested public`, `nested private` | CIL définit divers attributs permettant de spécifier la visibilité d'un type donné. Comme vous pouvez le constater, le CIL brut offre de nombreuses possibilités différentes de celles offertes par C#. Consultez la [documentation ECMA 335](https://ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf) pour plus de détails. |
+| `abstract`, `sealed`                                                                                                                  | Ces deux attributs peuvent être ajoutés à une directive `.class` pour définir respectivement une classe abstraite ou une classe scellée.                                                                                                                                                                                                                  |
+| `auto`, `sequential`, `explicit`                                                                                                      | Ces attributs servent à indiquer au CLR comment organiser les données des champs en mémoire. Pour les types de classe, l'indicateur d'organisation par défaut (auto) est approprié. Modifier cette valeur par défaut peut s'avérer utile si vous devez utiliser P/Invoke pour appeler du code C non managé.                                               |
+| `extends`, `implements`                                                                                                               | Ces attributs vous permettent de définir la classe de base d'un type (via `extends`) ou d'implémenter une interface sur un type (via `implements`).                                                                                                                                                                                                       |
 
 ##### Tableau 18-2.5: Les correspondances réelles (Mots-clés C# vs Attributs CIL)
 | Modificateur C#      | Attribut CIL équivalent               | Portée réelle dans le Runtime           |
@@ -678,19 +686,19 @@ implements MyNamespace.IMyInterface {}
 
 ## Définition de structures en CIL
 
-**La directive `.class` permet de définir une structure CTS si le type étend `System.ValueType`**. De plus, **==la directive `.class` doit être qualifiée avec l'attribut `sealed`==** (***==étant donné qu'une structure ne peut jamais être une structure de base pour d'autres types valeur==***). ==Si vous tentez de faire autrement, *ilasm.exe* générera une erreur de compilation.==
+**La directive `.class` permet de définir une *structure CTS* si le type étend `System.ValueType`**. De plus, **==la directive `.class` doit être qualifiée avec l'attribut `sealed`==** (***==étant donné qu'une structure ne peut jamais être une structure de base pour d'autres types valeur==***). ==Si vous tentez de faire autrement, *ilasm* générera une erreur de compilation.==
 
 ```cil
 // Une définition de structure est toujours scellée.
 .class public sealed MyStruct
-  extends [System.Runtime]System.ValueType{}
+  extends [System.Runtime]System.ValueType {}
 ```
 
 **Notez que CIL fournit une notation abrégée pour définir un type de structure. Si vous utilisez l'attribut `value`, le nouveau type héritera automatiquement du type de `[System.Runtime]System.ValueType`**. Par conséquent, vous pouvez définir `MyStruct` comme suit :
 
 ```cil
 // Notation abrégée pour déclarer une structure.
-.class public sealed value MyStruct{}
+.class public sealed value MyStruct {}
 ```
 
 ## Définition d'énumérations en CIL
@@ -700,14 +708,14 @@ implements MyNamespace.IMyInterface {}
 ```cil
 // Une Énumération.
 .class public sealed MyEnum
-  extends [System.Runtime]System.Enum{}
+  extends [System.Runtime]System.Enum {}
 ```
 
 **À l'instar des définitions de structures, les énumérations peuvent être définies à l'aide d'une notation abrégée grâce à l'attribut `enum`.** Voici un exemple :
 
 ```cil
 // Notation abrégée d'une énumération.
-.class public sealed enum MyEnum{}
+.class public sealed enum MyEnum {}
 ```
 
 ==Vous verrez dans un instant comment spécifier les paires nom-valeur d'une énumération.==
@@ -909,9 +917,7 @@ public static void MyMethod(int inputInt, ref int refInt, ArrayList ar, out int 
 .method public hidebysig static void MyMethod(int32 inputInt, int32& refInt,
 	class [System.Runtime.Extensions]System.Collections.ArrayList ar,
 	[out] int32& outputInt) cil managed
-{
-	...	
-}
+{ }
 ```
 
 # Examen des opcodes CIL
@@ -1040,9 +1046,9 @@ public static int Add(int a, int b)
 .method public hidebysig static int32 Add(int32 a, int32 b) cil managed
 {
 	.maxstack 2
-	ldarg.0 // Load "a" onto the stack.
-	ldarg.1 // Load "b" onto the stack.
-	add     // Add both values.
+	ldarg.0 // Charge "a" dans la pile
+	ldarg.1 // Charge "b" dans la pile
+	add     // Additionne les deux valeurs.
 	ret
 }
 ```
@@ -1102,11 +1108,11 @@ Comme vous vous en souvenez peut-être, **les opcodes `br` (`br`, `blt`, etc.) s
   IL_0002: br.s IL_0007 // Passer à IL_0007.
   IL_0003: ldloc.0      // Charger la valeur de la variable à l'index 0.
   IL_0004: ldc.i4.1     // Charger la valeur « 1 » sur la pile.
-  IL_0005: add    // Ajouter la valeur actuelle à l'index 0 de la pile.
+  IL_0005: add          // Ajouter la valeur actuelle à l'index 0 de la pile.
   IL_0006: stloc.0
-		IL_0007: ldloc.0      // Charger la valeur à l'index "0".
+  IL_0007: ldloc.0      // Charger la valeur à l'index "0".
   IL_0008: ldc.i4.s 10  // Charger la valeur « 10 » sur la pile.
-  IL_0009: clt    // Vérifier si la valeur sur la pile est inférieure à la valeur indiquée
+  IL_0009: clt          // Vérifier si la valeur sur la pile est inférieure à la valeur indiquée
   IL_000a: stloc.1      // Stocker le résultat à l'index "1"
   IL_000b: ldloc.1      // Charger la valeur à l'index "1"
   IL_000c: brtrue.s IL_0002 // Si vrai, retour à IL_0002
@@ -1371,8 +1377,7 @@ var builder = AssemblyBuilder.DefineDynamicAssembly(
 
 ## Émission du type `HelloClass` et de la variable membre `string`
 
-Maintenant que vous comprenez mieux le rôle de la méthode `ModuleBuilder.CreateType()`, examinons
-comment émettre le type de classe public `HelloWorld` et la variable `string` privée.
+Maintenant que vous comprenez mieux le rôle de la méthode `ModuleBuilder.CreateType()`, examinons comment émettre le type de classe public `HelloWorld` et la variable `string` privée.
 
 ```cs
 // Définition d'une classe publique nommée « HelloWorld ».
