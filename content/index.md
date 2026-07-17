@@ -44,8 +44,8 @@ Notes réalisé par Gianni MUCCI sur le Livre *Pro C# 10 with .NET 6* de Andrew 
 
 ### Partie 6: Gestion des Fichiers, Sérialisation d'objets et Accès aux Données
 
-- [[Chapitre 19]]
-- [[Chapitre 20]]
+- [[Chapitre 19]] — **Entrée/Sortie de Fichiers et Sérialisation d'Objets**
+- [[Chapitre 20]] — **Accès aux données avec ADO.NET**
 
 ### Partie 7: Entity Framework Core
 
