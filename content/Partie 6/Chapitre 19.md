@@ -67,7 +67,7 @@ Lors de la création d'applications de bureau, la possibilité d'enregistrer des
 
 ## La classe de base abstraite `FileSystemInfo`
 
-**Les types `DirectoryInfo` et `FileInfo` héritent de nombreux comportements de la classe de base abstraite `FileSystemInfo`**. **==Le plus souvent, vous utilisez les membres de la classe `FileSystemInfo` pour découvrir les caractéristiques générales==** (telles que la date de création, divers attributs, etc.) **==d'un fichier ou d'un répertoire donné==**. Le [[#Tableau 19-2 Propriété de `FileSystemInfo`|Tableau 19-2]] répertorie certaines propriétés essentielles.
+**Les types `DirectoryInfo` et `FileInfo` héritent de nombreux comportements de la classe de base abstraite `FileSystemInfo`**. **==Le plus souvent, vous utilisez les membres de la classe `FileSystemInfo` pour découvrir les caractéristiques générales==** (telles que la date de création, divers attributs, etc.) **==d'un fichier ou d'un répertoire donné==**. Le [[#Tableau 19-2 Propriétés de `FileSystemInfo`|Tableau 19-2]] répertorie certaines propriétés essentielles.
 
 ##### Tableau 19-2: Propriétés de `FileSystemInfo`
 
@@ -184,7 +184,6 @@ static void ShowSystemDirectoryInfo()
     Console.WriteLine($"Attributes: {dir.Attributes}");
     Console.WriteLine($"root: {dir.Root}");
     Console.WriteLine("*************************\n");
-  
 }
 
 Console.ReadLine();
@@ -418,7 +417,7 @@ Notez également qu'après avoir terminé avec l'objet `FileStream` actuel, *==v
 var f1 = new FileInfo(filename);
 using (FileStream fs1 = f1.Create())
 {
-// Utilisation de l'objet FileStream...
+	// Utilisation de l'objet FileStream...
 }
 f1.Delete();
 ```
@@ -428,7 +427,7 @@ f1.Delete();
 
 ## La méthode `FileInfo.Open()`
 
-**Vous pouvez utiliser la méthode `FileInfo.Open()` pour ouvrir des fichiers existants, ainsi que pour créer de nouveaux fichiers avec une bien plus grande précision qu'avec `FileInfo.Create()`. Cela fonctionne car `Open()` prend généralement plusieurs paramètres pour préciser exactement comment parcourir le fichier à manipuler. Une fois l'appel à `Open()` terminé, un objet `FileStream` est renvoyé. Prenons l'exemple suivant :
+**Vous pouvez utiliser la méthode `FileInfo.Open()` pour ouvrir des fichiers existants, ainsi que pour créer de nouveaux fichiers avec une bien plus grande précision qu'avec `FileInfo.Create()`. Cela fonctionne car `Open()` prend généralement plusieurs paramètres pour préciser exactement comment parcourir le fichier à manipuler. Une fois l'appel à `Open()` terminé, un objet `FileStream` est renvoyé. Prenons l'exemple suivant :**
 
 ```cs
 ...
@@ -500,9 +499,9 @@ public enum FileShare
 
 ## Les méthodes `FileInfo.OpenRead()` et `FileInfo.OpenWrite()`
 
-**La méthode `FileInfo.Open()` permet d'obtenir un descripteur de fichier de manière flexible, mais la classe `FileInfo` propose également des membres nommés `OpenRead()` et `OpenWrite()`**. Comme vous pouvez l'imaginer, **==ces méthodes renvoient un objet `FileStream` correctement configuré en lecture seule ou en écriture seule, sans qu'il soit nécessaire de fournir diverses valeurs d'énumération==**. ==À l'instar de `FileInfo.Create()` et `FileInfo.Open()`, `OpenRead()` et `OpenWrite()` renvoient un objet `FileStream`.
+**La méthode `FileInfo.Open()` permet d'obtenir un descripteur de fichier de manière flexible, mais la classe `FileInfo` propose également des membres nommés `OpenRead()` et `OpenWrite()`**. Comme vous pouvez l'imaginer, **==ces méthodes renvoient un objet `FileStream` correctement configuré en lecture seule ou en écriture seule, sans qu'il soit nécessaire de fournir diverses valeurs d'énumération==**. ==À l'instar de `FileInfo.Create()` et `FileInfo.Open()`, `OpenRead()` et `OpenWrite()` renvoient un objet `FileStream`.==
 
-**Notez que la méthode `OpenRead()` nécessite que le fichier existe déjà**. ***==Le code suivant crée le fichier, puis ferme le `FileStream` afin qu'il puisse être utilisé par la méthode `OpenRead()` :==**
+**Notez que la méthode `OpenRead()` nécessite que le fichier existe déjà**. ***==Le code suivant crée le fichier, puis ferme le `FileStream` afin qu'il puisse être utilisé par la méthode `OpenRead()` :==***
 
 ```cs
 f3.Create().Close();
@@ -724,17 +723,19 @@ for (int i = 0; i < bytesFromFile.Length; i++)
     // (PLus claire sur les valeurs de sortie)
     Console.Write($"{bytesFromFile[i]:X}");
 
-    /*
-     * Rappel :
-     *
-     * .NET et les languages modernes utilise
-     * l'encodage UTF-8, signifiant qu'un caractère
-     * est défini par 2 bytes (octets)
-     *
-     * La propriété Default de la classe Encoding 
-     * est donc défini sur UTF-8
-     *
-     */
+	/*
+	 * Rappel :
+	 *
+	 * .NET et les langages modernes utilisent par défaut l'encodage UTF-8.
+	 * C'est un encodage à taille variable : un caractère standard (ASCII)
+	 * consomme 1 byte (octet), tandis qu'un caractère accentué ou spécial 
+	 * peut consommer de 2 à 4 bytes.
+	 *
+	 * En mémoire, 1 byte est représenté numériquement par 2 chiffres HEXADÉCIMAUX 
+	 * (de 0x00 à 0xFF) ou jusqu'à 3 chiffres décimaux (de 0 à 255).
+	 *
+	 * La propriété Encoding.Default est configurée sur UTF-8 depuis .NET 5+.
+	 */
 }
 
 // Affiche le message décodé
@@ -755,7 +756,7 @@ File.Delete("myMessage.dat");
 
 **`StreamReader` hérite d’un type abstrait nommé `TextReader`, tout comme le type apparenté `StringReader`** (abordé plus loin dans ce chapitre). ***==La classe de base `TextReader` fournit un ensemble limité de fonctionnalités à chacun de ces descendants ; elle permet notamment de lire et d’observer un flux de caractères.==***
 
-**Le type `StreamWriter` (ainsi que `StringWriter`, que vous étudierez plus loin dans ce chapitre) hérite d’une classe de base abstraite nommée `TextWriter`**. ***==Cette classe définit des membres permettant aux types dérivés d’écrire des données textuelles dans un flux de caractères donné. ==***
+**Le type `StreamWriter` (ainsi que `StringWriter`, que vous étudierez plus loin dans ce chapitre) hérite d’une classe de base abstraite nommée `TextWriter`**. ***==Cette classe définit des membres permettant aux types dérivés d’écrire des données textuelles dans un flux de caractères donné.==***
 
 Pour vous aider à comprendre les capacités d'écriture de base des classes `StreamWriter` et `StringWriter`, le [[#Tableau 19-8 Membres clé de `TextWriter`|Tableau 19-8]] décrit les membres principaux de la classe de base abstraite `TextWriter`.
 
@@ -932,3 +933,700 @@ Console.ReadLine();
 **Les derniers ensembles lecteur/écrivain que vous examinerez dans cette section sont `BinaryReader` et `BinaryWriter`. Tous deux héritent directement de `System.Object`**. ***==Ces types vous permettent de lire et d'écrire des types de données discrets dans un flux sous-jacent, au format binaire compact==***. **La classe `BinaryWriter` définit une méthode `Write()` hautement surchargée pour placer un type de données dans le flux sous-jacent**. Outre le membre `Write()`, **==`BinaryWriter` fournit des membres supplémentaires qui vous permettent d'obtenir ou de définir le type dérivé du flux ; elle offre également la prise en charge de l'accès aléatoire aux données==** (voir le [[#Tableau 19-10 Membre clé de `BinaryWriter`|Tableau 19-10]]).
 
 ##### Tableau 19-10: Membre clé de `BinaryWriter`
+
+| Membre       | Description                                                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| `BaseStream` | Cette propriété en lecture seule donne accès au flux sous-jacent utilisé avec l'objet `BinaryWriter`. |
+| `Close()`    | Cette méthode ferme le flux binaire.                                                                  |
+| `Flush()`    | Cette méthode vide le flux binaire.                                                                   |
+| `Seek()`     | Cette méthode définit la position dans le flux actuel.                                                |
+| `Write()`    | Cette méthode écrit une valeur dans le flux actuel.                                                   |
+
+**La classe `BinaryReader` complète les fonctionnalités offertes par `BinaryWriter` avec les membres décrits dans le** [[#Tableau 19-11 Membre clé de `BinaryReader`|Tableau 19-11]].
+
+##### Tableau 19-11: Membre clé de `BinaryReader`
+
+
+| Membre       | Description                                                                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BaseStream` | Cette propriété en lecture seule donne accès au flux sous-jacent utilisé avec l'objet BinaryReader.                                                                      |
+| `Close()`    | Cette méthode ferme le lecteur binaire.                                                                                                                                  |
+| `PeekChar()` | Cette méthode renvoie le prochain caractère disponible sans avancer la position dans le flux.                                                                            |
+| `Read()`     | Cette méthode lit un ensemble donné d'octets ou de caractères et les stocke dans le tableau entrant.                                                                     |
+| `ReadXXXX()` | La classe `BinaryReader` définit de nombreuses méthodes de lecture qui récupèrent le type suivant du flux (par exemple, `ReadBoolean()`, `ReadByte()` et `ReadInt32()`). |
+
+L'exemple suivant (un projet d'application console nommé *BinaryWriterReader* utilisant `System.IO`) écrit différents types de données dans un nouveau fichier *.dat* :
+
+```cs
+Console.Title = "Fun with Binary Writers / Readers";
+Console.WriteLine("***** Fun with Binary Writers / Readers *****\n");
+
+// Ouvre un enregistreur binaire pour un fichier
+var f = new FileInfo("BinFile.dat");
+using (var bw = new BinaryWriter(f.OpenWrite()))
+{
+    // Affiche le type de BaseStream
+    // (System.IO.FileStream dans la cas présent)
+    Console.WriteLine($"Base stream is {bw.BaseStream}");
+
+    // Crée des donnée à enregistré dans le fichier
+    double aDouble = 1234.67;
+    int anInt = 34567;
+    string aString = "A, B, C";
+
+    // Écris les donnée
+    bw.Write(aDouble);
+    bw.Write(anInt);
+    bw.Write(aString);
+}
+Console.WriteLine("Done!");
+Console.ReadLine();
+```
+
+**Remarquez comment l'objet `FileStream` renvoyé par `FileInfo.OpenWrite()` est passé au constructeur du type `BinaryWriter`. Cette technique facilite l'insertion d'un flux avant l'écriture des données**. Notez que le **==constructeur de `BinaryWriter` accepte tout type dérivé de `Stream` (par exemple, `FileStream`, `MemoryStream` ou `BufferedStream`)==**. Ainsi, écrire des données binaires en mémoire est aussi simple que de fournir un objet `MemoryStream` valide.
+
+**Pour lire les données du fichier** *BinFile.dat*, **le type `BinaryReader` offre plusieurs options**. Ici, vous appelez différentes méthodes de lecture pour extraire chaque bloc de données du flux de fichiers :
+
+```cs
+using (var br = new BinaryReader(f.OpenRead()))
+{
+    Console.WriteLine(br.ReadDouble());
+    Console.WriteLine(br.ReadInt32());
+    Console.WriteLine(br.ReadString());
+}
+Console.ReadLine();
+```
+
+# Surveillance programmatique des fichiers
+
+Maintenant que vous maîtrisez mieux l'utilisation des différents lecteurs et enregistreurs, nous allons examiner le rôle de la classe `FileSystemWatcher`. ***==Ce type peut s'avérer très utile pour surveiller les fichiers de votre système par programmation==***. Plus précisément, **==vous pouvez configurer `FileSystemWatcher` pour qu'il surveille les fichiers et détecte toute action parmi celles spécifiées par l'énumération `System.IO.NotifyFilters`.
+
+>[!info] La classe `FileSystemWatcher` est ce qui se trouve sous le capot de la commande CLI `dontet watch`
+
+```cs
+public enum NotifyFilters
+{
+	Attributes, CreationTime,
+	DirectoryName, FileName,
+	LastAccess, LastWrite,
+	Security, Size
+}
+```
+
+**Pour commencer à utiliser le type `FileSystemWatcher`, vous devez définir la propriété `Path` afin de spécifier le nom (et l'emplacement) du répertoire contenant les fichiers à surveiller, ainsi que la propriété `Filter` qui définit les extensions des fichiers à surveiller.**
+
+À ce stade, **==vous pouvez choisir de gérer les événements `Changed`, `Created` et `Deleted`, qui fonctionnent tous conjointement avec le délégué `FileSystemEventHandler`. Ce délégué peut appeler toute méthode correspondant au modèle suivant :==**
+
+```cs
+// Le délégué FileSystemEventHandler doit pointer
+// vers des méthodes correspondant à la signature suivante.
+void MyNotificationHandler(object source, FileSystemEventArgs e)
+```
+
+**Vous pouvez également gérer l'événement `Renamed` à l'aide du type délégué `RenamedEventHandler`, qui peut appeler des méthodes correspondant à la signature suivante :**
+
+```cs
+// Le délégué RenamedEventHandler doit pointer
+// vers des méthodes correspondant à la signature suivante.
+void MyRenamedHandler(object source, RenamedEventArgs e)
+```
+
+Voyons maintenant comment surveiller un fichier. Le projet d'application console suivant (nommé *MyDirectoryWatcher* et utilisant `System.IO`) surveille les fichiers *.txt* du ==répertoire d'exécution== et affiche des messages lors de la création, la suppression, la modification ou le renommage de fichiers :
+
+>Dans mon cas, il vaut mieux exécuter le programme depuis le dossier `MyDirectoryWather`
+
+```cs
+Console.Title = "The Amazing File Wather App";
+Console.WriteLine("***** The Amazing File Wather App *****\n");
+
+// Établis le chemin d'accès vers le dossier à surveiller
+var watcher = new FileSystemWatcher();
+try
+{
+    watcher.Path = @".";
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine(ex.Message);
+    return;
+}
+
+// Définir les éléments à surveiller
+watcher.NotifyFilter =
+    NotifyFilters.LastAccess
+    | NotifyFilters.LastWrite
+    | NotifyFilters.FileName
+    | NotifyFilters.DirectoryName;
+
+// Surveille seulement les fichier texte
+watcher.Filter = "*.txt";
+
+// Ajoute les délégués pour les événements
+// Spécifie quoi faire quand un fichier et crée, modifié ou supprimé
+watcher.Changed += (s, e) =>
+    Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
+watcher.Created += (s, e) =>
+    Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
+watcher.Deleted += (s, e) =>
+    Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
+
+// Spécifie quoi faire quand un fichier est renommé
+watcher.Renamed += (s, e) =>
+    Console.WriteLine($"File: {e.OldFullPath} renamed to {e.FullPath}");
+
+// Démarre la surveillance du dossier
+watcher.EnableRaisingEvents = true;
+
+// Attend que l'utilisateur quitte le programme.
+Console.WriteLine("Press 'q' to quit app");
+
+// Lève des événements
+using (var sw = File.CreateText("Test.txt"))
+{
+    sw.Write("This is some text");
+}
+File.Move("Test.txt", "Test2.txt");
+File.Delete("Test2.txt");
+
+// Autre syntaxe permettant d'attendre la fermeture
+// de l'application par l'utilisateur
+while (Console.Read() != 'q')
+    ;
+```
+
+>[!warning] Comportement différent sur macOS (Avec Gemini)
+>Pour le système d'exploitation, le bilan net de cette rafale d'actions est ultra-simple : **Le fichier `test.txt` a été créé, puis il a disparu.**
+>
+>Plutôt que de lever trois événements distincts (Created -> Renamed -> Deleted), l'API macOS économise des calculs. Elle fusionne la séquence et conclut de manière logique : _"Le fichier d'origine `test.txt` a été supprimé"_. C'est pour cela que votre événement `Deleted` se déclenche sur `test.txt` et que le `Renamed` passe complètement à la trappe.
+>
+>En mettant `Thread.Sleep(10)` juste après `File.Move`, vous forcez le thread de votre programme à s'arrêter. Cela laisse une fenêtre de tir à macOS pour valider la première vague d'événements (Création + Renommage) et envoyer les notifications au `FileSystemWatcher`. Lorsque le programme se réveille pour exécuter `File.Delete`, c'est traité comme une toute nouvelle action indépendante.
+
+>[!important] les événements d'un système de fichiers sont **asynchrones et non garantis dans l'ordre**.
+
+Lorsque vous exécuterez ce programme, les dernières lignes créeront, modifieront, renommeront puis supprimeront un fichier texte, déclenchant ainsi les événements nécessaires. ==Vous pouvez également accéder au répertoire d'exécution du projet et manipuler les fichiers (avec l'extension *.txt*) afin de déclencher des événements supplémentaires.==
+
+```
+***** The Amazing File Wather App ***** 
+
+Press 'q' to quit app 
+File: ./test.txt Changed 
+File: ./test.txt Created 
+File: ./test.txt renamed to ./test2.txt 
+File: ./test2.txt Deleted
+```
+
+Ceci conclut notre présentation des opérations d'entrée/sortie fondamentales au sein de la plateforme .NET. ***==Bien que vous utilisiez certainement ces techniques dans de nombreuses applications, vous constaterez peut-être aussi que les services de sérialisation d'objets peuvent grandement simplifier la manière dont vous stockez de grandes quantités de données.==***
+
+# Comprendre la sérialisation d'objets
+
+**Le terme** *sérialisation* **décrit le processus de persistance (et éventuellement de transfert) de l'état d'un objet dans un flux (par exemple, un flux de fichiers ou un flux mémoire)**. **La séquence de données persistante contient toutes les informations nécessaires pour reconstruire (ou *désérialiser*) l'état public de l'objet en vue d'une utilisation ultérieure**. **==Cette technologie simplifie considérablement la sauvegarde de grandes quantités de données. Dans de nombreux cas, la sauvegarde des données d'une application à l'aide de services de sérialisation permet d'écrire moins de code qu'avec les lecteurs/enregistreurs disponibles dans l'espace de noms `System.IO`.==**
+
+Par exemple, ==supposons que vous souhaitiez créer une application de bureau avec interface graphique permettant aux utilisateurs de sauvegarder leurs préférences== (par exemple, la couleur de la fenêtre et la taille de la police). ==Pour ce faire, vous pourriez définir une classe nommée `UserPrefs` qui encapsule une vingtaine de champs de données. Si vous utilisiez un type `System.IO.BinaryWriter`, vous devriez sauvegarder *manuellement* chaque champ de l'objet `UserPrefs`. De même, si vous deviez recharger les données d'un fichier en mémoire, vous devriez utiliser un `System.IO.BinaryReader` et (encore une fois) lire *manuellement* chaque valeur pour reconfigurer un nouvel objet `UserPrefs`.==
+
+Tout cela est faisable, mais **==vous pouvez gagner du temps en utilisant la sérialisation XML==** (eXtensible Markup Language) **==ou JSON==** (JavaScript Object Notation). **Chacun de ces formats permet de représenter l'état public d'un objet dans un seul bloc de texte utilisable sur différentes plateformes et dans différents langages de programmation.**
+
+>[!Failure] Note
+>Le type BinaryFormatter, présenté dans les éditions précédentes de cet ouvrage, représente un risque de sécurité élevé et vous devez cesser immédiatement de l'utiliser (http://aka.ms/binaryformatter). Parmi les alternatives plus sûres, citons l'utilisation de `BinaryReaders`/`BinaryWriters` conjointement avec la sérialisation XML ou JSON.
+
+***==La sérialisation des objets .NET facilite la persistance des objets ; cependant, les processus mis en œuvre en coulisses sont assez sophistiqués==***. Par exemple, lorsqu'un objet est persisté dans un flux, toutes les données publiques associées (par exemple, les données de la classe de base et les objets contenus) sont également sérialisées automatiquement. Par conséquent,*==si vous tentez de persister une classe dérivée, toutes les données publiques de la chaîne d'héritage sont également sérialisées==*. ***==Comme vous le verrez, vous utilisez un graphe d'objets pour représenter un ensemble d'objets interdépendants.==***
+
+**Enfin, sachez que vous pouvez persister un graphe d'objets dans *n'importe quel* type dérivé de `System.IO.Stream`. L'important est que la séquence de données représente correctement l'état des objets au sein du graphe.**
+
+## Le rôle d'un graphe d'objets
+
+Comme mentionné précédemment, **le runtime .NET prend en compte tous les objets liés afin de garantir la persistance correcte des données publiques lors de la sérialisation d'un objet**. ==Cet ensemble d'objets liés est appelé *graphe d'objets*==. **Les graphes d'objets offrent un moyen simple de documenter la façon dont un ensemble d'éléments se référencent mutuellement**. ==Les graphes d'objets *ne représentent pas* les relations « *est un* » ou « *possède un* » de la programmation orientée objet==. En revanche, **les flèches d'un diagramme d'objets peuvent être interprétées comme « *nécessite* » ou « *dépend de* ».**
+
+**Chaque objet d'un graphe d'objets se voit attribuer une valeur numérique unique. Il est important de noter que les nombres attribués aux membres d'un graphe d'objets sont arbitraires et n'ont aucune signification concrète pour le monde extérieur.** **==Une fois que vous avez attribué une valeur numérique à tous les objets, le graphe d'objets peut enregistrer l'ensemble des dépendances de chaque objet.==**
+
+Par exemple, supposons que vous ayez créé un ensemble de classes qui modélisent des automobiles (évidemment). Vous avez une classe de base nommée `Car`, *qui possède* une classe `Radio`. Une autre classe nommée `JamesBondCar` étend le type de base `Car`. L'image suivante montre un graphe d'objets possible qui modélise ces relations.
+
+![[Figure 19.1.png|Un simple graphe d'objet]]
+
+**Lors de la lecture de graphes d'objets, vous pouvez utiliser les expressions « *dépend de* » ou « *fait référence à* » pour relier les flèches**. Ainsi, dans l'image précédente ==vous pouvez voir que la classe `Car` fait référence à la classe `Radio` (étant donné la relation « *possède un* »). `JamesBondCar` fait référence à `Car` (étant donné la relation « *est un* »), ainsi qu'à `Radio` (elle hérite de cette variable membre protégée).==
+
+**Bien sûr, le CLR ne représente pas directement en mémoire un graphe d'objets liés. En réalité, la relation illustrée dans l'image précédente est représentée par une formule mathématique qui ressemble à ceci :**
+
+```
+[Car 3, ref 2], [Radio 2], [JamesBondCar 1, ref 3, ref 2]
+```
+
+Si vous analysez cette formule, ==vous constaterez que l'objet 3 ( `Car`) dépend de l'objet 2 ( `Radio`)==. ***==L'objet 2, la `Radio`, est indépendant et ne dépend d'aucun autre objet==***. Enfin, ==l'objet 1 (`jamesBondCar`) dépend à la fois de l'objet 3 et de l'objet 2==. Quoi qu'il en soit, **lors de la sérialisation ou de la désérialisation d'une instance de `JamesBondCar`, le graphe d'objets garantit que les types `Radio` et `Car` participent également au processus.**
+
+**==L'avantage du processus de sérialisation est que le graphe représentant les relations entre vos objets est établi automatiquement en arrière-plan==**. Comme vous le verrez plus loin dans ce chapitre, ***==vous pouvez toutefois vous impliquer davantage dans la construction d'un graphe d'objets donné en personnalisant le processus de sérialisation à l'aide d'attributs.==***
+
+## Création des types d'exemple et des instructions de niveau supérieur
+
+Créez un nouveau projet d'application console nommé *SimpleSerialize*. Mettez à jour le fichier *Program.cs* comme suit :
+
+```cs
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Xml;
+global using System.Xml.Serialization;
+using SimpleSerialize;
+
+Console.Title = "Fun with Object Serialization";
+Console.WriteLine("***** Fun with Object Serialization *****\n");
+```
+
+Ensuite, ajoutez une nouvelle classe nommée *Radio.cs* et mettez à jour le code comme suit :
+
+```cs
+namespace SimpleSerialize;
+
+public class Radio
+{
+    public bool HasTweeters;
+    public bool HasSubWoofers;
+    public List<double> StationPresets;
+    public string RadioId = "XF-552RR6";
+
+    public override string ToString()
+    {
+        var presets = string.Join(
+            ", ",
+            StationPresets.Select(i => i.ToString()).ToList()
+        );
+        return $"HasTweeters:{HasTweeters} HasSubWoofers:{HasSubWoofers} Station Presets:{presets}";
+    }
+}
+```
+
+Ensuite, ajoutez une classe nommée *Car.cs* et mettez à jour le code pour qu'il corresponde à cet exemple :
+
+```cs
+namespace SimpleSerialize;
+
+public class Car
+{
+  public Radio TheRadio = new();
+  public bool IsHatchBack;
+  public override string ToString() => $"IsHatchBack:{IsHatchBack} Radio:{TheRadio}";
+}
+```
+
+Ensuite, ajoutez une autre classe nommée *JamesBondCar.cs* et utilisez le code suivant pour cette classe :
+
+```cs
+namespace SimpleSerialize;
+
+public class JamesBondCar : Car
+{
+    public bool CanFly;
+    public bool canSubmerge;
+
+    public override string ToString() =>
+        $"CanFly:{CanFly} canSubmerge:{canSubmerge} {base.ToString()}";
+}
+```
+
+La classe finale, *Person.cs*, est présentée ici :
+
+```cs
+namespace SimpleSerialize;
+
+public class Person
+{
+    // Un champ publique
+    public bool IsAlive = true;
+
+    // Un champ privé
+    private readonly int PersonAge = 21;
+
+    // Propriété publique / donnée privé
+    private string _fName = string.Empty;
+    public string FirstName
+    {
+        get => _fName;
+        set => _fName = value;
+    }
+
+    public override string ToString() =>
+        $"IsAlive:{IsAlive} FirstName:{FirstName} Age:{PersonAge}";
+}
+```
+
+Enfin, ajoutez le code suivant au fichier *Program.cs* du code de départ (en conservant les instructions `using` ajoutées précédemment) :
+
+```cs
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Xml;
+global using System.Xml.Serialization;
+using SimpleSerialize;
+
+Console.Title = "Fun with Object Serialization";
+Console.WriteLine("***** Fun with Object Serialization *****\n");
+
+var theRadio = new Radio
+{
+    // Syntaxe C# 12.
+    StationPresets = [89.3, 105.1, 97.1],
+    HasTweeters = true,
+};
+
+// Crée un objet JamesBondCar et défini sont état.
+JamesBondCar jbc = new()
+{
+    CanFly = true,
+    CanSubmerge = false,
+    TheRadio = new()
+    {
+        StationPresets = [89.3, 105.1, 97.1],
+        HasTweeters = true,
+    },
+};
+
+List<JamesBondCar> myCars =
+[
+    new JamesBondCar
+    {
+        CanFly = true,
+        CanSubmerge = true,
+        TheRadio = theRadio,
+    },
+    new JamesBondCar
+    {
+        CanFly = true,
+        CanSubmerge = false,
+        TheRadio = theRadio,
+    },
+    new JamesBondCar
+    {
+        CanFly = false,
+        CanSubmerge = true,
+        TheRadio = theRadio,
+    },
+    new JamesBondCar
+    {
+        CanFly = false,
+        CanSubmerge = false,
+        TheRadio = theRadio,
+    },
+];
+
+var p = new Person { FirstName = "James", IsAlive = true };
+```
+
+Vous êtes maintenant prêt à explorer la sérialisation XML et JSON.
+
+## Langage de balisage extensible (XML)
+
+**L'un des objectifs initiaux du XML était de représenter un objet (ou un ensemble d'objets) dans un format lisible par l'homme et par la machine**. ==Un document XML est un fichier unique contenant le ou les éléments sérialisés==. **Pour être conforme à la norme (et être utilisable par les systèmes logiciels prenant en charge le XML), le document s'ouvre avec une Déclaration XML définissant la version et, éventuellement, l'encodage**. ==La ligne suivante est l'élément racine et contient les espaces de noms XML. Toutes les données sont contenues entre les balises ouvrante et fermante de l'élément racine.==
+
+Par exemple, la classe `Person` peut être représentée en XML comme dans l'exemple suivant. **Vous pouvez voir la déclaration XML et l'élément racine (`Person`), ainsi que le balisage supplémentaire pour les propriétés. Les propriétés peuvent également être représentées par des attributs.**
+
+```xml
+<?xml version="1.0"?>
+<Person xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <IsAlive>true</IsAlive>
+  <FirstName>James</FirstName>
+</Person>
+```
+
+**Si vous avez une liste d'objets**, comme une liste d'objets `JamesBondCar`, **la structure est identique**. Dans l'exemple suivant, l'élément racine n'est pas un `JamesBondCar`, mais un tableau de `JamesBondCar`. **==Chaque `JamesBondCar` du tableau est alors contenu dans l'élément racine. L'exemple suivant illustre la syntaxe des attributs pour les propriétés `CanFly` et `CanSubmerge` :==**
+
+```xml
+<?xml version="1.0"?>
+<ArrayOfJamesBondCar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <JamesBondCar CanFly="true" CanSubmerge="true">
+    <TheRadio xmlns="http://www.MyCompany.com">
+      <HasTweeters>false</HasTweeters>
+      <HasSubWoofers>false</HasSubWoofers>
+      <RadioId>XF-552RR6</RadioId>
+      <StationPresets>
+        <double>89.3</double>
+        <double>105.1</double>
+        <double>97.1</double>
+      </StationPresets>
+    </TheRadio>
+    <IsHatchBack xmlns="http://www.MyCompany.com">false</IsHatchBack>
+  </JamesBondCar>
+  <JamesBondCar CanFly="true" CanSubmerge="false">
+    <TheRadio xmlns="http://www.MyCompany.com">
+      <HasTweeters>false</HasTweeters>
+      <HasSubWoofers>false</HasSubWoofers>
+      <RadioId>XF-552RR6</RadioId>
+      <StationPresets>
+        <double>89.3</double>
+        <double>105.1</double>
+        <double>97.1</double>
+      </StationPresets>
+    </TheRadio>
+    <IsHatchBack xmlns="http://www.MyCompany.com">false</IsHatchBack>
+  </JamesBondCar>
+</ArrayOfJamesBondCar>
+```
+
+### Sérialisation et désérialisation avec `XmlSerializer`
+
+**L'espace de noms `System.Xml` fournit la classe `System.Xml.Serialization.XmlSerializer`. Vous pouvez utiliser ce formateur pour conserver l'état *public* d'un objet donné au format XML pur**. ***==Notez que `XmlSerializer` exige que vous déclariez le type à sérialiser (ou à désérialiser).==***
+
+#### Contrôle des données XML générées
+
+Si vous maîtrisez les technologies XML, vous savez qu'**il est souvent crucial de s'assurer que les données d'un document XML respectent un ensemble de règles qui en définissent la *validité***. Il est important de comprendre qu'***==un document XML valide n'est pas lié à la syntaxe des éléments XML (par exemple, l'absence d'élément ouvrant `<p>` ou `<div>` fermé). En revanche, un document valide respecte des règles de formatage convenues==*** (==par exemple, le champ `X` doit être exprimé comme un attribut et non comme un sous-élément==), ***==généralement définies par un schéma XML ou un fichier de définition de type de document (DTD).==***
+
+**Par défaut, `XmlSerializer` sérialise tous les champs/propriétés publics en tant qu'éléments XML, et non en tant qu'attributs XML**. **==Pour contrôler la manière dont `XmlSerializer` génère le document XML résultant, vous pouvez agrémenter les types avec autant d'attributs .NET supplémentaires que nécessaire, issus de l'espace de noms `System.Xml.Serialization`==**. Le [[#Tableau 19-12 Sélection d'attribut de l'espace de nom `System.Xml.Serialization`|Tableau 19-12]] documente certains (mais pas tous) des attributs .NET qui influencent la façon dont les données XML sont encodées dans un flux.
+
+##### Tableau 19-12: Sélection d'attribut de l'espace de nom `System.Xml.Serialization`
+
+| Attribut .NET    | Description                                                                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[XmlAttribute]` | You can use this .NET attribute on a public field or property in a class to tell XmlSerializer to serialize the data as an XML attribute (rather than as a subelement). |
+| `[XmlElement]`   | The field or property will be serialized as an XML element named as you so choose.                                                                                      |
+| `[XmlEnum]`      | This attribute provides the element name of an enumeration member.                                                                                                      |
+| `[XmlRoot]`      | This attribute controls how the root element will be constructed (namespace and element name).                                                                          |
+| `[XmlText]`      | The property or field will be serialized as XML text (i.e., the content between the start tag and the end tag of the root element).                                     |
+| `[XmlType]`      | This attribute provides the name and namespace of the XML type.                                                                                                         |
+
+Bien entendu, **==vous pouvez utiliser de nombreux autres attributs .NET pour contrôler la façon dont `XmlSerializer` génère le document XML résultant==**. Pour plus de détails, consultez l'espace de noms `System.Xml.Serialization` dans la [documentation .NET](https://learn.microsoft.com/en-us/dotnet/api/system.xml.serialization?view=net-10.0).
+
+>[!note] 
+>Le `XmlSerializer` exige que tous les types sérialisés dans le graphe d'objets prennent en charge un constructeur par défaut (veillez donc à le rajouter si vous définissez des constructeurs personnalisés).
+
+#### Sérialisation d'objets à l'aide de `XmlSerializer`
+
+Considérez la fonction locale suivante ajoutée à votre fichier *Program.cs* :
+
+```cs
+static void SaveAsXmlFormat<T>(T objGraph, string fileName)
+{
+    // Doit déclarer le type dans le constructeur de XmlSerializer
+    var XmlFormat = new XmlSerializer(typeof(T));
+    // on cast implicitement vers la classe de base Stream
+    using (
+        Stream fStream = new FileStream(
+            fileName,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None
+        )
+    )
+    {
+        XmlFormat.Serialize(fStream, objGraph);
+    }
+}
+```
+
+Ajoutez le code suivant à vos instructions de niveau supérieur :
+
+```cs
+SaveAsXmlFormat(jbc, "CarData.xml");
+Console.WriteLine("=> Saved car in XML format!");
+
+SaveAsXmlFormat(p, "PersonData.xml");
+Console.WriteLine("=> Saved person in XML format!");
+```
+
+Si vous consultiez le fichier *CarData.xml* nouvellement généré, vous y trouveriez les données XML illustrées ici :
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<JamesBondCar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TheRadio>
+    <HasTweeters>true</HasTweeters>
+    <HasSubWoofers>false</HasSubWoofers>
+    <StationPresets>
+      <double>89.3</double>
+      <double>105.1</double>
+      <double>97.1</double>
+    </StationPresets>
+    <RadioId>XF-552RR6</RadioId>
+  </TheRadio>
+  <IsHatchBack>false</IsHatchBack>
+  <CanFly>true</CanFly>
+  <CanSubmerge>false</CanSubmerge>
+</JamesBondCar>
+```
+
+**Si vous souhaitez spécifier un espace de noms XML personnalisé qui qualifie `JamesBondCar` et encode les valeurs `CanFly` et `CanSubmerge` en tant qu'attributs XML plutôt qu'en tant qu'éléments, vous pouvez le faire en modifiant la définition C# de `JamesBondCar` comme suit :**
+
+```cs
+namespace SimpleSerialize;
+
+[Serializable, XmlRoot(Namespace = "http://www.MyCompany.com")]
+public class JamesBondCar : Car
+{
+    [XmlAttribute]
+    public bool CanFly;
+
+    [XmlAttribute]
+    public bool CanSubmerge;
+
+	...
+}
+```
+
+Ceci donne le document XML suivant (notez l'élément d'ouverture `<JamesBondCar>`) :
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<JamesBondCar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" CanFly="true" CanSubmerge="false" xmlns="http://www.MyCompany.com">
+	
+	...
+
+</JamesBondCar>
+```
+
+Ensuite, examinez le fichier *PersonData.xml* suivant :
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Person xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <IsAlive>true</IsAlive>
+  <FirstName>James</FirstName>
+</Person>
+```
+
+**Remarquez que la propriété `PersonAge` n'est pas sérialisée dans le XML. Ceci confirme que la sérialisation XML ne sérialise que les propriétés et les champs publics.**
+
+#### Sérialisation des collections d'objets
+
+La sérialisation des collections fonctionne de la même manière. Ajoutez les instructions suivantes à vos instructions de niveau supérieur :
+
+```cs
+SaveAsXmlFormat(myCars, "CarCollection.xml");
+Console.WriteLine("=> Saved list of cars in XML format!");
+```
+
+Le code XML généré correspond à l'exemple présenté au début de cette section, avec
+`ArrayOfJamesBondCar` comme élément racine.
+
+#### Désérialisation d'objets et de collections d'objets
+
+**La désérialisation XML est littéralement l'inverse de la sérialisation d'objets** (et de collections d'objets). Prenons l'exemple de la fonction locale suivante permettant de désérialiser du XML en un graphe d'objets. ==Notez que, là encore, le type à désérialiser doit être passé au constructeur de `XmlSerializer`== :
+
+```cs
+static T ReadAsXmlFormat<T>(string fileName)
+{
+    // Crée une instance du type XmlSerializer
+    var xmlFormat = new XmlSerializer(typeof(T));
+    // pas besoin de crée une nouvelle portée using dans le cas présent.
+    using Stream fStream = new FileStream(fileName, FileMode.Open);
+    T obj = (T)xmlFormat.Deserialize(fStream);
+    return obj;
+}
+```
+
+Ajoutez le code suivant aux instructions de niveau supérieur pour reconstituer votre XML en objets (ou liste d'objets) :
+
+```cs
+var savedCar = ReadAsXmlFormat<JamesBondCar>("CarData.xml");
+Console.WriteLine($"Original Car:\t{jbc}");
+Console.WriteLine($"Read Car:\t{savedCar}");
+
+var savedCars = ReadAsXmlFormat<List<JamesBondCar>>("CarCollection.xml");
+```
+
+**La sérialisation XML est utilisée non seulement pour stocker et récupérer des données, comme le montrent ces exemples, mais aussi pour envoyer des données entre systèmes, notamment entre systèmes développés avec des technologies différentes**. **==Tous les langages de programmation modernes (et de nombreux fournisseurs de bases de données) prennent en charge nativement XML.==**
+
+## Sérialisation JavaScript Object Notation (JSON)
+
+Bien que la sérialisation XML soit encore largement utilisée, elle a été largement supplantée par les systèmes utilisant JSON pour partager, persister et/ou charger des données. JSON, comme XML, est une représentation textuelle d'un objet (ou d'un graphe d'objets) compatible multiplateforme et conforme à une norme ouverte. Les systèmes développés avec une grande variété de langages et d'outils intègrent une prise en charge native de JSON.
+
+Les objets dans les documents JSON sont désignés par des paires nom-valeur pour les propriétés, encadrées par des accolades (`{}`). Par exemple, une instance de Person, une fois sérialisée en JSON, produit le document suivant :
+
+```json
+{
+	"firstName": "James",
+	"isAlive": true
+}
+```
+
+Remarquez quelques différences clés entre la représentation JSON et la représentation XML de la même instance de la section précédente. Il n'y a ni déclaration ni nom racine, seulement les propriétés de l'objet sérialisé. Cela permet d'obtenir un texte beaucoup plus court, ce qui en fait un format plus efficace.
+
+***L'absence du nom de classe (`Person`) dans le JSON offre une flexibilité accrue. L'expéditeur (ici, nous) peut appeler la classe `Person`, tandis que le destinataire peut l'appeler `Human`. Tant que les propriétés correspondent, le JSON sera correctement appliqué à l'objet.***
+
+**Les listes d'objets sont stockées sous forme de tableaux JavaScript entre crochets (`[]`)**. Voici une liste contenant deux objets `JamesBondCar` :
+
+## La Sérialisation Binaire Automatique (Avec Gemini)
+
+Dans les sections précédentes, le livre aborde de manière détaillé la sérialisation **XML** et **JSON**. Ces formats dits "textuels" sont d'excellents outils pédagogiques car ils sont directement lisibles par un humain. Cependant, ils souffrent de deux défauts majeurs en production :
+
+1. **La verbosité (le poids) :** Plus de 90 % de l'espace d'un fichier XML/JSON est gaspillé par des balises textuelles répétitives, des parenthèses ou des URL d'infrastructure Microsoft.
+2. **Le coût CPU :** Convertir des types natifs en texte (Parsing) nécessite de nombreuses allocations de mémoire (RAM) et des calculs de chaînes de caractères complexes.
+
+Pour sauvegarder un état complexe (comme un graphe d'objets ou une sauvegarde de jeu vidéo), écrire manuellement chaque variable ligne par ligne avec un `BinaryWriter` est un enfer d'ingénierie. Cela nécessite de gérer manuellement l'ordre exact des octets, la taille des buffers, et d'éviter les décalages d'un seul byte qui corrompraient l'intégralité du fichier.
+
+##  Les Standards Modernes de l'Industrie
+
+Pour obtenir la légèreté du binaire avec la simplicité automatique du XML/JSON, **l'industrie moderne** (notamment le développement de jeux vidéo comme avec Unity) **s'appuie sur deux bibliothèques majeures via *NuGet***.
+
+###  Google Protobuf (Protocol Buffers)
+
+Développé par Google, c'est le standard incontesté pour les performances réseau (gRPC) et le stockage compact. Il fonctionne exactement comme le `XmlSerializer` de votre livre : vous décorez vos classes avec des attributs pour définir l'ordre des données, et le moteur s'occupe du reste.
+
+```cs
+using ProtoBuf;
+using System.IO;
+
+// 1. Décoration de la structure avec des indices de contrats fixes
+[ProtoContract]
+public class GameSnapshot
+{
+    [ProtoMember(1)]
+    public int CurrentLevel { get; set; }
+
+    [ProtoMember(2)]
+    public List<Enemy> ActiveEnemies { get; set; } = [];
+}
+
+[ProtoContract]
+public class Enemy
+{
+    [ProtoMember(1)]
+    public string Type { get; set; } = "";
+
+    [ProtoMember(2)]
+    public bool IsAggressive { get; set; }
+}
+
+// 2. Utilisation avec les FileStreams du Chapitre 19
+public static class BinarySerializer
+{
+    public static void SaveToBinary(string path, GameSnapshot snapshot)
+    {
+        using var stream = File.Create(path);
+        // Génère un flux binaire pur, ultra-compact et sécurisé
+        Serializer.Serialize(stream, snapshot);
+    }
+
+    public static GameSnapshot LoadFromBinary(string path)
+    {
+        using var stream = File.OpenRead(path);
+        return Serializer.Deserialize<GameSnapshot>(stream);
+    }
+}
+```
+
+###  MessagePack
+
+La philosophie de MessagePack est simple : _"C'est comme du JSON, mais compressé directement au format binaire"_. Il est réputé pour être l'un des sérialiseurs les plus rapides de l'écosystème informatique mondial.
+
+```cs
+using MessagePack;
+using System.IO;
+
+[MessagePackObject(keyAsPropertyName: true)]
+public class PlayerState
+{
+    public string Username { get; set; } = "James";
+    public int Score { get; set; }
+}
+
+// Sauvegarde et lecture en une seule ligne de code
+byte[] data = MessagePackSerializer.Serialize(myPlayerState);
+File.WriteAllBytes("save.dat", data);
+```
+
+##### Tableau 19-XXX:  Comparatif des Formats de Sérialisation
+
+Pour un objet simple composé d'un booléen `IsAlive = true` et d'une chaîne `FirstName = "James"`, voici l'empreinte réelle sur votre disque :
+
+| Format                  | Poids Moyen (Bytes) | Lisible à l'œil nu ? | Avantage Principal                   | Inconvénient Principal              |
+| ----------------------- | ------------------- | -------------------- | ------------------------------------ | ----------------------------------- |
+| XML                     | ~213 bytes          | Oui                  | Standard historique universel.       | Extrêmement lourd et verbeux.       |
+| JSON                    | ~35 bytes           | Oui                  | Le roi du web moderne, très lisible. | Moins performant que le binaire.    |
+| Binaire Auto (Protobuf) | ~7 bytes            | **Non**              | Poids plume, ultra-rapide, sécurisé. | Nécessite des outils tiers (NuGet). |
