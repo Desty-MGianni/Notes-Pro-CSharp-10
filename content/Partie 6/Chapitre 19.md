@@ -1413,10 +1413,10 @@ static void SaveAsXmlFormat<T>(T objGraph, string fileName)
 Ajoutez le code suivant à vos instructions de niveau supérieur :
 
 ```cs
-SaveAsXmlFormat(jbc, "CarData.xml");
+SaveAsXmlFormat(jbc, "XML/CarData.xml");
 Console.WriteLine("=> Saved car in XML format!");
 
-SaveAsXmlFormat(p, "PersonData.xml");
+SaveAsXmlFormat(p, "XML/PersonData.xml");
 Console.WriteLine("=> Saved person in XML format!");
 ```
 
@@ -1487,7 +1487,7 @@ Ensuite, examinez le fichier *PersonData.xml* suivant :
 La sérialisation des collections fonctionne de la même manière. Ajoutez les instructions suivantes à vos instructions de niveau supérieur :
 
 ```cs
-SaveAsXmlFormat(myCars, "CarCollection.xml");
+SaveAsXmlFormat(myCars, "XML/CarCollection.xml");
 Console.WriteLine("=> Saved list of cars in XML format!");
 ```
 
@@ -1513,11 +1513,11 @@ static T ReadAsXmlFormat<T>(string fileName)
 Ajoutez le code suivant aux instructions de niveau supérieur pour reconstituer votre XML en objets (ou liste d'objets) :
 
 ```cs
-var savedCar = ReadAsXmlFormat<JamesBondCar>("CarData.xml");
+var savedCar = ReadAsXmlFormat<JamesBondCar>("XML/CarData.xml");
 Console.WriteLine($"Original Car:\t{jbc}");
 Console.WriteLine($"Read Car:\t{savedCar}");
 
-var savedCars = ReadAsXmlFormat<List<JamesBondCar>>("CarCollection.xml");
+var savedCars = ReadAsXmlFormat<List<JamesBondCar>>("XML/CarCollection.xml");
 ```
 
 **La sérialisation XML est utilisée non seulement pour stocker et récupérer des données, comme le montrent ces exemples, mais aussi pour envoyer des données entre systèmes, notamment entre systèmes développés avec des technologies différentes**. **==Tous les langages de programmation modernes (et de nombreux fournisseurs de bases de données) prennent en charge nativement XML.==**
@@ -1604,10 +1604,10 @@ static void SaveAsJsonFormat<T>(T objGraph, string fileName)
 Ajoutez le code suivant à vos instructions de niveau supérieur :
 
 ```cs
-SaveAsJsonFormat(jbc, "CarData.json");
+SaveAsJsonFormat(jbc, "JSON/CarData.json");
 Console.WriteLine("=> Saved car in JSON format!");
 
-SaveAsJsonFormat(p, "PersonData.json");
+SaveAsJsonFormat(p, "JSON/PersonData.json");
 Console.WriteLine("=> Saved person in JSON format!");
 ```
 
@@ -1913,10 +1913,281 @@ public class Person
 
 Suite à cette modification, les propriétés sont sérialisées dans l'ordre suivant : `FirstName` ($-1$) puis `IsAlive` ($1$). **==`PersonAge` n'est pas sérialisée car elle est `private`. Si elle était `public`, elle recevrait l'ordre par défaut de zéro et serait placée entre les deux autres propriétés.==**
 
-##### Prise en charge de IAsyncEnumerable (Nouveauté C# 10)
+##### Prise en charge de `IAsyncEnumerable` (Nouveauté C# 10)
 
-Avec la sortie de .NET 6/C# 10, System.Text.Json.JsonSerializer prend désormais en charge la sérialisation
-et la désérialisation des flux asynchrones.
+Avec la sortie de .NET 6/C# 10, `System.Text.Json.JsonSerializer` prend désormais en charge la sérialisation et la désérialisation des flux asynchrones.
+
+##### Sérialisation de flux continu
+
+Pour illustrer la sérialisation en flux continu, commencez par ajouter une nouvelle méthode qui renverra un `IAsyncEnumerable<int>` :
+
+```cs
+static async IAsyncEnumerable<int> PrintNumbers(int n)
+{
+    for (int i = 0; i < n; i++)
+        yield return i;
+}
+```
+
+Ensuite, créez un flux à partir de la console et sérialisez l'objet `IAsyncEnumerable<int>` renvoyé par la fonction `PrintNumbers()`.
+
+```cs
+static async void SerializeAsync()
+{
+    Console.WriteLine("Async Serialization");
+    using Stream stream = Console.OpenStandardOutput();
+    // Type anonyme comportant une propriété Data
+    var data = new { Data = PrintNumbers(3) };
+    await JsonSerializer.SerializeAsync(stream, data);
+    Console.WriteLine();
+}
+```
+
+##### Désérialisation de flux continu
+
+**Une nouvelle API, `DeserializeAsyncEnumerable<T>()`, prend désormais en charge la désérialisation en flux continu.** Pour illustrer son utilisation, ajoutez une méthode qui créera un `MemoryStream` puis effectuera la désérialisation à partir de ce flux :
+
+```cs
+static async void DeserializeAsync()
+{
+    Console.WriteLine("Async Deserialization");
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes("[0,1,2,3,4]"));
+    await foreach (
+        int item in JsonSerializer.DeserializeAsyncEnumerable<int>(stream)
+    )
+        Console.Write(item);
+    Console.WriteLine();
+}
+```
+
+```
+Async Serialization 
+{"Data":[0,1,2]} 
+Async Deserialization 
+01234
+```
+
+##### Problèmes de performance potentiels liés à l'utilisation de `JsonSerializerOptions`
+
+**Lorsque vous utilisez `JsonSerializerOption`, il est préférable de créer une seule instance et de la réutiliser dans toute votre application.** Dans cette optique, mettez à jour vos instructions de niveau supérieur et vos méthodes JSON comme suit :
+
+```cs
+var options = new JsonSerializerOptions()
+{
+    PropertyNameCaseInsensitive = true,
+    // PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    PropertyNamingPolicy = null, // PascalCase
+    // IncludeFields = true // J'utilise les attributs donc pas nécessaire
+    WriteIndented = true,
+    NumberHandling =
+        JsonNumberHandling.AllowReadingFromString
+        | JsonNumberHandling.WriteAsString,
+};
+
+SaveAsJsonFormat(options, jbc, "JSON/CarData.json");
+Console.WriteLine("=> Saved car in JSON format!");
+
+SaveAsJsonFormat(options, p, "JSON/PersonData.json");
+Console.WriteLine("=> Saved person in JSON format!");
+
+...
+
+static void SaveAsJsonFormat<T>(
+    JsonSerializerOptions options,
+    T objGraph,
+    string fileName
+) =>
+    File.WriteAllText(
+        fileName,
+        System.Text.Json.JsonSerializer.Serialize(objGraph, options)
+    );
+```
+
+##### Valeurs par défaut Web pour `JsonSerializer`
+
+Lors de la création d'applications Web, vous pouvez utiliser un constructeur spécialisé pour définir les propriétés suivantes :
+
+```cs
+PropertyNameCaseInsensitive = true,
+PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+NumberHandling = JsonNumberHandling.AllowReadingFromString
+```
+
+Vous pouvez toujours définir des propriétés supplémentaires ou remplacer les valeurs par défaut via l'initialisation de l'objet, comme ceci :
+
+```cs
+JsonSerializerOptions options = new(JsonSerializerDefaults.Web)
+{
+	WriteIndented = true,
+	ReferenceHandler = ReferenceHandler.IgnoreCycles
+};
+```
+
+##### Paramètres par défaut généraux pour `JsonSerializer`
+
+Pour commencer avec des paramètres plus généraux, passez `JsonSerializerDefaults.General` au constructeur ; les propriétés suivantes seront alors définies :
+
+```cs
+PropertyNameCaseInsensitive = false,
+PropertyNamingPolicy = null, //Pascal Casing
+NumberHandling = JsonNumberHandling.Strict
+```
+
+Comme dans la version web, vous pouvez toujours définir des propriétés supplémentaires ou remplacer les valeurs par défaut via l'initialisation de l'objet, comme ceci :
+
+```cs
+JsonSerializerOptions options = new(JsonSerializerDefaults.General)
+{
+    WriteIndented = true,
+    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+    PropertyNameCaseInsensitive = true,
+};
+```
+
+#### Sérialisation de collections d'objets
+
+**La sérialisation d'une collection d'objets au format JSON se fait de la même manière que pour un objet unique.** Ajoutez la ligne suivante aux instructions de niveau supérieur :
+
+```cs
+SaveAsJsonFormat(options, myCars, "CarCollection.json");
+```
+
+#### Désérialisation d'objets et de collections d'objets
+
+La désérialisation JSON est l'opération inverse de la sérialisation. La fonction suivante désérialise un objet JSON dans le type spécifié à l'aide de la version générique de la méthode :
+
+```cs
+static T ReadAsJsonFormat<T>(JsonSerializerOptions options, string fileName) =>
+    JsonSerializer.Deserialize<T>(File.ReadAllText(fileName), options);
+```
+
+Ajoutez le code suivant aux instructions de niveau supérieur pour reconstituer votre JSON en objets (ou liste d'objets) :
+
+```cs
+var savedJsonCar = ReadAsJsonFormat<JamesBondCar>(options, "JSON/CarData.json");
+Console.WriteLine($"Read Car: {savedJsonCar}");
+
+List<JamesBondCar> savedJsonCars = ReadAsJsonFormat<List<JamesBondCar>>(
+    options,
+    "JSON/CarCollection.json"
+);
+foreach (var c in savedJsonCars)
+    Console.WriteLine($"Read Car from list: {c}");
+Console.WriteLine();
+```
+
+**Notez que le type créé lors du processus de désérialisation peut être un objet unique ou une collection générique.**
+
+#### La classe abstraite `JsonConverter`
+
+**Vous pouvez affiner le contrôle du processus de sérialisation/désérialisation en ajoutant des convertisseurs personnalisés. Les convertisseurs personnalisés héritent de `JsonConverter<T>` (où `T` est le type sur lequel le convertisseur opère) et redéfinissent les méthodes de base `Read()` et `Write()`. Voici les méthodes de base abstraites à redéfinir :**
+
+```cs
+public abstract T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options);
+
+public abstract void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options);
+```
+
+**Un scénario courant consiste à convertir les valeurs `null` de votre objet en une chaîne vide dans le JSON, puis à les reconvertir en valeur `null` dans votre objet**. Pour illustrer cela, ajoutez un fichier nommé *JsonStringNullToEmptyConverter.cs*, rendez la classe publique, faites-la hériter de `JsonConverter<string>` et implémentez les membres abstraits. Voici le code initial :
+
+```cs
+namespace SimpleSerialize;
+
+public class JsonStringNullToEmptyCopnverter : JsonConverter<string>
+{
+    public override string Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    ) { }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        string value,
+        JsonSerializerOptions options
+    ) { }
+}
+
+```
+
+Dans la méthode `Read`, utilisez l'instance `Utf8JsonReader` pour lire la valeur de chaîne du nœud. Si cette valeur est `null` ou une chaîne vide, retournez `null`. Sinon, retournez la valeur lue.
+
+```cs
+public override string Read(
+	ref Utf8JsonReader reader,
+	Type typeToConvert,
+	JsonSerializerOptions options
+)
+{
+	var value = reader.GetString();
+	if (string.IsNullOrEmpty(value))
+		return null;
+	return value;
+}
+```
+
+Dans la méthode `Write`, utilisez `Utf8JsonWriter` pour écrire une chaîne vide si la valeur est `null` :
+
+```cs
+public override void Write(
+	Utf8JsonWriter writer,
+	string value,
+	JsonSerializerOptions options
+)
+{
+	value ??= string.Empty;
+	writer.WriteStringValue(value);
+}
+```
+
+**La dernière étape du convertisseur personnalisé consiste à forcer le sérialiseur à traiter les valeurs `null`**. ==Par défaut, les valeurs `null` ne sont pas transmises lors de la conversion afin d'améliorer les performances==. Cependant, **dans ce cas précis, nous souhaitons que les valeurs nulles soient traitées**. Il faut donc redéfinir la propriété de base `HandleNull` et lui attribuer la valeur `true` au lieu de `false` (valeur par défaut).
+
+```cs
+public override bool HandleNull => true;
+```
+
+**La dernière étape consiste à ajouter le convertisseur personnalisé aux options de sérialisation.** Créez une nouvelle méthode nommée `HandleNullStrings()` et ajoutez le code suivant :
+
+```cs
+static void HandleNullStrings()
+{
+    Console.WriteLine("Handle Null Strings");
+    var options = new JsonSerializerOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = null,
+        IncludeFields = true,
+        WriteIndented = true,
+        // Syntaxe d'expression de collection (C# 12) pas possible !
+        // On peut modifier ce qui se trouve dans la list mais pas
+        // recréer une nouvelle liste (La raison de p)
+        Converters = { new JsonStringNullToEmptyCopnverter() },
+    };
+
+    // Crée un nouvel objet avec une chaîne null
+    var radio = new Radio
+    {
+        HasSubWoofers = true,
+        HasTweeters = true,
+        RadioId = null,
+    };
+
+    // Sérialise l'objet en JSON
+    var json = JsonSerializer.Serialize(radio, options);
+    Console.WriteLine(json);
+}
+```
+
+**Lorsque vous appelez cette méthode depuis les instructions de niveau supérieur, vous pouvez constater que la propriété `RadioId` est en effet une chaîne vide dans le JSON au lieu d'une valeur `null`. Les valeurs `StationPresets` restent nulles dans le JSON car le convertisseur personnalisé ne fonctionne qu'avec des chaînes de caractères, et non avec des listes de chaînes.**
+
+```json
+{ 
+	"HasTweeters": true, 
+	"HasSubWoofers": true, 
+	"StationPresets": null, 
+	"RadioId": ""
+}
+```
 
 ## La Sérialisation Binaire Automatique (Avec Gemini)
 
@@ -1927,11 +2198,11 @@ Dans les sections précédentes, le livre aborde de manière détaillé la séri
 
 Pour sauvegarder un état complexe (comme un graphe d'objets ou une sauvegarde de jeu vidéo), écrire manuellement chaque variable ligne par ligne avec un `BinaryWriter` est un enfer d'ingénierie. Cela nécessite de gérer manuellement l'ordre exact des octets, la taille des buffers, et d'éviter les décalages d'un seul byte qui corrompraient l'intégralité du fichier.
 
-##  Les Standards Modernes de l'Industrie
+###  Les Standards Modernes de l'Industrie
 
 Pour obtenir la légèreté du binaire avec la simplicité automatique du XML/JSON, **l'industrie moderne** (notamment le développement de jeux vidéo comme avec Unity) **s'appuie sur deux bibliothèques majeures via *NuGet***.
 
-###  Google Protobuf (Protocol Buffers)
+####  Google Protobuf (Protocol Buffers)
 
 Développé par Google, c'est le standard incontesté pour les performances réseau (gRPC) et le stockage compact. Il fonctionne exactement comme le `XmlSerializer` de votre livre : vous décorez vos classes avec des attributs pour définir l'ordre des données, et le moteur s'occupe du reste.
 
@@ -1978,7 +2249,7 @@ public static class BinarySerializer
 }
 ```
 
-###  MessagePack
+####  MessagePack
 
 La philosophie de MessagePack est simple : _"C'est comme du JSON, mais compressé directement au format binaire"_. Il est réputé pour être l'un des sérialiseurs les plus rapides de l'écosystème informatique mondial.
 
@@ -2007,3 +2278,10 @@ Pour un objet simple composé d'un booléen `IsAlive = true` et d'une chaîne `F
 | XML                     | ~213 bytes          | Oui                  | Standard historique universel.       | Extrêmement lourd et verbeux.       |
 | JSON                    | ~35 bytes           | Oui                  | Le roi du web moderne, très lisible. | Moins performant que le binaire.    |
 | Binaire Auto (Protobuf) | ~7 bytes            | **Non**              | Poids plume, ultra-rapide, sécurisé. | Nécessite des outils tiers (NuGet). |
+
+
+# Résumé du chapitre
+
+**Vous avez commencé ce chapitre en examinant l'utilisation des types `Directory(Info)` et `File(Info)`**. Comme vous l'avez appris, **==ces classes vous permettent de manipuler un fichier ou un répertoire physique sur votre disque dur==**. Ensuite, **vous avez examiné plusieurs classes dérivées de la classe abstraite `Stream`**. ***==Étant donné que les types dérivés de `Stream` opèrent sur un flux brut d'octets, l'espace de noms `System.IO` fournit de nombreux types de lecture/écriture==*** (par exemple `StreamWriter`, `StringWriter` et `BinaryWriter`) ***==qui simplifient le processus==***. **Vous avez également exploré les fonctionnalités offertes par `DriveType`, appris à surveiller les fichiers à l'aide du type `FileSystemWatcher` et vu comment interagir avec les flux de manière asynchrone.**
+
+**Ce chapitre vous a également présenté le sujet des services de sérialisation d'objets.** Comme vous l'avez vu, **==la plateforme .NET utilise un graphe d'objets pour prendre en compte l'ensemble des objets liés que vous souhaitez conserver dans un flux.==** **Vous avez ensuite travaillé avec la sérialisation et la désérialisation XML et JSON.**
