@@ -252,7 +252,7 @@ Dans l'univers .NET, **la** *réflexion* **est le processus de découverte des t
 
 **Comme tout espace de noms, `System.Reflection`** (défini dans *System.Runtime.dll*) **contient plusieurs types associés.** Le [[#Tableau 17-1 Un échantillon de membres de l'espace de noms `System.Reflection`|Tableau 17-1]] répertorie certains des éléments essentiels à connaître.
 
-##### Tableau 17-1: Un échantillon de membres de l'espace de noms `System.Reflection`
+###### Tableau 17-1: Un échantillon de membres de l'espace de noms `System.Reflection`
 
 
 | Type            | Description                                                                                                                                          |
@@ -275,7 +275,7 @@ Pour comprendre comment exploiter l'espace de noms `System.Reflection` afin de l
 
 **La classe `System.Type` définit des membres permettant d’examiner les métadonnées d’un type, dont un grand nombre renvoient des types de l’espace de noms `System.Reflection`**. Par exemple, **==`Type.GetMethods()` renvoie un tableau d’objets `MethodInfo`, `Type.GetFields()` renvoie un tableau d’objets `FieldInfo`, etc==**. ***==L’ensemble complet des membres exposés par `System.Type` est très vaste==*** ; toutefois, le [[#Tableau 17-2 Sélection de membres de `System.Type`|Tableau 17-2]] offre un aperçu partiel des membres pris en charge par `System.Type` (voir la [documentation .NET](https://learn.microsoft.com/en-us/dotnet/api/system.type?view=net-10.0) pour plus de détails).
 
-##### Tableau 17-2: Sélection de membres de `System.Type`
+###### Tableau 17-2: Sélection de membres de `System.Type`
 
 | Membre                                                                                                                                                                                                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1083,7 +1083,7 @@ Comme illustré au début de ce chapitre, ***==l'un des rôles d'un compilateur 
 
 **Les attributs .NET sont des types de classe qui étendent la classe de base abstraite `System.Attribute`**. ==En explorant les espaces de noms .NET, vous découvrirez de nombreux attributs prédéfinis que vous pourrez utiliser dans vos applications==. De plus, **vous pouvez créer des attributs personnalisés pour préciser le comportement de vos types en créant un nouveau type dérivant de `Attribute`**. ***==La bibliothèque de classes de base .NET fournit des attributs dans différents espaces de noms==***. Le [[#Tableau 17-3 En petit échantillon d'attributs prédéfinis|Tableau 17-3]] présente un aperçu de certains attributs prédéfinis, mais *==la liste est loin d'être exhaustive.==*
 
-##### Tableau 17-3: En petit échantillon d'attributs prédéfinis
+###### Tableau 17-3: En petit échantillon d'attributs prédéfinis
 
 | Attribut         | Description                                                                                                                                                                                                                                       |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2459,7 +2459,7 @@ public class FullChainBenchmark
 
 >La structure de `BenchmarkDotNet` est proche de `munit` pour le C
 
-##### Tableau 17-4: Benchmark de la chaîne complète
+###### Tableau 17-4: Benchmark de la chaîne complète
 
 | Method                     |     Mean | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
 | -------------------------- | -------: | --------: | --------: | ----: | ------: | -----: | --------: | ----------: |
@@ -2549,7 +2549,7 @@ public class LateBindingBenchmark
 
 ```
 
-##### Tableau 17-5: Benchmark des appels de méthode
+###### Tableau 17-5: Benchmark des appels de méthode
 
 | Method           | Mean       | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
 | ---------------- | ---------: | --------: | --------: | ----: | -----: | --------: | ----------: |

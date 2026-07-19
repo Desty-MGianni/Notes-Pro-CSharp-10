@@ -1429,7 +1429,7 @@ Comme vous pouvez vous y attendre, les applications .NET peuvent également êtr
 >---
 >*Sous .NET 6, une application "Hello World" autonome pesait environ 60-70 Mo. Avec les nouvelles options de **Trim** et de **AOT** des versions récentes, on peut descendre en dessous de 10-15 Mo.*
 
-##### Tableau 16-1: Quelque options pour publier une application
+###### Tableau 16-1: Quelque options pour publier une application
 
 | Options / Propriété MSBuild                                                              | Description                                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1443,7 +1443,7 @@ Comme vous pouvez vous y attendre, les applications .NET peuvent également êtr
 
 >[!info] Toute les commande affiché prennent une seule ligne !
 
-##### Tableau 16-1.5: Mise à jour .NET 8 et 9
+###### Tableau 16-1.5: Mise à jour .NET 8 et 9
 
 | Options / Propriété MSBuild                   | Description                                                                                           |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -1632,7 +1632,7 @@ Jusqu'à présent dans ce livre, **tous les assemblies que vous avez créés ét
 >2. **Shared Framework :** S'il ne trouve pas une DLL (comme `System.Console`), il va voir dans le dossier `/usr/local/share/dotnet/shared/` correspondant à la version définie dans ton fichier `.runtimeconfig.json`.
 >3. **Dossier NuGet :** Pour les paquets tiers, il peut aller voir dans ton cache local `~/.nuget/packages`.
 
-##### Tableau 16-2: Propriétés de sondage des applications
+###### Tableau 16-2: Propriétés de sondage des applications
 
 | Option                          | Description                                                                                      |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |

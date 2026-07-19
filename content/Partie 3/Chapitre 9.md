@@ -265,7 +265,7 @@ Comme mentionné précédemment, **les générations 0 et 1 sont de courte duré
 
 **La taille du segment éphémère varie en fonction de plusieurs facteurs, tels que le type de ramasse-miettes** (abordé ci-après) **et l'architecture du système**. Le [[#Tableau 9-1 La taille des segments éphémères|Tableau 9-1]] présente les différentes tailles des segments éphémères.
 
-##### Tableau 9-1: La taille des segments éphémères
+###### Tableau 9-1: La taille des segments éphémères
 
 | Type de ramasse miette             | 32-bit  | 64-bit   |
 | ---------------------------------- | ------- | -------- |
@@ -309,7 +309,7 @@ L'assembly *mscorlib.dll* fournit un type de classe nommé `System.GC` qui perme
 
 Ce pourrait être le cas si vous développez une classe effectuant des appels à l'API Windows basée sur C via le protocole d'invocation de la plateforme .NET Core, ou encore en raison d'une logique d'interopérabilité COM complexe et de bas niveau. Le [[#Tableau 9-2 Sélection de membres du type `System.GC`|Tableau 9-2]] présente un aperçu de certains des membres les plus importants (consultez la documentation du SDK .NET Framework pour plus de détails).
 
-##### Tableau 9-2: Sélection de membres du type `System.GC`
+###### Tableau 9-2: Sélection de membres du type `System.GC`
 
 | Membre `System.GC`                                | Description                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -102,7 +102,7 @@ Comme vous pouvez le constater, ==de nombreuses propriétés définies par `Syst
 Le [[#Tableau 7-1 Membres principaux du type `System.Exception`|Tableau 7-1]] décrit les membres les plus importants de System.Exception.
 
 
-##### Tableau 7-1: Membres principaux du type `System.Exception`
+###### Tableau 7-1: Membres principaux du type `System.Exception`
 
 | Propriétés de `System.Exception` | Description                                                                                                                                                                                                                                                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

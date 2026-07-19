@@ -168,7 +168,7 @@ Les données peuvent se trouver à bien d'autres endroits que ces deux types d'e
 
 Avant .NET 3.5, interagir avec différents types de données nécessitait l'utilisation d'API très diverses. Prenons l'exemple du [[#Tableau 13-1 Manière de manipuler des types de donnée variés|Tableau 13-1]], qui illustre plusieurs API courantes permettant d'accéder à divers types de données (et vous pouvez certainement trouver de nombreux autres exemples).
 
-##### Tableau 13-1: Manière de manipuler des types de donnée variés
+###### Tableau 13-1: Manière de manipuler des types de donnée variés
 
 >[!info] Une partie des informations présenté seront expliqués un peu plus loin !
 
@@ -186,7 +186,7 @@ Avant .NET 3.5, interagir avec différents types de données nécessitait l'util
 >- **Collections :** La grande tendance moderne est l'utilisation des collections **Immutables**. Une fois créées, elles ne changent plus, ce qui évite de nombreux bugs dans les applications asynchrones ou multi-threadées.
 >- **Performance :** C# 13 met l'accent sur les types `Span<T>` et `ReadOnlySpan<T>` pour manipuler les tableaux et les chaînes de caractères de manière ultra-rapide sans allocation mémoire inutile.
 
-##### Tableau 13-2:  Nouveaux type de données manipulable (C# 11 +)
+###### Tableau 13-2:  Nouveaux type de données manipulable (C# 11 +)
 
 | La donnée que l'on veut       | Comment l'obtenir (Moderne)                | Note technologique                                      |
 | ----------------------------- | ------------------------------------------ | ------------------------------------------------------- |
@@ -722,7 +722,7 @@ static void QueryOverInts()
 >1. **Le court-circuitage :** Si vous faites `.Where(condition).First()`, l'itérateur moderne ne va pas filtrer toute la liste. Il va s'arrêter dès qu'il trouve le **premier** élément qui correspond à la condition et fermer la boucle immédiatement.
 >2. **L'accès direct :** Si vous appelez `.First()` sur un tableau (`int[]`), .NET 10 ne passe plus par un itérateur. Il vérifie simplement si la taille du tableau est > 0 et vous donne l'élément `[0]`.
 
-##### Tableau 13-3: Temps d'exécution et type de retour selon les méthodes LINQ
+###### Tableau 13-3: Temps d'exécution et type de retour selon les méthodes LINQ
 
 | Méthode                              | Type de retour         | Exécution             |
 | ------------------------------------ | ---------------------- | --------------------- |
@@ -1281,9 +1281,9 @@ static void OfTypeAsFilter()
 
 # Étude des opérateurs de requêtes LINQ en C#
 
-C# définit un grand nombre d'opérateurs de requête prêts à l'emploi. Le [[#Tableau 13-3 Opérateurs de requêtes LINQ courants|Tableau 13-3]] répertorie certains des opérateurs de requête les plus couramment utilisés. ==Outre la liste partielle d'opérateurs présentée dans le [[#Tableau 13-3 Opérateurs de requêtes LINQ courants|Tableau 13-3]], **la classe `System.Linq.Enumerable` fournit un ensemble de méthodes qui ne possèdent pas de notation abrégée directe pour les opérateurs de requête C#, mais sont exposées en tant que méthodes d'extension**==. **Ces méthodes génériques peuvent être appelées pour transformer un ensemble de résultats de diverses manières** (`Reverse<>()`, `ToArray<>()`, `ToList<>()`, etc.). **Certaines servent à extraire des singletons d'un ensemble de résultats, d'autres à effectuer diverses opérations d'ensembles** (`Distinct<>()`, `Union<>()`, `Intersect<>()`, etc.), **et d'autres encore à agréger les résultats** (`Count<>()`, `Sum<>()`, `Min<>()`, `Max<>()`, etc.).
+C# définit un grand nombre d'opérateurs de requête prêts à l'emploi. Le [[#Tableau 13-3 Opérateurs de requêtes LINQ courants|Tableau 13-3]] répertorie certains des opérateurs de requête les plus couramment utilisés. ==Outre la liste partielle d'opérateurs présentée dans le [[#Tableau 13-4 Opérateurs de requêtes LINQ courants|Tableau 13-4]], **la classe `System.Linq.Enumerable` fournit un ensemble de méthodes qui ne possèdent pas de notation abrégée directe pour les opérateurs de requête C#, mais sont exposées en tant que méthodes d'extension**==. **Ces méthodes génériques peuvent être appelées pour transformer un ensemble de résultats de diverses manières** (`Reverse<>()`, `ToArray<>()`, `ToList<>()`, etc.). **Certaines servent à extraire des singletons d'un ensemble de résultats, d'autres à effectuer diverses opérations d'ensembles** (`Distinct<>()`, `Union<>()`, `Intersect<>()`, etc.), **et d'autres encore à agréger les résultats** (`Count<>()`, `Sum<>()`, `Min<>()`, `Max<>()`, etc.).
 
-##### Tableau 13-3: Opérateurs de requêtes LINQ courants
+###### Tableau 13-4: Opérateurs de requêtes LINQ courants
 
 | Opérateur de requête                 | Description                                                                                                                                                            |
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -72,7 +72,7 @@ Bien que les processus et les threads ne soient pas nouveaux, **la manière d'in
 
 **L'espace de noms `System.Diagnostics` définit plusieurs types qui vous permettent d'interagir par programmation avec les processus et divers types liés au diagnostic, tels que le journal des événements système et les compteurs de performances**. **==Dans ce chapitre, nous nous intéresserons uniquement aux types centrés sur les processus définis dans le [[#Tableau 14-1 Sélection de membre de l'espace de noms `System.Diagnostics`|Tableau 14-1]].==**
 
-##### Tableau 14-1: Sélection de membre de l'espace de noms `System.Diagnostics`
+###### Tableau 14-1: Sélection de membre de l'espace de noms `System.Diagnostics`
 
 | Types centrés sur les processus de l'espace de noms `System.Diagnostics` | Description                                                                                                                                                                                                                                  |
 | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ Bien que les processus et les threads ne soient pas nouveaux, **la manière d'in
 
 **La classe `System.Diagnostics.Process` vous permet d'analyser les processus exécutés sur une machine donnée** (locale ou distante). **==La classe `Process` fournit également des membres permettant de démarrer et d'arrêter des processus par programmation, d'afficher (ou de modifier) ​​le niveau de priorité d'un processus et d'obtenir la liste des threads actifs et/ou des modules chargés au sein d'un processus donné==**. Le [[#Tableau 14-2 Sélection de propriété du type `Process`|Tableau 14-2]] répertorie certaines des propriétés clés de `System.Diagnostics.Process`.
 
-##### Tableau 14-2: Sélection de propriété du type `Process`
+###### Tableau 14-2: Sélection de propriété du type `Process`
 
 | Propriété         | Description                                                                                                                                                                                                                                                                                                               |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +102,7 @@ Bien que les processus et les threads ne soient pas nouveaux, **la manière d'in
 
 En plus des propriétés que nous venons d'examiner, **`System.Diagnostics.Process` définit également quelques méthodes utiles** (voir [[#Tableau 14-3 Sélection de méthode du type `Process`|Tableau 14-3]]).
 
-##### Tableau 14-3: Sélection de méthode du type `Process`
+###### Tableau 14-3: Sélection de méthode du type `Process`
 
 | Méthode               | Description                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -321,7 +321,7 @@ Here are the threads used by: msedge
 
 **Le type `ProcessThread` possède d'autres membres importants**, outre `Id`, `StartTime` et `PriorityLevel`. Le [[#Tableau 14-4 Sélection de membres du type `ProcessThread`|Tableau 14-4]] présente certains de ces membres.
 
-##### Tableau 14-4: Sélection de membres du type `ProcessThread`
+###### Tableau 14-4: Sélection de membres du type `ProcessThread`
 
 | Membre               | Description                                                                                          |
 | -------------------- | ---------------------------------------------------------------------------------------------------- |

@@ -1972,7 +1972,7 @@ public class Car : IComparable
 
 Comme vous pouvez le constater, **la logique de `CompareTo()` consiste à comparer l'objet entrant à l'instance actuelle en fonction d'un point de données spécifique**. ==La valeur de retour de `CompareTo()` permet de déterminer si ce type est inférieur, supérieur ou égal à l'objet avec lequel il est comparé== (voir [[#Tableau 8-1 Valeurs de retours de la méthode `CompareTo()`|Tableau 8-1]]).
 
-##### Tableau 8-1: Valeurs de retours de la méthode `CompareTo()`
+###### Tableau 8-1: Valeurs de retours de la méthode `CompareTo()`
 
 | Valeur de retour             | Description                                                         |
 | ---------------------------- | ------------------------------------------------------------------- |

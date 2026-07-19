@@ -133,7 +133,7 @@ Avant d'aborder l'espace de noms `System.Threading`, la bibliothèque TPL et les
 
 **Sous les plateformes .NET et .NET Core, l’espace de noms `System.Threading` fournit des types permettant la construction directe d’applications multithread**. Outre les types permettant d’interagir avec un thread du runtime .NET Core, **cet espace de noms définit des types permettant d’accéder au pool de threads géré par le runtime .NET Core, une classe `Timer` simple** (sans interface graphique) **et de nombreux types utilisés pour fournir un accès synchronisé aux ressources partagées**. Le [[#Tableau 15-1 Types principaux de l'espace de noms `System.Threading`|Tableau 15-1]] répertorie certains des membres importants de cet espace de noms. (Pour plus de détails, consultez la [documentation](https://learn.microsoft.com/en-us/dotnet/api/system.threading?view=net-10.0) du SDK .NET Core.)
 
-##### Tableau 15-1:  Types principaux de l'espace de noms `System.Threading`
+###### Tableau 15-1:  Types principaux de l'espace de noms `System.Threading`
 
 | Type                       | Description                                                                                                                                                                                                                   |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -193,7 +193,7 @@ Avant d'aborder l'espace de noms `System.Threading`, la bibliothèque TPL et les
 
 ==Le type le plus primitif de l'espace de noms `System.Threading` est `Thread`==. **Cette classe représente un wrapper orientée objet autour d'un chemin d'exécution donné au sein d'un AppDomain**. **==Ce type définit également plusieurs méthodes==** (statiques et d'instance) **==permettant de créer de nouveaux threads dans le domaine d'application courant, ainsi que de suspendre, d'arrêter et de détruire un thread==**. Consultez la liste des principaux membres statiques dans le [[#Tableau 15-2 Membres statique clé du type `Thread`|Tableau 15-2]].
 
-##### Tableau 15-2: Membres statique clé du type `Thread`
+###### Tableau 15-2: Membres statique clé du type `Thread`
 
 | Membre statique    | Description                                                                                                                                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ Avant d'aborder l'espace de noms `System.Threading`, la bibliothèque TPL et les
 
 La classe `Thread` prend également en charge plusieurs membres au niveau de l'instance, dont certains sont présentés dans le [[#Tableau 15-3 Sélection de membres d'instance du type `Thread`|Tableau 15-3]].
 
-##### Tableau 15-3: Sélection de membres d'instance du type `Thread`
+###### Tableau 15-3: Sélection de membres d'instance du type `Thread`
 
 | Membre au niveau de l'objet | Description                                                                                                                |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -222,7 +222,7 @@ La classe `Thread` prend également en charge plusieurs membres au niveau de l'i
 >[!note]
 >**Interrompre ou suspendre un thread actif est généralement considéré comme une mauvaise idée**. Dans ce cas, il existe un risque (même minime) qu'un thread « fuie » sa charge de travail lorsqu'il est interrompu ou terminé.
 
-##### Tableau 15-4: État et propriétés de la classe Thread (Gemini)
+###### Tableau 15-4: État et propriétés de la classe Thread (Gemini)
 
 | Membre           | Statut Moderne      | Rôle / Pertinence sur macOS                                                                                                    |
 | ---------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -832,7 +832,7 @@ Maintenant, **étant donné que le mot-clé `lock` semble nécessiter moins de c
 
 **Bien que cela puisse paraître surprenant, tant qu'on n'a pas examiné le code CIL sous-jacent, les affectations et les opérations arithmétiques simples *ne sont pas atomiques***. **==C'est pourquoi l'espace de noms `System.Threading` fournit un type qui permet d'opérer atomiquement sur un point de données unique, avec une demande mémoire moindre qu'avec le type `Monitor`==**. La classe `Interlocked` définit les membres statiques clés présentés dans le [[#Tableau 15-5 Sélection de membre statique du type `System.Threading.Interlocked`|Tableau 15-5]].
 
-##### Tableau 15-5: Sélection de membre statique du type `System.Threading.Interlocked`
+###### Tableau 15-5: Sélection de membre statique du type `System.Threading.Interlocked`
 
 | Membre              | Description                                                                                                              |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -1864,7 +1864,7 @@ Pour conclure votre présentation de la bibliothèque TPL, **sachez qu'il existe
 
 Les méthodes d'extension nécessaires se trouvent dans la classe `ParallelEnumerable` de l'espace de noms `System.Linq`. Le [[#Tableau 15-6 Sélection de membre de la classe `ParallelEnumerable`|Tableau 15-6]] présente quelques extensions PLINQ utiles.
 
-##### Tableau 15-6: Sélection de membre de la classe `ParallelEnumerable`
+###### Tableau 15-6: Sélection de membre de la classe `ParallelEnumerable`
 
 | Membre                      | Description                                                                                                                                                                                              |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2066,7 +2066,7 @@ static async Task Main(string[] args)
 
 Après avoir traduit cette nouvelle implémentation de `DoWorkAsync()` dans un langage plus naturel (poétique), ==vous comprenez mieux le rôle réel du jeton `await`==. **Ce mot-clé modifie toujours une méthode qui renvoie un objet `Task`**. **==Lorsque le flux d'exécution atteint le jeton `await`, le thread appelant est suspendu dans cette méthode jusqu'à la fin de l'appel==**. ==S'il s'agissait d'une application graphique, l'utilisateur pourrait continuer à utiliser l'interface utilisateur pendant l'exécution de la méthode `DoWorkAsync()`.==
 
-##### Tableau 15-7: Juxtaposition entre la méthode manuelle et `async`/`await`/
+###### Tableau 15-7: Juxtaposition entre la méthode manuelle et `async`/`await`/
 
 | Ce que tu as fait manuellement              | Son remplaçant moderne                                |
 | ------------------------------------------- | ----------------------------------------------------- |
@@ -2167,7 +2167,7 @@ await Parallel.ForEachAsync(files, async (file, token) =>
 });
 ```
 
-##### Tableau 15-8: La distinction clé entre les deux méthodes
+###### Tableau 15-8: La distinction clé entre les deux méthodes
 
 |                          | `Task.WhenAll`               | `Parallel.ForEachAsync`                     |
 | ------------------------ | ---------------------------- | ------------------------------------------- |

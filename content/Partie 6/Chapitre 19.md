@@ -41,7 +41,7 @@ Lors de la création d'applications de bureau, la possibilité d'enregistrer des
 
 **De nombreux types de l'espace de noms `System.IO` permettent la manipulation programmatique de répertoires et de fichiers physiques. Cependant, d'autres types prennent en charge la lecture et l'écriture de données dans des tampons de chaînes (*string buffers*), ainsi que dans des emplacements mémoire bruts.** Le [[#Tableau 19-1 Membres clé de l'espace de noms `System.IO`|Tableau 19-1]] présente les classes principales (non abstraites), offrant une vue d'ensemble des fonctionnalités de `System.IO`.
 
-##### Tableau 19-1: Membres clé de l'espace de noms `System.IO`
+###### Tableau 19-1: Membres clé de l'espace de noms `System.IO`
 
 | Type de classes E/S non abstraites | Description                                                                                                                                                                                                                                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -69,7 +69,7 @@ Lors de la création d'applications de bureau, la possibilité d'enregistrer des
 
 **Les types `DirectoryInfo` et `FileInfo` héritent de nombreux comportements de la classe de base abstraite `FileSystemInfo`**. **==Le plus souvent, vous utilisez les membres de la classe `FileSystemInfo` pour découvrir les caractéristiques générales==** (telles que la date de création, divers attributs, etc.) **==d'un fichier ou d'un répertoire donné==**. Le [[#Tableau 19-2 Propriétés de `FileSystemInfo`|Tableau 19-2]] répertorie certaines propriétés essentielles.
 
-##### Tableau 19-2: Propriétés de `FileSystemInfo`
+###### Tableau 19-2: Propriétés de `FileSystemInfo`
 
 | Propriété        | Description                                                                                                                                                                                                            |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,7 +88,7 @@ Lors de la création d'applications de bureau, la possibilité d'enregistrer des
 
 Le premier type d'E/S créable que vous examinerez est la classe `DirectoryInfo`. **Cette classe contient un ensemble de membres utilisés pour créer, déplacer, supprimer et énumérer les répertoires et sous-répertoires**. En plus des fonctionnalités fournies par sa classe de base (`FileSystemInfo`), `DirectoryInfo` offre les principaux membres détaillés dans le [[#Tableau 19-3 Membres clés du type `DirectoryInfo`|Tableau 19-3]].
 
-##### Tableau 19-3: Membres clés du type `DirectoryInfo`
+###### Tableau 19-3: Membres clés du type `DirectoryInfo`
 
 | Membre                               | Description                                                                                            |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
@@ -355,7 +355,7 @@ Label: /dev
 
 Comme illustré dans l'exemple précédent de *DirectoryApp*, **la classe `FileInfo` vous permet d'obtenir des informations sur les fichiers existants sur votre disque dur** (par exemple, la date de création, la taille et les attributs du fichier) **et facilite la création, la copie, le déplacement et la suppression de fichiers**. Outre les fonctionnalités héritées de `FileSystemInfo`, vous trouverez des membres spécifiques à la classe `FileInfo`, décrits dans le [[#Tableau 19-4 Membres importants de `FileInfo`|Tableau 19-4]].
 
-##### Tableau 19-4: Membres importants de `FileInfo`
+###### Tableau 19-4: Membres importants de `FileInfo`
 
 | Membre          | Description                                                                                                                   |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -461,7 +461,7 @@ public enum FileMode
 }
 ```
 
-##### Tableau 19-5: Membres de l'énumération `FileMode`
+###### Tableau 19-5: Membres de l'énumération `FileMode`
 
 | Membre         | Description                                                                                                                                                                                                         |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -623,7 +623,7 @@ File.Delete(fileName);
 
 Le type `File` prend également en charge quelques membres, présentés dans le [[#Tableau 19-6 Méthodes du type `File`|Tableau 19-6]], qui peuvent grandement simplifier les processus de lecture et d'écriture de données textuelles.
 
-##### Tableau 19-6: Méthodes du type `File`
+###### Tableau 19-6: Méthodes du type `File`
 
 | Méthode           | Description                                                                                                                         |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -670,7 +670,7 @@ La leçon à retenir est que **pour obtenir rapidement un descripteur de fichier
 
 **Là encore, les classes dérivées de `Stream` représentent les données sous forme de flux brut d'octets** ; par conséquent, *==manipuler directement des flux bruts peut s'avérer complexe==*. ==Certains types dérivés de `Stream` prennent en charge la *recherche (seek)*, qui désigne le processus permettant d'obtenir et d'ajuster la position actuelle dans le flux==. Le [[#Tableau 19-7 Membres abstraits de `Stream`|Tableau 19-7]] vous aide à comprendre les fonctionnalités offertes par la classe Stream en décrivant ses membres principaux.
 
-##### Tableau 19-7: Membres abstraits de `Stream`
+###### Tableau 19-7: Membres abstraits de `Stream`
 
 | Membre                                       | Description                                                                                                                                                                                                                                                                               |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -760,7 +760,7 @@ File.Delete("myMessage.dat");
 
 Pour vous aider à comprendre les capacités d'écriture de base des classes `StreamWriter` et `StringWriter`, le [[#Tableau 19-8 Membres clé de `TextWriter`|Tableau 19-8]] décrit les membres principaux de la classe de base abstraite `TextWriter`.
 
-##### Tableau 19-8: Membres clé de `TextWriter`
+###### Tableau 19-8: Membres clé de `TextWriter`
 
 | Membre                              | Description                                                                                                                                                                                                                       |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -805,7 +805,7 @@ Après avoir exécuté ce programme, vous pouvez examiner le contenu de ce nouve
 
 Vous apprendrez ensuite à lire des données à partir d'un fichier par programmation en utilisant le type `StreamReader` correspondant. Rappelons que cette classe hérite de la classe abstraite `TextReader`, qui offre les fonctionnalités décrites dans le [[#Tableau 19-9 Membres Clé de `TextReader`|Tableau 19-9]].
 
-##### Tableau 19-9: Membres Clé de `TextReader`
+###### Tableau 19-9: Membres Clé de `TextReader`
 
 | Membre                              | Description                                                                                                                                                         |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -932,7 +932,7 @@ Console.ReadLine();
 
 **Les derniers ensembles lecteur/écrivain que vous examinerez dans cette section sont `BinaryReader` et `BinaryWriter`. Tous deux héritent directement de `System.Object`**. ***==Ces types vous permettent de lire et d'écrire des types de données discrets dans un flux sous-jacent, au format binaire compact==***. **La classe `BinaryWriter` définit une méthode `Write()` hautement surchargée pour placer un type de données dans le flux sous-jacent**. Outre le membre `Write()`, **==`BinaryWriter` fournit des membres supplémentaires qui vous permettent d'obtenir ou de définir le type dérivé du flux ; elle offre également la prise en charge de l'accès aléatoire aux données==** (voir le [[#Tableau 19-10 Membre clé de `BinaryWriter`|Tableau 19-10]]).
 
-##### Tableau 19-10: Membre clé de `BinaryWriter`
+###### Tableau 19-10: Membre clé de `BinaryWriter`
 
 | Membre       | Description                                                                                           |
 | ------------ | ----------------------------------------------------------------------------------------------------- |
@@ -944,7 +944,7 @@ Console.ReadLine();
 
 **La classe `BinaryReader` complète les fonctionnalités offertes par `BinaryWriter` avec les membres décrits dans le** [[#Tableau 19-11 Membre clé de `BinaryReader`|Tableau 19-11]].
 
-##### Tableau 19-11: Membre clé de `BinaryReader`
+###### Tableau 19-11: Membre clé de `BinaryReader`
 
 
 | Membre       | Description                                                                                                                                                              |
@@ -1370,7 +1370,7 @@ Si vous maîtrisez les technologies XML, vous savez qu'**il est souvent crucial 
 
 **Par défaut, `XmlSerializer` sérialise tous les champs/propriétés publics en tant qu'éléments XML, et non en tant qu'attributs XML**. **==Pour contrôler la manière dont `XmlSerializer` génère le document XML résultant, vous pouvez agrémenter les types avec autant d'attributs .NET supplémentaires que nécessaire, issus de l'espace de noms `System.Xml.Serialization`==**. Le [[#Tableau 19-12 Sélection d'attribut de l'espace de nom `System.Xml.Serialization`|Tableau 19-12]] documente certains (mais pas tous) des attributs .NET qui influencent la façon dont les données XML sont encodées dans un flux.
 
-##### Tableau 19-12: Sélection d'attribut de l'espace de nom `System.Xml.Serialization`
+###### Tableau 19-12: Sélection d'attribut de l'espace de nom `System.Xml.Serialization`
 
 | Attribut .NET    | Description                                                                                                                                                             |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1524,22 +1524,399 @@ var savedCars = ReadAsXmlFormat<List<JamesBondCar>>("CarCollection.xml");
 
 ## Sérialisation JavaScript Object Notation (JSON)
 
-Bien que la sérialisation XML soit encore largement utilisée, elle a été largement supplantée par les systèmes utilisant JSON pour partager, persister et/ou charger des données. JSON, comme XML, est une représentation textuelle d'un objet (ou d'un graphe d'objets) compatible multiplateforme et conforme à une norme ouverte. Les systèmes développés avec une grande variété de langages et d'outils intègrent une prise en charge native de JSON.
+**Bien que la sérialisation XML soit encore largement utilisée, elle a été largement supplantée par les systèmes utilisant JSON pour partager, persister et/ou charger des données**. ***==JSON, comme XML, est une représentation textuelle d'un objet (ou d'un graphe d'objets) compatible multiplateforme et conforme à une norme ouverte==***. Les systèmes développés avec une grande variété de langages et d'outils intègrent une prise en charge native de JSON.
 
-Les objets dans les documents JSON sont désignés par des paires nom-valeur pour les propriétés, encadrées par des accolades (`{}`). Par exemple, une instance de Person, une fois sérialisée en JSON, produit le document suivant :
+**Les objets dans les documents JSON sont désignés par des paires nom-valeur pour les propriétés, encadrées par des accolades (`{}`)**. Par exemple, une instance de `Person`, une fois sérialisée en JSON, produit le document suivant :
 
 ```json
 {
-	"firstName": "James",
-	"isAlive": true
+  "firstName": "James",
+  "isAlive": true
 }
 ```
 
-Remarquez quelques différences clés entre la représentation JSON et la représentation XML de la même instance de la section précédente. Il n'y a ni déclaration ni nom racine, seulement les propriétés de l'objet sérialisé. Cela permet d'obtenir un texte beaucoup plus court, ce qui en fait un format plus efficace.
+Remarquez quelques différences clés entre la représentation JSON et la représentation XML de la même instance de la section précédente. **Il n'y a ni déclaration ni nom racine, seulement les propriétés de l'objet sérialisé. Cela permet d'obtenir un texte beaucoup plus court, ce qui en fait un format plus efficace.**
 
 ***L'absence du nom de classe (`Person`) dans le JSON offre une flexibilité accrue. L'expéditeur (ici, nous) peut appeler la classe `Person`, tandis que le destinataire peut l'appeler `Human`. Tant que les propriétés correspondent, le JSON sera correctement appliqué à l'objet.***
 
 **Les listes d'objets sont stockées sous forme de tableaux JavaScript entre crochets (`[]`)**. Voici une liste contenant deux objets `JamesBondCar` :
+
+```json
+[
+  {
+    "CanFly": true,
+    "CanSubmerge": true,
+    "TheRadio": {
+      "StationPresets": ["89.3", "105.1", "97.1"],
+      "HasTweeters": true,
+      "HasSubWoofers": false,
+      "RadioId": "XF-552RR6"
+    },
+    "IsHatchBack": false
+  },
+  {
+    "CanFly": true,
+    "CanSubmerge": false,
+    "TheRadio": {
+      "StationPresets": ["89.3", "105.1", "97.1"],
+      "HasTweeters": true,
+      "HasSubWoofers": false,
+      "RadioId": "XF-552RR6"
+    },
+    "IsHatchBack": false
+  }
+]
+```
+
+Notez que ***==le fichier entier est ouvert et fermé par un crochet, puis chaque objet du tableau est ouvert et fermé par une accolade==***. Les préréglages radio sont également une liste, ils sont donc sérialisés sous forme de tableau de valeurs.
+
+### Sérialisation et désérialisation avec `System.Text.Json`
+
+**L'espace de noms `System.Text.Json` fournit le `System.Text.Json.JsonSerializer`. Vous pouvez utiliser ce formateur pour conserver l'état public d'un objet donné au format JSON.**
+
+#### Contrôle des données JSON générées
+
+**Par défaut, `JsonSerializer` sérialise toutes les propriétés publiques sous forme de paires nom-valeur JSON en utilisant le même nom (et la même casse) que les noms des propriétés de l'objet**. **==Vous pouvez contrôler de nombreux aspects du processus de sérialisation à l'aide d'attributs==** ; certains des attributs les plus couramment utilisés sont répertoriés dans le [[#Tableau 19-13 Sélection d'attributs de l'espace de noms `System.Text.Json.Serialization`|Tableau 19-13]].
+
+###### Tableau 19-13: Sélection d'attributs de l'espace de noms `System.Text.Json.Serialization`
+
+| Attribut .NET        | Description                                                                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[JsonIgnore]`       | Cette propriété sera ignorée.                                                                                                                                   |
+| `[JsonInclude]`      | Le membre sera inclus.                                                                                                                                          |
+| `[JsonPropertyName]` | Ceci spécifie le nom de la propriété à utiliser lors de la sérialisation/désérialisation d'un membre. Cela sert généralement à résoudre les problèmes de casse. |
+| `[JsonConstructor]`  | Ceci indique le constructeur à utiliser lors de la désérialisation de JSON en un graphe d'objets.                                                               |
+
+#### Sérialisation d'objets avec `JsonSerializer`
+
+**`JsonSerializer` contient des méthodes statiques `Serialize` permettant de convertir des objets .NET (y compris les graphes d'objets) en une représentation sous forme de chaîne de caractères de leurs propriétés publiques**. Les données sont représentées par des paires nom-valeur en notation objet JavaScript. Prenons l'exemple de la fonction locale suivante ajoutée à votre fichier *Program.cs* :
+
+```cs
+static void SaveAsJsonFormat<T>(T objGraph, string fileName)
+{
+    File.WriteAllText(
+        fileName,
+        System.Text.Json.JsonSerializer.Serialize(objGraph)
+    );
+}
+```
+
+Ajoutez le code suivant à vos instructions de niveau supérieur :
+
+```cs
+SaveAsJsonFormat(jbc, "CarData.json");
+Console.WriteLine("=> Saved car in JSON format!");
+
+SaveAsJsonFormat(p, "PersonData.json");
+Console.WriteLine("=> Saved person in JSON format!");
+```
+
+==Lorsque vous examinerez les fichiers JSON créés, vous constaterez peut-être avec surprise que le fichier *CarData.json* est vide (à l'exception d'une paire d'accolades) et que le fichier *PersonData.json* ne contient que la valeur `Firstname`==. Ceci est dû au fait que, **par défaut, `JsonSerializer` n'écrit que les propriétés publiques, et non les champs publics. Vous corrigerez ce problème dans la section suivante.**
+
+##### Inclure les champs
+
+Pour inclure les champs publics dans le JSON généré, **deux options s'offrent à vous**. La première consiste à **==utiliser la classe `JsonSerializerOptions` pour indiquer à `JsonSerializer` d'inclure tous les champs==**. La seconde consiste à **==mettre à jour vos classes en ajoutant l'attribut `[JsonInclude]` à chaque champ public à inclure dans le JSON de sortie==**. **Notez que la première méthode** (utilisant `JsonSerializationOptions`) **inclura tous les champs publics dans le graphe d'objets. Pour exclure certains champs publics avec cette technique, vous devez utiliser l'attribut `JsonExclude` sur les champs à exclure.**
+
+Mettez à jour la méthode `SaveAsJsonFormat` comme suit :
+
+```cs
+static void SaveAsJsonFormat<T>(T objGraph, string fileName)
+{
+    var options = new JsonSerializerOptions { IncludeFields = true };
+    File.WriteAllText(
+        fileName,
+        System.Text.Json.JsonSerializer.Serialize(objGraph, options)
+    );
+}
+```
+
+Au lieu d'utiliser `JsonSerializerOptions`, **vous pouvez obtenir le même résultat en mettant à jour tous les champs publics des classes d'exemple comme suit (notez que vous pouvez laisser les attributs XML dans les classes et ils n'interféreront pas avec `JsonSerializer`) :**
+
+```cs
+// Radio.cs
+namespace SimpleSerialize;
+
+public class Radio
+{
+    [JsonInclude]
+    public bool HasTweeters;
+
+    [JsonInclude]
+    public bool HasSubWoofers;
+
+    [JsonInclude]
+    public List<double> StationPresets;
+
+    [JsonInclude]
+    public string RadioId = "XF-552RR6";
+
+	...
+}
+```
+
+```cs
+// Car.cs
+namespace SimpleSerialize;
+
+public class Car
+{
+    [JsonInclude]
+    public Radio TheRadio = new();
+
+    [JsonInclude]
+    public bool IsHatchBack;
+
+	...
+}
+```
+
+```cs
+// JamesBondCar.cs
+namespace SimpleSerialize;
+
+[Serializable, XmlRoot(Namespace = "http://www.MyCompany.com")]
+public class JamesBondCar : Car
+{
+    [XmlAttribute]
+    [JsonInclude]
+    public bool CanFly;
+
+    [XmlAttribute]
+    [JsonInclude]
+    public bool CanSubmerge;
+
+	...
+}
+```
+
+```cs
+// Person.cs
+namespace SimpleSerialize;
+
+public class Person
+{
+    // Un champ publique
+    [JsonInclude]
+    public bool IsAlive = true;
+
+	...
+}
+```
+
+**Désormais, lorsque vous exécutez le code avec l'une ou l'autre méthode, toutes les propriétés et tous les champs publics sont écrits dans le fichier**. ==Cependant, en examinant son contenu, vous constaterez que le JSON est *minifié*==. **La minification est un format où tous les espaces et sauts de ligne non significatifs sont supprimés**. ***==Il s'agit du format par défaut, principalement en raison de l'utilisation répandue du JSON dans les services RESTful, ce qui réduit la taille du paquet de données lors de l'envoi d'informations entre services via HTTP/HTTPS.==***
+
+##### Formatage lisible du JSON
+
+**Outre la possibilité d'inclure les champs publics, le `JsonSerializer` peut être configuré pour écrire le JSON indenté** (et lisible par un humain). Mettez à jour votre méthode comme suit :
+
+```cs
+static void SaveAsJsonFormat<T>(T objGraph, string fileName)
+{
+    var options = new JsonSerializerOptions
+    {
+	    // IncludeFileds = true
+        WriteIndented = true, // Active le Pretty Printing
+    };
+    File.WriteAllText(
+        fileName,
+        System.Text.Json.JsonSerializer.Serialize(objGraph, options)
+    );
+}
+```
+
+Examinez maintenant le fichier *CarData.json* ; le résultat est beaucoup plus lisible.
+
+```json
+{
+  "CanFly": true,
+  "CanSubmerge": false,
+  "TheRadio": {
+    "HasTweeters": true,
+    "HasSubWoofers": false,
+    "StationPresets": [
+      89.3,
+      105.1,
+      97.1
+    ],
+    "RadioId": "XF-552RR6"
+  },
+  "IsHatchBack": false
+}
+
+```
+
+#### PascalCase ou camelCase en JSON
+
+==Le PascalCase est un format qui utilise une majuscule pour la première lettre et pour chaque partie significative d'un nom. Le camelCase, quant à lui, met la première lettre en minuscule (comme le mot camelCase dans le titre de cette section), puis chaque partie significative du nom commence par une majuscule==. Prenons l'exemple JSON précédent. `canSubmerge` est un exemple de camelCase. La version PascalCase de cet exemple est `CanSubmerge`.
+
+**Pourquoi est-ce important ? Parce que la plupart des langages populaires sont sensibles à la casse (comme C#). Cela signifie que `CanSubmerge` et `canSubmerge` sont deux éléments différents**. ***==Comme vous l'avez vu tout au long de ce livre, la norme généralement acceptée pour nommer les éléments publics en C# (classes, propriétés publiques, fonctions, etc.) est d'utiliser le PascalCase==***. ***Cependant, la plupart des frameworks JavaScript préfèrent utiliser le camelCase.*** *==Cela peut poser problème lors de l'utilisation de .NET et C# pour transmettre des données JSON à/depuis des services RESTful non-C#/.NET.==*
+
+**Heureusement, le `JsonSerializer` est personnalisable pour gérer la plupart des situations, y compris les différences de casse. Si aucune politique de nommage n'est spécifiée, le `JsonSerializer` utilisera la notation camelCase lors de la sérialisation et de la désérialisation JSON. Pour modifier le processus de sérialisation et utiliser la notation PascalCase, vous devez définir la propriété `PropertyNamingPolicy` sur `null`, comme suit :**
+
+```cs
+static void SaveAsJsonFormat<T>(T objGraph, string fileName)
+{
+    var options = new JsonSerializerOptions
+    {
+        WriteIndented = true, // Active le Pretty Printing
+        PropertyNamingPolicy = null, // Évite de changer la casse des objets
+    };
+    File.WriteAllText(
+        fileName,
+        System.Text.Json.JsonSerializer.Serialize(objGraph, options)
+    );
+}
+```
+
+Désormais, lorsque vous exécutez le code appelant, le JSON produit est entièrement en PascalCase.
+
+```json
+{
+  "CanFly": true,
+  "CanSubmerge": false,
+  "TheRadio": {
+    "HasTweeters": true,
+    "HasSubWoofers": false,
+    "StationPresets": [
+      89.3,
+      105.1,
+      97.1
+    ],
+    "RadioId": "XF-552RR6"
+  },
+  "IsHatchBack": false
+}
+```
+
+**Lors de la lecture de JSON, C# est sensible à la casse par défaut**. ***==Le paramètre de casse de la propriété `PropertyNamingPolicy` est utilisé lors de la désérialisation==***. **Si cette propriété n'est pas définie, la casse par défaut (camelcase) est utilisée**. ==En définissant la propriété `PropertyNamingPolicy` sur PascalCase, tout le JSON entrant doit être en PascalCase==. *==Si la casse ne correspond pas, le processus de désérialisation (abordé prochainement) échoue.==*
+
+**Il existe une troisième option pour la désérialisation de JSON : l'indifférence à la casse**. ==En définissant l'option `PropertyNameCaseInsensitive` sur `true`, C# désérialisera `canSubmerge` indifféremment avec `CanSubmerge` ou `CanSubmerge`. Voici le code permettant de définir cette option :==
+
+```cs
+var options = new JsonSerializerOptions
+{
+	...
+	
+	PropertyNameCaseInsensitive = true,
+};
+```
+
+
+###### L'astuce moderne (C# 11 / .NET 7+)
+
+Si vous voulez du JSON configuré automatiquement avec des options courantes (comme le _CamelCase_ pour les noms de variables, qui est le standard du Web), Microsoft a introduit deux singletons prêts à l'emploi : [1](https://www.c-sharpcorner.com/article/explaining-system-text-json-in-net/)
+
+- `JsonSerializerOptions.Default` (JSON condensé, noms de clés stricts).
+- `JsonSerializerOptions.Web` (JSON condensé, noms de clés en camelCase)
+
+##### Ignorer les références circulaires avec `JsonSerializer` (Nouveauté C# 10)
+
+**Introduit dans .NET 6/C# 10, le `System.Text.Json.JsonSerializer` permet d'ignorer les références circulaires lors de la sérialisation d'un graphe d'objets**. **==Pour ce faire, définissez la propriété `ReferenceHandler` sur `ReferenceHandler.IgnoreCycles` dans `JsonSerializerOptions`==**. Voici le code permettant de configurer le sérialiseur pour ignorer les références circulaires :
+
+```cs
+JsonSerializerOptions options = new()
+{
+	...
+	
+	ReferenceHandler = ReferenceHandler.IgnoreCycles
+};
+```
+
+Le  [[#Tableau 19-14 Valeurs de l'énumération `ReferenceHander`|Tableau 19-14]] répertorie les valeurs disponibles dans l'énumération `ReferenceHandler`.
+
+###### Tableau 19-14: Valeurs de l'énumération `ReferenceHander`
+
+| Valeur de l'énumération | Description                                                                                                                                                                                                                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IgnoreCycles`          | Les références circulaires ne sont pas sérialisées et la boucle de référence est remplacée par une valeur nulle.                                                                                                                                                                                                                         |
+| `Preserve`              | Les propriétés de métadonnées seront prises en compte lors de la désérialisation d'objets et de tableaux JSON en types référence, et écrites lors de la sérialisation de ces types référence. Ceci est nécessaire pour créer un JSON exploitable dans les deux sens à partir d'objets contenant des cycles ou des références dupliquées. |
+
+##### Gestion des nombres avec `JsonSerializer`
+
+**La gestion par défaut des nombres est stricte : les nombres sont sérialisés et désérialisés comme des nombres (sans guillemets)**. ==L’objet `JsonSerializerOptions` possède une propriété `NumberHandling` qui contrôle la lecture et l’écriture des nombres==. Le [[#Tableau 19-15 Valeurs de l'énumération `JsonNumberHandling`|Tableau 19-15]] répertorie les valeurs disponibles dans l’énumération `JsonNumberHandling`.
+
+###### Tableau 19-15: Valeurs de l'énumération `JsonNumberHandling`
+
+| Valeurs de l'énumération                | Description                                                                                                                                                                                |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Strict` (`0`)                          | Les nombres sont lus et écrits tels quels. Les guillemets ne sont ni autorisés ni générés.                                                                                                 |
+| `AllowReadingFromString` (`1`)          | Les nombres peuvent être lus à partir de jetons numériques ou de chaînes de caractères.                                                                                                    |
+| `WriteAsString` (`2`)                   | Les nombres sont écrits sous forme de chaînes JSON (avec des guillemets).                                                                                                                  |
+| `AllowNamedFloatingPointLiterals` (`4`) | Les jetons de chaîne `Nan`, `Infinity` et `-Infinity` peuvent être lus, et les valeurs Single et Double seront écrites sous forme de leurs représentations de chaîne JSON correspondantes. |
+
+>Rappel : ici, l'entier sous-jacentepasse de $2$ à $4$ car l'énumération est marquée par l'attribut `[flags]`
+
+Si vous souhaitez lire des chaînes de caractères (et des nombres) et écrire des nombres sous forme de chaînes de caractères, utilisez l'option suivante :
+
+```cs
+var options = new JsonSerializerOptions
+{
+	...
+	
+	NumberHandling =
+		JsonNumberHandling.AllowReadingFromString
+		& JsonNumberHandling.WriteAsString,
+}
+```
+
+Suite à cette modification, le JSON créé pour la classe `Car` est le suivant :
+
+```json
+{
+  "TheRadio": {
+    "HasTweeters": true,
+    "HasSubWoofers": false,
+    "StationPresets": [
+      "89.3", 
+      "105.1",
+      "97.1"
+    ],
+    "RadioId": "XF-552RR6"
+  },
+  "IsHatchBack": false
+}
+```
+
+##### Ordre des propriétés JSON (Nouveau C# 10)
+
+**Avec la sortie de .NET 6/C# 10, l'attribut `JsonPropertyOrder` contrôle l'ordre des propriétés lors de la sérialisation**. **==Plus le nombre est petit (y compris les valeurs négatives), plus la propriété apparaît tôt dans le JSON résultant.==** **Les propriétés sans ordre se voient attribuer un ordre par défaut de zéro**. Mettez à jour la classe Person comme suit :
+
+```cs
+namespace SimpleSerialize;
+
+public class Person
+{
+    // Un champ publique
+    [JsonInclude]
+    [JsonPropertyOrder(1)]
+    public bool IsAlive = true;
+
+    // Un champ privé
+    private readonly int PersonAge = 21;
+
+    // Propriété publique / donnée privé
+    private string _fName = string.Empty;
+
+    [JsonPropertyOrder(-1)]
+    public string FirstName
+    {
+        get => _fName;
+        set => _fName = value;
+    }
+
+    public override string ToString() =>
+        $"IsAlive:{IsAlive} FirstName:{FirstName} Age:{PersonAge}";
+}
+```
+
+>[!important] **Il faut bien gardé l'attribut `[JsonInclude]` pour le champ `IsAlive` si on n'assigne pas la propriété `IncludeFields` de `JsonSerializerOptions` à `true`.**
+
+Suite à cette modification, les propriétés sont sérialisées dans l'ordre suivant : `FirstName` ($-1$) puis `IsAlive` ($1$). **==`PersonAge` n'est pas sérialisée car elle est `private`. Si elle était `public`, elle recevrait l'ordre par défaut de zéro et serait placée entre les deux autres propriétés.==**
+
+##### Prise en charge de IAsyncEnumerable (Nouveauté C# 10)
+
+Avec la sortie de .NET 6/C# 10, System.Text.Json.JsonSerializer prend désormais en charge la sérialisation
+et la désérialisation des flux asynchrones.
 
 ## La Sérialisation Binaire Automatique (Avec Gemini)
 
@@ -1621,7 +1998,7 @@ byte[] data = MessagePackSerializer.Serialize(myPlayerState);
 File.WriteAllBytes("save.dat", data);
 ```
 
-##### Tableau 19-XXX:  Comparatif des Formats de Sérialisation
+###### Tableau 19-XXX:  Comparatif des Formats de Sérialisation
 
 Pour un objet simple composé d'un booléen `IsAlive = true` et d'une chaîne `FirstName = "James"`, voici l'empreinte réelle sur votre disque :
 

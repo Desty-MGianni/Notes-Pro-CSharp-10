@@ -551,7 +551,7 @@ Ensuite, créez un nouveau fichier nommé *CILTypes.il* à l'aide de l'éditeur 
 
 Outres `.assembly` et `.module`, **il existe des directives CIL qui précisent davantage la structure globale du binaire .NET que vous composez**. Le [[#Tableau 18-1 Directives supplémentaires axées sur l'assembly|Tableau 18-1]] répertorie quelques-unes des directives de niveau assembleur les plus courantes.
 
-##### Tableau 18-1: Directives supplémentaires axées sur l'assembly
+###### Tableau 18-1: Directives supplémentaires axées sur l'assembly
 
 | Directive     | Description                                                                                                                                                                                                                                                                   |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -623,7 +623,7 @@ Pour définir correctement la classe parente de `MyDerivedClass`, vous devez sp�
 
 **Outre les attributs `public` et `extends`, une définition de classe CIL peut comporter de nombreux qualificateurs supplémentaires qui contrôlent la visibilité du type, la disposition des champs, etc**. Le [[#Tableau 18-2 Divers attributs utilisés conjointement avec la directive `.class`|Tableau 18-2]] illustre certains (mais pas tous) des attributs pouvant être utilisés conjointement avec la directive `.class`.
 
-##### Tableau 18-2: Divers attributs utilisés conjointement avec la directive `.class`
+###### Tableau 18-2: Divers attributs utilisés conjointement avec la directive `.class`
 
 
 | Attributs                                                                                                                             | Description                                                                                                                                                                                                                                                                                                                                               |
@@ -633,7 +633,7 @@ Pour définir correctement la classe parente de `MyDerivedClass`, vous devez sp�
 | `auto`, `sequential`, `explicit`                                                                                                      | Ces attributs servent à indiquer au CLR comment organiser les données des champs en mémoire. Pour les types de classe, l'indicateur d'organisation par défaut (auto) est approprié. Modifier cette valeur par défaut peut s'avérer utile si vous devez utiliser P/Invoke pour appeler du code C non managé.                                               |
 | `extends`, `implements`                                                                                                               | Ces attributs vous permettent de définir la classe de base d'un type (via `extends`) ou d'implémenter une interface sur un type (via `implements`).                                                                                                                                                                                                       |
 
-##### Tableau 18-2.5: Les correspondances réelles (Mots-clés C# vs Attributs CIL)
+###### Tableau 18-2.5: Les correspondances réelles (Mots-clés C# vs Attributs CIL)
 | Modificateur C#      | Attribut CIL équivalent               | Portée réelle dans le Runtime           |
 | -------------------- | ------------------------------------- | --------------------------------------- |
 | `public`             | `public`                              | Accessible de partout.                  |
@@ -777,7 +777,7 @@ Une fois cette opération effectuée, vous pouvez ouvrir votre assembly compilé
 
 **==Le [[#Tableau 18-3 Correspondance entre les types de classes de base .NET et les mots clés C , et entre les mots clés C et CIL.|Tableau 18-3]] illustre la correspondance entre un type de classe de base .NET et le mot-clé C# correspondant, ainsi que la correspondance de chaque mot-clé C# avec le code CIL brut==**. **Ce tableau documente également les notations de constantes abrégées utilisées pour chaque type CIL. Comme vous le verrez, ces constantes sont fréquemment référencées par de nombreux opcodes CIL.**
 
-##### Tableau 18-3: Correspondance entre les types de classes de base .NET et les mots clés C#, et entre les mots clés C# et CIL.
+###### Tableau 18-3: Correspondance entre les types de classes de base .NET et les mots clés C#, et entre les mots clés C# et CIL.
 
 | Type de classe de base .NET Core | Mot clé C# | Représentation CIL | Notation constante CIL |
 | -------------------------------- | ---------- | ------------------ | ---------------------- |
@@ -930,7 +930,7 @@ public static void MyMethod(int inputInt, ref int refInt, ArrayList ar, out int 
 
 Pour mieux comprendre l'implémentation des membres en CIL, le [[#Tableau 18-4 Divers codes d'opération CIL spécifiques à l'implémentation|Tableau 18-4]] présente certains des opcodes les plus utiles liés à la logique d'implémentation des membres, regroupés par fonctionnalité.
 
-##### Tableau 18-4: Divers codes d'opération CIL spécifiques à l'implémentation
+###### Tableau 18-4: Divers codes d'opération CIL spécifiques à l'implémentation
 
 | Opcodes                              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -945,7 +945,7 @@ Pour mieux comprendre l'implémentation des membres en CIL, le [[#Tableau 18-4 D
 
 **La catégorie suivante d'opcodes CIL** (==dont un sous-ensemble est présenté dans le [[#Tableau 18-5 Les opcodes principaux centrés sur la pile du CIL|Tableau 18-5]]==) **sert à charger (empiler) les arguments sur la pile d'exécution virtuelle**. Notez que ces opcodes spécifiques au chargement prennent le préfixe `ld` (chargement).
 
-##### Tableau 18-5: Les opcodes principaux centrés sur la pile du CIL
+###### Tableau 18-5: Les opcodes principaux centrés sur la pile du CIL
 
 | Opcode                                  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -958,7 +958,7 @@ Pour mieux comprendre l'implémentation des membres en CIL, le [[#Tableau 18-4 D
 
 **Outre l'ensemble des opcodes spécifiques au chargement, CIL fournit de nombreux opcodes qui dépilent *explicitement* la valeur la plus haute de la pile**. Comme l'illustrent les premiers exemples de ce chapitre, **==dépiler une valeur implique généralement de la stocker dans une zone de stockage locale temporaire pour une utilisation ultérieure==** (par exemple, comme paramètre pour un appel de méthode ultérieur). À ce propos, notez combien d'opcodes qui dépilent la valeur courante de la pile d'exécution virtuelle prennent le préfixe `st` (stockage). Le tableau 18-6 en présente les principaux.
 
-##### Tableau 18-6: Divers opcodes axés sur le dépilage
+###### Tableau 18-6: Divers opcodes axés sur le dépilage
 
 | Opcode                                  | Description                                                                                                                      |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -1153,7 +1153,7 @@ Examinons les types disponibles dans `System.Reflection.Emit`.
 
 **La création d'un assembly dynamique nécessite une certaine familiarité avec les opcodes CIL, mais les types de l'espace de noms `System.Reflection.Emit` masquent autant que possible la complexité du CIL**. Par exemple, ==au lieu de spécifier les directives et attributs CIL nécessaires pour définir un type de classe, vous pouvez simplement utiliser la classe `TypeBuilder`==. De même, ==si vous souhaitez définir un nouveau constructeur d'instance, il n'est pas nécessaire d'émettre le jeton `specialname`, `rtspecialname` ou `.ctor` ; vous pouvez utiliser `ConstructorBuilder`==. Le [[#Tableau 18-7 Sélection de membres de l'espace de noms `System.Reflection.Emit`|Tableau 18-7]] répertorie les membres clés de l'espace de noms `System.Reflection.Emit`.
 
-##### Tableau 18-7: Sélection de membres de l'espace de noms `System.Reflection.Emit`
+###### Tableau 18-7: Sélection de membres de l'espace de noms `System.Reflection.Emit`
 
 | Membres                                                                                                                                                 | Description                                                                                                                                                                                                                                                             |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1185,7 +1185,7 @@ ILGenerator myCILGen = myCtorBuilder.GetILGenerator();
 
 **Une fois que vous disposez d'un `ILGenerator`, vous pouvez générer les opcodes CIL bruts à l'aide de différentes méthodes**. Le [[#Tableau 18-8 Diverses méthodes de `ILGenerator`|Tableau 18-8]] présente certaines (mais pas toutes) les méthodes de `ILGenerator`.
 
-##### Tableau 18-8: Diverses méthodes de `ILGenerator`
+###### Tableau 18-8: Diverses méthodes de `ILGenerator`
 
 | Method                  | Meaning in Life                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -1327,7 +1327,7 @@ static AssemblyBuilder CreateMyAsm()
 
 Lors de l'appel à `DefineDynamicAssembly()`, vous devez spécifier le mode d'accès de l'assembly à définir; les valeurs les plus courantes sont présentées dans le [[#Tableau 18-9 Valeurs communes de l'énumération `AssemblyBuilderAccess`|Tableau 18-9]].
 
-##### Tableau 18-9: Valeurs communes de l'énumération `AssemblyBuilderAccess`
+###### Tableau 18-9: Valeurs communes de l'énumération `AssemblyBuilderAccess`
 
 | Valeur          | Description                                                                                           |
 | --------------- | ----------------------------------------------------------------------------------------------------- |
@@ -1348,7 +1348,7 @@ var builder = AssemblyBuilder.DefineDynamicAssembly(
 
 **`ModuleBuilder` est le type clé utilisé lors du développement d'assemblages dynamiques**. Comme on peut s'y attendre, ==`ModuleBuilder` prend en charge plusieurs membres permettant de définir l'ensemble des types contenus dans un module donné== (classes, interfaces, structures, etc.) ==ainsi que l'ensemble des ressources intégrées== (tables de chaînes, images, etc.) ==qu'il contient==. Le [[#Tableau 18-10 Sélection de membre du type `ModuleBuilder`|Tableau 18-10]] décrit deux méthodes de création. (Notez que chaque méthode renvoie un type associé représentant le type que vous souhaitez construire.)
 
-##### Tableau 18-10: Sélection de membre du type `ModuleBuilder`
+###### Tableau 18-10: Sélection de membre du type `ModuleBuilder`
 
 | Méthode        | Description                                                                                                                         |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -1357,7 +1357,7 @@ var builder = AssemblyBuilder.DefineDynamicAssembly(
 
 **La méthode `DefineType()` de la classe `ModuleBuilder` est essentielle**. Outre la spécification du nom du type (sous forme de chaîne de caractères), **==vous utiliserez également l'énumération `System.Reflection.TypeAttributes` pour décrire le format du type lui-même==**. Le [[#Tableau 18-11 Sélection de membre de l'énumération `TypeAttributes`|Tableau 18-11]] répertorie certains (mais pas tous) des principaux membres de l'énumération `TypeAttributes`.
 
-##### Tableau 18-11: Sélection de membre de l'énumération `TypeAttributes`
+###### Tableau 18-11: Sélection de membre de l'énumération `TypeAttributes`
 
 | Membre              | Description                                                                                                                                                                                        |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

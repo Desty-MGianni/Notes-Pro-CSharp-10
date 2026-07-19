@@ -26,7 +26,7 @@ Au moment de la traduction de cet article, le *SDK .NET* est à la version *10.0
 
 Pour confirmer l'installation du SDK et des runtimes, **ouvrez une fenêtre de commande et utilisez l'interface de ligne de commande (CLI) .NET**, ```dotnet.exe``` (**juste `dotnet` pour les versions plus récente**). Le CLI propose des options et des commandes SDK. Les commandes permettent notamment de créer, de compiler, d'exécuter et de publier des projets et des solutions. Vous trouverez des exemples de ces commandes plus loin dans ce document. Dans cette section, nous allons examiner les options SDK, qui sont au nombre de quatre, comme le montre le [[#Tableau 2-1 .NET CLI SDK options|tableau 2-1]].
 
-##### Tableau 2-1: .NET CLI SDK options
+###### Tableau 2-1: Options de .NET CLI SDK
 
 | Option            | Description                             |
 | ----------------- | --------------------------------------- |
@@ -232,7 +232,7 @@ Pour changer la version de .NET, par exemple la version 5, il faut simplement ch
 
 Dans les versions de .NET et du .NET Framework, la version de C# prise en charge par un projet pouvait être modifiée. Depuis la sortie de .NET Core 3.0 (et de chaque version .NET ultérieure), la version de C# utilisée est liée à la version .NET Core/.NET. Pour les projets .NET 6.0, la version du langage est verrouillée sur C# 10. Le [[#Tableau 2-2 Versions de C et Les Framework associé|Tableau 2-2]] répertorie les frameworks cibles (.NET, .NET Core, .NET Standard et .NET Framework) et la version C# par défaut utilisée.
 
-##### Tableau 2-2: Versions de C# et Les Framework associé
+###### Tableau 2-2: Versions de C# et Les Framework associé
 
 | Framework Cible | Version | Version par défaut de C# |
 | --------------- | ------- | ------------------------ |

@@ -396,7 +396,7 @@ class Calc
 
 Le [[Chapitre 5#Présentation du type de classe C|Chapitre 5]] vous permettra d'aborder officiellement l'étude des type *class* en `C#`, cependant, le [[#Tableau 1-1: Les caractéristiques des classes CTS| Tableau 1-1]] présente un certain nombre de caractéristiques relative aux type *class*.
 
-##### Tableau 1-1: Les caractéristiques des classes CTS
+###### Tableau 1-1: Les caractéristiques des classes CTS
 
 | Caractéristique de classes                          | Signification                                                                                                                                                                                                                                         |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -504,7 +504,7 @@ membre a un *trait de visibilité* donné (par exemple, *public*, *privé*, *pro
 
 Le dernier aspect du `CTS` à prendre en compte pour l'instant est qu'il établit un ensemble bien défini de
 types de données fondamentaux. Bien qu'un langage donné dispose généralement d'un mot-clé unique utilisé pour déclarer un type de données fondamental, tous les mots-clés des langages .NET se résolvent finalement au même type `CTS` défini dans un assembly nommé *mscorlib.dll*. Consultez le [[#Tableau 1-2 Les type de données intrinsèques CTS|tableau 1-2]], qui documente la manière dont les types de données `CTS` clés sont exprimés en `VB.NET` et `C#`.
-##### Tableau 1-2: Les type de données intrinsèques CTS
+###### Tableau 1-2: Les type de données intrinsèques CTS
 
 > Aussi appelé primitifs
 
@@ -657,7 +657,7 @@ End Module
 
 Une fois que vous maîtrisez le langage de programmation .NET de votre choix, votre prochain objectif en tant que développeur .NET est clairement d'apprendre à connaître la multitude de types définis dans les (nombreux) espaces de noms .NET. **L'espace de noms le plus fondamental à comprendre au départ est celui nommé `System`. Cet espace de noms fournit un ensemble de types essentiels dont vous aurez besoin à maintes reprises en tant que développeur .NET. En fait, vous ne pouvez pas créer d' application C# fonctionnelle sans faire au moins référence à l'espace de noms System, car les types de données de base (par exemple, System.Int32, System.String) y sont définis**. Le [[#Tableau 1-3 Un échantillon de namespace .NET|tableau 1-3]] présente un aperçu de certains (mais certainement pas tous) des espaces de noms .NET regroupés par fonctionnalité.
 
-##### Tableau 1-3 Un échantillon de namespace .NET
+###### Tableau 1-3 Un échantillon de namespace .NET
 
 | .NET namespace                                                     | Description                                                                                                                                                                                                                                                                                      |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -729,7 +729,7 @@ En plus de placer les instructions using globales dans Program.cs (ou dans un fi
 
 Une autre nouvelle fonctionnalité incluse dans .NET 6/C# 10 concerne les instructions using globales implicites. Les instructions *using globales implicites* fournies par .NET 6 varient en fonction du type d'application que vous développez. Le [[#Tableau 1-4 Un échantillon d'espace noms .NET|tableau 1-4]] répertorie les types d'applications et les espaces de noms inclus.
 
-##### Tableau 1-4: Un échantillon d'espace noms .NET
+###### Tableau 1-4: Un échantillon d'espace noms .NET
 
 | Type d'application .NET                     | Les espaces noms couvert par la déclaration `implicit global using`                                                                                                                                                                                                                                                                                         |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

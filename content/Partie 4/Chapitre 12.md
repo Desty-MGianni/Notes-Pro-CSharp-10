@@ -226,7 +226,7 @@ public abstract class Delegate : ICloneable, ISerializable
 
 **Il est important de comprendre que vous ne pouvez jamais hériter directement de ces classes de base dans votre code** (cela provoquerait une erreur de compilation). Cependant, ==lorsque vous utilisez le mot-clé `delegate`, vous créez indirectement une classe qui est un `MulticastDelegate`==. Le [[#Tableau 12-1 Sélection de membres de `System.MulticastDelegate`/`System.Delegate`|Tableau 12-1]] répertorie les membres principaux communs à tous les types de délégués.
 
-##### Tableau 12-1: Sélection de membres de `System.MulticastDelegate`/`System.Delegate`
+###### Tableau 12-1: Sélection de membres de `System.MulticastDelegate`/`System.Delegate`
 
 | Membre                     | Description                                                                                                                                                                                                                                                   |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -963,7 +963,7 @@ Comme vous pouvez le constater, **l'utilisation du délégué `Action<>` vous é
 >---
 > _Note : Dans les langages comme Rust ou Kotlin, `void` est remplacé par un type réel (`Unit`), ce qui permet d'unifier ces deux concepts. C# reste fidèle à ses racines C++ avec cette séparation stricte._
 
-##### Tableau 12-2 : Les différents types de méthode et les rôles
+###### Tableau 12-2 : Les différents types de méthode et les rôles
 
 | Concept       | Type C#       | Rôle Matériel                                | Intention Logique                        |
 | ------------- | ------------- | -------------------------------------------- | ---------------------------------------- |

@@ -308,7 +308,7 @@ string s3 = s1 + s2; // s3 vaut maintenant "Hello World!"
 
 **Le langage C# permet de créer des classes et des structures personnalisées qui réagissent également de manière unique aux mêmes opérateurs de base** (comme l'opérateur `+`). Bien que **==tous les opérateurs C# ne soient pas surchargeables, un grand nombre le sont==**, comme illustré dans le [[#Tableau 11-1 Surchargeabilité des opérateurs C|Tableau 11-1]].
 
-##### Tableau 11-1: Surchargeabilité des opérateurs C#
+###### Tableau 11-1: Surchargeabilité des opérateurs C#
 
 | Opérateur C#                                                 | Surchargeablilté                                                                                                                                                                                                            |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

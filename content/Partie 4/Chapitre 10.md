@@ -64,7 +64,7 @@ strArray[3] = "nouvel élément ?";
 
 Lors du lancement de la plateforme .NET, les programmeurs utilisaient fréquemment les classes de collections non génériques de l’espace de noms `System.Collections`, qui contient un ensemble de classes permettant de gérer et d’organiser de grandes quantités de données en mémoire. Le [[#Tableau 10-1 Types utiles de `System.Collections`|Tableau 10-1]] présente certaines des classes de collections les plus couramment utilisées de cet espace de noms et les interfaces principales qu’elles implémentent.
 
-##### Tableau 10-1: Types utiles de `System.Collections`
+###### Tableau 10-1: Types utiles de `System.Collections`
 
 | Classe `System.Collections` | Description                                                                                                                                                               | Interfaces clés implémentées                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -77,7 +77,7 @@ Lors du lancement de la plateforme .NET, les programmeurs utilisaient fréquemme
 
 **Les interfaces implémentées par ces classes de collections offrent un aperçu précieux de leur fonctionnalité globale**. Le [[#Tableau 10-2 Interfaces clés prises en charge par les classes de `System.Collections`|Tableau 10-2]] décrit la nature générale de ces interfaces clés, dont certaines ont été abordées directement au [[Chapitre 8#Les interfaces `IEnumerable` et `IEnumerator`|Chapitre 8]].
 
-##### Tableau 10-2: Interfaces clés prises en charge par les classes de `System.Collections`
+###### Tableau 10-2: Interfaces clés prises en charge par les classes de `System.Collections`
 
 | Interfaces `System.Collections` | Description                                                                                                                                           |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -133,7 +133,7 @@ Comme vous vous en doutez, **la classe `ArrayList` possède de nombreux membres 
 
 `System.Collections` n'est pas le seul espace de noms .NET Core contenant des classes de collections non génériques. L'espace de noms `System.Collections.Specialized` définit plusieurs types de collections spécialisés (veuillez excuser la redondance). ==Le [[#Tableau 10-3 Classes utiles de `System.Collections.Specialized`|Tableau 10-3]] présente certains des types les plus utiles de cet espace de noms dédié aux collections, tous non génériques.==
 
-##### Tableau 10-3: Classes utiles de `System.Collections.Specialized`
+###### Tableau 10-3: Classes utiles de `System.Collections.Specialized`
 
 | Type `System.Collections.Specialized` | Description                                                                                                                                                                           |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -712,7 +712,7 @@ Lorsque vous développez une application .NET Core et que vous avez besoin de g�
 
 En fait, **vous pouvez trouver un certain nombre d'interfaces génériques qui étendent leurs homologues non génériques**. Cela peut sembler étrange ; cependant, **==ce faisant, les classes implémentant ces interfaces prendront également en charge les fonctionnalités héritées présentes dans leurs homologues non génériques==**. Par exemple, `IEnumerable<T>` étend `IEnumerable`. Le tableau 10-4 répertorie les interfaces génériques principales que vous rencontrerez lorsque vous travaillerez avec les classes de collections génériques.
 
-##### Tableau 10-4: Interfaces clés prises en charge par les classes de `System.Collections.Generic`
+###### Tableau 10-4: Interfaces clés prises en charge par les classes de `System.Collections.Generic`
 
 | Interfaces de `System.Collections.Generic`<br> | Description                                                                                                                                                                        |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -726,7 +726,7 @@ En fait, **vous pouvez trouver un certain nombre d'interfaces génériques qui �
 
 **L’espace de noms `System.Collections.Generic` définit également plusieurs classes qui implémentent bon nombre de ces interfaces clés**. Le [[#Tableau 10-5 Les classes de `System.Collections.Generic`|Tableau 10-5]] décrit certaines classes couramment utilisées de cet espace de noms, les interfaces qu’elles implémentent et leurs fonctionnalités de base.
 
-##### Tableau 10-5 Les classes de `System.Collections.Generic`
+###### Tableau 10-5 Les classes de `System.Collections.Generic`
 
 | Classe Générique                 | Interfaces clés prises en charge                                                                                         | Description                                                                               |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
@@ -1050,7 +1050,7 @@ Error! Stack empty.
 
 **Les `Queues` sont des conteneurs qui garantissent un accès aux éléments selon le principe du premier arrivé, premier servi**. Malheureusement, nous autres humains, sommes soumis aux files d'attente toute la journée : à la banque, au cinéma, au café le matin. Si vous devez modéliser un scénario où les éléments sont traités selon le principe du premier arrivé, premier servi, **la classe `Queue<T>` répondra parfaitement à vos besoins**. Outre les fonctionnalités offertes par les interfaces prises en charge, la classe `Queue` définit les membres clés présentés dans le [[#Tableau 10-6 Membres du type `Queue<T>`|Tableau 10-6]].
 
-##### Tableau 10-6: Membres du type `Queue<T>`
+###### Tableau 10-6: Membres du type `Queue<T>`
 
 | Sélection de membres de  `Queue<T>` | Description                                                               |
 | ----------------------------------- | ------------------------------------------------------------------------- |
@@ -1432,7 +1432,7 @@ Dictionary<string, Person> peopleC = new Dictionary<string, Person>()
 
 Maintenant que vous comprenez comment utiliser les principales classes génériques, ==nous allons examiner brièvement un espace de noms supplémentaire centré sur les collections== : `System.Collections.ObjectModel`. **Cet espace de noms est relativement petit et contient quelques classes**. Le [[#Tableau 10-7 Membres utiles de `System.Collections.ObjectModel`|Tableau 10-7]] répertorie **les deux classes que vous devriez absolument connaître**.
 
-##### Tableau 10-7: Membres utiles de `System.Collections.ObjectModel`
+###### Tableau 10-7: Membres utiles de `System.Collections.ObjectModel`
 
 | Types `System.collections.ObjectModel` | Description                                                                                                                                                                |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1965,7 +1965,7 @@ Comme l'illustre ce chapitre, **tout élément générique possède au moins un 
 
 Grâce à ce mot-clé, **vous pouvez ajouter un ensemble de contraintes à un paramètre de type donné, que le compilateur C# vérifiera à la compilation**. Plus précisément, vous pouvez contraindre un paramètre de type comme décrit dans le [[#Tableau 10-8 Contraintes possibles pour les paramètres de types générique|Tableau 10-8]].
 
-##### Tableau 10-8: Contraintes possibles pour les paramètres de types générique
+###### Tableau 10-8: Contraintes possibles pour les paramètres de types générique
 
 | Contraintes de générique     | Description                                                                                                                                                                                                                                                                                          |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

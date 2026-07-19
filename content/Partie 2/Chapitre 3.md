@@ -494,7 +494,7 @@ Number of processors: 10
 
 Le type `Environment` définit des membres autres que ceux indiqués dans l'exemple précédent. Le [[#Tableau 3-1 Sélection de Propriétés de `System.Environment`|Tableau 3-1]] présente certaines propriétés supplémentaires intéressantes; toutefois, veillez à consulter la [documentation](https://learn.microsoft.com/en-us/dotnet/api/system.environment?view=net-10.0) en ligne pour obtenir des informations complètes.
 
-##### Tableau 3-1: Sélection de Propriétés de `System.Environment`
+###### Tableau 3-1: Sélection de Propriétés de `System.Environment`
 
 | Propriété                | Description                                                                                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -516,7 +516,7 @@ Presque toutes les applications d'exemple créées au cours des premiers chapitr
 
 Comme son nom l'indique, la classe `Console` encapsule les manipulations des flux d'entrée, de sortie et d'erreur pour les applications basées sur la console (*stdin*, *stdout* et *stderr* sur les systèmes basés sur *Unix*). Le [[#Tableau 3-2 Sélection de membres de la classe `Console`|tableau 3-2]] répertorie certains membres intéressants (mais certainement pas tous). Comme vous pouvez le constater, la classe `Console` fournit certains membres qui peuvent enrichir une application en ligne de commande simple, tels que la possibilité de modifier les couleurs d'arrière-plan et de premier plan et d'émettre des bips sonores (à différentes fréquences ![^1]).
 
-##### Tableau 3-2: Sélection de membres de la classe `Console`
+###### Tableau 3-2: Sélection de membres de la classe `Console`
 
 | Membre                                                           | Description                                                                                                                                                                         |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -609,7 +609,7 @@ Les chaînes peuvent également être formatées à l'aide de l'*interpolation d
 
 Si vous avez besoin d'un formatage plus élaboré pour les données numériques, chaque espace réservé peut contenir, en option, divers caractères de formatage. Le [[#Tableau 3-3 Caractères de format numérique .NET Core|Tableau 3-3]] présente les options de formatage les plus courantes.
 
-##### Tableau 3-3: Caractères de format numérique .NET Core
+###### Tableau 3-3: Caractères de format numérique .NET Core
 
 | Caractère de format<br> de nombre | Description                                                                                                                                              |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -678,7 +678,7 @@ Comme tout langage de programmation, **C# définit des *mots-clés* pour les typ
 
 >Tous les types système se trouvent dans l'espace de noms `System` ne sont pas dans le tableau pour plus de lisibilité.
 
-##### Tableau 3-4: Tous les types de donnée *primitifs* de C#
+###### Tableau 3-4: Tous les types de donnée *primitifs* de C#
 
 | Abréviation C# | CLS Compliant? | Type Système | Portée                                                                             | Description                                             |
 | -------------- | -------------- | ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------- |
@@ -1165,7 +1165,7 @@ static void BinaryLiterals()
 
 `System.String` fournit un certain nombre de méthodes que l'on peut attendre d'une telle classe utilitaire, notamment des ==méthodes qui renvoient la longueur des données de caractères, recherchent des sous-chaînes dans la chaîne actuelle et convertissent en majuscules/minuscules et vice versa==. Le [[#Tableau 3-5 Sélection de membres de `System.String`|Tableau 3-5]] répertorie certains des membres intéressants (mais en aucun cas tous).
 
-##### Tableau 3-5: Sélection de membres de `System.String`
+###### Tableau 3-5: Sélection de membres de `System.String`
 
 | Membre de la classe String | Description                                                                                                                                                                                    |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1262,7 +1262,7 @@ static void StringConcatenation()
 
 Comme dans les autres langages basés sur le C, les littéraux de chaîne C# peuvent contenir divers **caractères d'échappement, qui déterminent la manière dont les données de caractère doivent être imprimées dans le flux de sortie**. ==Chaque caractère d'échappement commence par une barre oblique inversée, suivie d'un jeton spécifique==. Si vous n'êtes plus très au fait de la signification de ces caractères d'échappement, le [[#Tableau 3-6 Caractères d'échappement pour les chaînes littérales.|Tableau 3-6]] répertorie les options les plus courantes.
 
-##### Tableau 3-6: Caractères d'échappement pour les chaînes littérales.
+###### Tableau 3-6: Caractères d'échappement pour les chaînes littérales.
 
 | Caractère | Desciption                                                                                                            |
 | --------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -1520,7 +1520,7 @@ if (firstString.ToUpper() == secondString.ToUpper())
 
 ==Cela crée une copie de chaque chaîne avec toutes les lettres en minuscules. Cela ne pose probablement pas de problème dans la plupart des cas, mais cela peut nuire aux performances avec une chaîne très longue, voire entraîner un échec en fonction de la culture==. **Une bien meilleure pratique consiste à utiliser les surcharges des méthodes énumérées précédemment qui prennent une valeur de l'*énumération* `StringComparison` pour contrôler exactement la manière dont les comparaisons sont effectuées**. Le [[#Tableau 3-7 Les valeurs de l'énumération `StringComparison`|Tableau 3-7]] décrit les valeurs `StringComparison`.
 
-##### Tableau 3-7: Les valeurs de l'énumération `StringComparison`
+###### Tableau 3-7: Les valeurs de l'énumération `StringComparison`
 
 | Opérateur d'égalité/comparaison C# | Description                                                                                                                               |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2365,7 +2365,7 @@ static void IfElsePatternMatching()
 
 C# 9.0 a introduit toute une série d'améliorations à la correspondance de motifs, comme le montre le [[#Tableau 3-9 Améliorations de la correspondance de motifs|Tableau 3-9]].
 
-##### Tableau 3-9: Améliorations de la correspondance de motifs
+###### Tableau 3-9: Améliorations de la correspondance de motifs
 
 | Motif                         | Description                                                                                                     |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -2484,7 +2484,7 @@ Si vous n'êtes pas familier avec le mot-clé `ref`, ne vous inquiétez pas trop
 
 Une instruction `if` peut également être composée d'expressions complexes et contenir des instructions `else` pour effectuer des tests plus complexes. La syntaxe est identique à celle du C (et du C++) et du Java. Pour créer des expressions complexes, C# propose un ensemble d'opérateurs logiques, comme indiqué dans le [[#Tableau 3-10 Les opérateurs logiques C|Tableau 3-10]].
 
-##### Tableau 3-10: Les opérateurs logiques C# 
+###### Tableau 3-10: Les opérateurs logiques C# 
 
 | Opérateur | Example                            | Description                                                                       |
 | --------- | ---------------------------------- | --------------------------------------------------------------------------------- |

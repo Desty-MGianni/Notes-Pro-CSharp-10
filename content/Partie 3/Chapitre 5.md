@@ -1145,7 +1145,7 @@ Ceci conclut notre rapide aperçu des piliers de la POO. Maintenant que vous ave
 
 **Lorsque vous travaillez avec l'encapsulation, vous devez toujours considérer quels aspects d'un type sont visibles par les différentes parties de votre application. Plus précisément, les types** (classes, interfaces, structures, énumérations et délégués) **ainsi que leurs membres** (propriétés, méthodes, constructeurs et champs) **sont définis à l'aide d'un mot-clé spécifique pour contrôler la visibilité de l'élément par les autres parties de votre application**. Bien que C# définisse de nombreux mots-clés, pour contrôler l'accès, ils diffèrent selon leur application (type ou membre). Le [[#Tableau 5-1 Les modificateurs d'accès C|Tableau 5-1]] décrit le rôle de chaque modificateur d'accès et son application.
 
-##### Tableau 5-1: Les modificateurs d'accès C# 
+###### Tableau 5-1: Les modificateurs d'accès C# 
 
 | Modificateur d'accès | Applicable à                          | Description                                                                                                                                                                                                                                                    |
 | -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -3309,7 +3309,7 @@ rors.Deconstruct(out double x4, out double y4, out double z4);
 Console.WriteLine($"X: {x4}, Y: {y4}, Z: {z4}");
 ```
 
-##### Tableau 5-2: Différences entre `record` et `record struct`
+###### Tableau 5-2: Différences entre `record` et `record struct`
 | Caractéristique        | `record` (ou `record class`)     | `record struct`                        |
 | ---------------------- | -------------------------------- | -------------------------------------- |
 | **Nature**             | Type Référence (Classe)          | Type Valeur (Structure)                |

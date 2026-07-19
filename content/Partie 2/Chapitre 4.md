@@ -305,7 +305,7 @@ static void PassAndReceiveArrays()
 
 **Chaque tableau que vous créez tire une grande partie de ses fonctionnalités de la classe `System.Array`**. Grâce à ces membres communs, vous pouvez exploiter un tableau à l'aide d'un modèle objet cohérent. Le [[#Tableau 4-1 Sélection de membre de `System.Array`|Tableau 4-1]] présente quelques-uns des membres les plus intéressants (consultez la documentation pour plus de détails).
 
-##### Tableau 4-1: Sélection de membres de `System.Array`
+###### Tableau 4-1: Sélection de membres de `System.Array`
 
 | Membre de la Classe `Array` | Description                                                                                                                                                                                                                                                             |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -639,7 +639,7 @@ static int AddWrapperWithStatic(int x, int y)
 
 Bien que la définition d'une méthode en C# soit assez simple, *vous pouvez utiliser quelques méthodes pour contrôler la manière dont les arguments lui sont transmis*, comme indiqué dans le [[#Tableau 4-2 Les modificateurs de paramètres C|Tableau 4-2]]*.
 
-##### Tableau 4-2: Les modificateurs de paramètres C# 
+###### Tableau 4-2: Les modificateurs de paramètres C# 
 
 | Modificateur de paramètre | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1483,7 +1483,7 @@ Comme vous le verrez au fil de ce texte, **les énumérations sont largement uti
 
 **Les opérations binaires offrent un mécanisme rapide pour traiter des nombres binaires au niveau du bit**. Le [[#Tableau 4-3 Opérations au niveau du bit.|Tableau 4-3]] présente les opérateurs binaires C#, leur fonction et un exemple pour chacun d'eux.
 
-##### Tableau 4-3: Opérations au niveau du bit.
+###### Tableau 4-3: Opérations au niveau du bit.
 
 | Opérateur                | Opération                                                       | Example                             |
 | ------------------------ | --------------------------------------------------------------- | ----------------------------------- |
@@ -2370,7 +2370,7 @@ Pour conclure, consultez le [[#Tableau 4-4 Comparaison entre les types de valeur
 >[!note]- Note personnel
 >Dans mes notes nommée "*Notes code & CLI*", dans la partie C#, J'ai représenté en image la différence entre type valeurs et type de référence pour plus de clarté.
 
-##### Tableau 4-4: Comparaison entre les types de valeur et les types de référence.
+###### Tableau 4-4: Comparaison entre les types de valeur et les types de référence.
 | Question                                                       | Type valeur                                                                                                                           | Type référence                                                                                                                                       |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Où sont allouée les objets ?                                   | Dans la pile (*stack*)                                                                                                                | Dans le tas (*heap*) géré  (*garbage collector*)                                                                                                     |
@@ -2509,7 +2509,7 @@ Pour les visualiser en action, créez une application console nommée `FunWithNu
 </Project>
 ```
 
-##### Tableau 4-5: Valeurs pour `Nullable` dans le fichier *.csproj*
+###### Tableau 4-5: Valeurs pour `Nullable` dans le fichier *.csproj*
 
 | Valeurs       | Annotations | Avertissements |
 | ------------- | ----------- | -------------- |
@@ -2525,7 +2525,7 @@ Pour les visualiser en action, créez une application console nommée `FunWithNu
  
 Comme on peut s'y attendre, l'élément `<Nullable>` du fichier projet affecte l'ensemble du projet. ==Pour contrôler des parties plus petites du projet, utilisez les directives du compilateur présentées dans le [[#Tableau 4-6 Valeurs pour la directive de compilateur ` nullable`|Tableau 4-6]]==.
 
-##### Tableau 4-6: Valeurs pour la directive de compilateur `#nullable`
+###### Tableau 4-6: Valeurs pour la directive de compilateur `#nullable`
 
 | Valeur                | Annotations | Avertissements |
 | --------------------- | ----------- | -------------- |
@@ -2539,7 +2539,7 @@ Comme on peut s'y attendre, l'élément `<Nullable>` du fichier projet affecte l
 | `enable annotations`  | ✅           | ❓              |
 | `restore annotations` | *.csproj*   | ❓              |
 
-###### Légende des symboles
+**Légende des symboles**
 
 - ✅ -> activé
 - ❌ -> désactivé
