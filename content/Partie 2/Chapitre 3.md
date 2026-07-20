@@ -94,10 +94,11 @@ La logique de la classe `Program` se trouve dans `Main()`. Ici, vous utilisez la
 
 deux Manières différentes sur VSCode:
 
-1. Lors de la création d'un projet dans VSCode (pas le CLI), on peut, à la fin des menu, lors de la finalisation, on peut choisir `Do not use top-level statement`. Il faut mettre sur `true`
+1. Lors de la création d'un projet dans VSCode (pas le CLI), on peut, à la fin des menu, lors de la finalisation, on peut choisir `Do not use top-level statement`. Il faut mettre sur `true`.
+
 	![[Figure 3.1.png|Basculer entre déclaration de haut/bas niveau]]
 
-2. Quand le fichier utilise une déclaration de haut niveau, cliquer sur l'icône lampe :![[lampe IntelliSense.png|]] et sélectionner `Convert to 'Program.main' style program` ou `Convert to top-level statement`  selon la déclaration présente (le raccourcis *cmd + .* est disponible)
+2. Quand le fichier utilise une déclaration de haut niveau, cliquer sur l'icône lampe : ![[lampe IntelliSense.png|20]] et sélectionner `Convert to 'Program.main' style program` ou `Convert to top-level statement`  selon la déclaration présente (le raccourcis *cmd + .* est disponible)
 
 ## Utilisation des variantes de la méthode `Main()` (MaJ C# 7.1)
 
@@ -137,6 +138,7 @@ static Task<int> Main(string[])
 >La méthode `Main()` peut également être définie comme publique plutôt que privée. Notez que le modificateur d'accès est présumé privé si vous ne fournissez pas de modificateur d'accès spécifique. Les modificateurs d'accès sont décrits en détail au [[Chapitre 5#Comprendre les modificateurs d'accès (MaJ C 7.2)|Chapitre 5]].
 
 Évidemment, votre choix quant à la manière de construire `Main()` dépendra de trois questions: 
+
 - Premièrement, souhaitez-vous renvoyer une valeur au système lorsque `Main()` est terminé et que votre programme se termine ? 
     - Si oui, vous devez renvoyer un type de données `int` (`byte`) plutôt que `void`. 
 - Deuxièmement, avez-vous besoin de traiter des paramètres de ligne de commande fournis par l'utilisateur? 
@@ -198,7 +200,7 @@ Comparons cela avec le `TypeDef` du point d'entrée vu dans le [[Chapitre 1#Le r
 //          MethodName: Main (06000001)
 ```
 
-Remarquez que dans l'exemple du [[Chapitre 1#Le rôle des métadonnée des types de donnée .NET|chapitre 1]], la valeur `TypDefName` est indiquée comme l'espace de noms `CalculatorExamples` plus le nom de la classe `Program`, et la valeur `MethodName` est `Main`. Dans l'exemple mis à jour utilisant des instructions de niveau supérieur, le compilateur a renseigné les valeurs `<Program>$` pour `TypDefName` et `<Main>$` pour le nom de la méthode.
+Remarquez que dans l'exemple du [[Chapitre 1#Le rôle des métadonnée des types de donnée .NET|Chapitre 1]], la valeur `TypDefName` est indiquée comme l'espace de noms `CalculatorExamples` plus le nom de la classe `Program`, et la valeur `MethodName` est `Main`. Dans l'exemple mis à jour utilisant des instructions de niveau supérieur, le compilateur a renseigné les valeurs `<Program>$` pour `TypDefName` et `<Main>$` pour le nom de la méthode.
 
 ## Spécification d'un code d'erreur d'application (MaJ C# 9.0)
 
@@ -210,12 +212,7 @@ Lorsque vous utilisez des instructions de niveau supérieur, si le code en cours
 
 **Sous les systèmes d'exploitation basés sur *UNIX*, la variable d'environnement qui stocke la valeur de retour est `$?`.**
 
->[!info]- Thèmes de terminal 
->Si un thème de terminal est installé, il est possible d'afficher directement ces variables dans le prompt, comme l'image suivante (*Powerlevel10K*):
->
->![[Code de sortie.png|Thème de terminal (ici P10K)]]
-
- Si vous deviez créer une application qui lance par programmation un autre exécutable (un sujet examiné au [[Chapitre 18|chapitre 18]]), vous pouvez obtenir la valeur de `%ERRORLEVEL%` ou `$?` à l'aide de la propriété `ExitCode` du processus lancé.
+ Si vous deviez créer une application qui lance par programmation un autre exécutable (un sujet examiné au [[Chapitre 17#Chargement dynamique d'assemblies|Chapitre 17]]), vous pouvez obtenir la valeur de `%ERRORLEVEL%` ou `$?` à l'aide de la propriété `ExitCode` du processus lancé.
 
 Étant donné que la valeur de retour d'une application est transmise au système au moment où l'application se termine, **il n'est évidemment pas possible pour une application d'obtenir et d'afficher son code d'erreur final pendant son exécution**. Cependant, pour illustrer comment afficher ce niveau d'erreur à la fin du programme, commencez par mettre à jour les instructions de niveau supérieur comme suit :
 
@@ -294,7 +291,7 @@ echo "All Done."
 
 >Ici, on stock `$?` (qui est la variable du dernier code de retours) sinon à chaque commande cette valeur change, tandis que l'on veut seulement la valeur de retour de la commande `dotnet run`
 
-À ce stade, ouvrez une invite de commande (ou utilisez le terminal Visual Studio Code) et accédez au dossier contenant votre nouveau fichier *.cmd* / *.zsh*. Exécutez le fichier en tapant son nom et en appuyant sur la touche Entrée. ==Vous devriez obtenir le résultat suivant, à condition que vos instructions de niveau supérieur (ou méthode Main()) renvoient -1==. Si les instructions de niveau supérieur (ou la méthode `Main()`) renvoyaient 0, le message « Cette application a réussi ! » s'afficherait dans la console.
+À ce stade, ouvrez une invite de commande (ou utilisez le terminal Visual Studio Code) et accédez au dossier contenant votre nouveau fichier *.cmd* / *.zsh*. Exécutez le fichier en tapant son nom et en appuyant sur la touche Entrée. ==Vous devriez obtenir le résultat suivant, à condition que vos instructions de niveau supérieur (ou méthode `Main()`) renvoient $-1$==. Si les instructions de niveau supérieur (ou la méthode `Main()`) renvoyaient 0, le message « Cette application a réussi ! » s'afficherait dans la console.
 
 ```
 ***** My First C# App *****
@@ -321,7 +318,7 @@ Write-Host "All Done."
 
 >[!Note]- Erreur lors de l'exécution du script *.ps1* 
 >Si vous recevez une erreur de stratégie de sécurité lors de l'exécution du script PowerShell, vous pouvez définir la stratégie pour autoriser les scripts locaux non signés en exécutant la commande suivante dans PowerShell :
->```
+>```powershell
 set-executionpolicy -executionpolicy remotesigned -scope currentuser
 >```
 
@@ -529,7 +526,7 @@ Comme son nom l'indique, la classe `Console` encapsule les manipulations des flu
 
 ## Exécution d'entrées et sorties (E/S) de base avec la classe Console
 
-En plus des membres du [[#Tableau 3-2 Sélection de membres de la classe `Console`|tableau 3-2]], le type `Console` définit un ensemble de méthodes permettant de capturer les entrées et les sorties, qui sont toutes statiques et sont donc appelées en préfixant le nom de la classe (Console) au nom de la méthode. **Comme vous l'avez vu, `WriteLine()` envoie une chaîne de texte (y compris un retour chariot) vers le flux de sortie (*stdin*)**. ==La méthode `Write()` transfère le texte vers le flux de sortie sans retour chariot==. **La méthode `ReadLine()` vous permet de recevoir des informations du flux d'entrée jusqu'à ce que la touche Entrée soit enfoncée**, ==tandis que `Read()` est utilisé pour capturer un seul caractère du flux d'entrée==.
+En plus des membres du [[#Tableau 3-2 Sélection de membres de la classe `Console`|Tableau 3-2]], le type `Console` définit un ensemble de méthodes permettant de capturer les entrées et les sorties, qui sont toutes statiques et sont donc appelées en préfixant le nom de la classe (Console) au nom de la méthode. **Comme vous l'avez vu, `WriteLine()` envoie une chaîne de texte (y compris un retour chariot) vers le flux de sortie (*stdin*)**. ==La méthode `Write()` transfère le texte vers le flux de sortie sans retour chariot==. **La méthode `ReadLine()` vous permet de recevoir des informations du flux d'entrée jusqu'à ce que la touche Entrée soit enfoncée**, ==tandis que `Read()` est utilisé pour capturer un seul caractère du flux d'entrée==.
 
 Pour illustrer une E/S simple à l'aide de la classe `Console`, créez un nouveau projet d'application console nommé *BasicConsoleIO* et ajoutez-le à votre solution à l'aide des commandes CLI suivantes 
 
@@ -555,7 +552,7 @@ static void GetUserData()
 >>[!example] Dans Visual Studio Code, vous appuyez une fois sur la touche Tab ; dans Visual Studio, vous devez appuyer deux fois sur la touche Tab.
 
 
-Implémentez cette méthode après les instructions de niveau supérieur avec une logique qui invite l'utilisateur à fournir certaines informations et renvoie chaque élément vers le flux de sortie standard (*stdout*). ==Par exemple, vous pouvez demander à l'utilisateur son nom et son âge== (qui seront traités comme des valeurs textuelles pour plus de simplicité, plutôt que comme les valeurs numériques attendues), ==comme sui==t :
+Implémentez cette méthode après les instructions de niveau supérieur avec une logique qui invite l'utilisateur à fournir certaines informations et renvoie chaque élément vers le flux de sortie standard (*stdout*). ==Par exemple, vous pouvez demander à l'utilisateur son nom et son âge== (qui seront traités comme des valeurs textuelles pour plus de simplicité, plutôt que comme les valeurs numériques attendues), ==comme suit== :
 
 ```cs
 static void GetUserData()
@@ -664,8 +661,7 @@ x format: 1869f
 
 En note finale, comprenez que l'utilisation des caractères de formatage de chaîne n'est pas limitée aux programmes console. **Cette même syntaxe de formatage peut être utilisée lors de l'appel de la méthode statique `string.Format()`**. ==Cela peut être utile lorsque vous devez composer des données textuelles lors de l'exécution pour les utiliser dans n'importe quel type d'application== (par exemple, une application GUI de bureau, une application web ASP.NET, ...)
 
-**La méthode `string.Format()` renvoie un nouvel objet chaîne, qui est formaté selon les
-indicateurs fournis**. Le code suivant formate une chaîne en hexadécimal :
+**La méthode `string.Format()` renvoie un nouvel objet chaîne, qui est formaté selon les indicateurs fournis**. Le code suivant formate une chaîne en hexadécimal :
 
 ```cs
 // Utilisation de string.Format() pour formatter une chaine de caractères littérale.
@@ -705,7 +701,7 @@ Comme tout langage de programmation, **C# définit des *mots-clés* pour les typ
 
 Lorsque vous déclarez une variable locale (par exemple, une variable dans la portée d'un membre), vous le faites en **spécifiant le type de données**, **suivi du nom de la variable**. Pour commencer, créez un nouveau projet d'application console nommé *BasicDataTypes* et ajoutez-le à la solution à l'aide des commandes suivantes :
 
-```
+```bash
 dotnet new console -lang c# -n BasicDataTypes -o ./BasicDataTypes
 dotnet sln ./chapter3_allProjects.sln add ./BasicDataTypes
 ```
@@ -910,7 +906,7 @@ static void DataTypeFunctionality()
 
 ## Comprendre les membres de `System.Boolean`
 
-Ensuite, considérons le type de données `System.Boolean`. **La seule affectation valide qu'un bool C# peut prendre provient du set: `{true || false}`**. Compte tenu de ce point, il devrait être clair que `System.Boolean` ne prend pas en charge un ensemble de propriétés `MinValue`/`MaxValue`, ==mais plutôt `TrueString`/`FalseString` (qui produit respectivement la chaîne « True » ou « False », respectivement)==. Voici un exemple :
+Ensuite, considérons le type de données `System.Boolean`. **La seule affectation valide qu'un bool C# peut prendre provient du set: `{true || false}`**. Compte tenu de ce point, il devrait être clair que `System.Boolean` ne prend pas en charge un ensemble de propriétés `MinValue` / `MaxValue`, ==mais plutôt `TrueString` / `FalseString` (qui produit respectivement la chaîne « True » ou « False », respectivement)==. Voici un exemple :
 
 ```cs
 Console.WriteLine("bool.FalseString: {0}", bool.FalseString);
@@ -971,7 +967,7 @@ static void ParseFromStrings()
 bool b = bool.Parse("Hello");
 ```
 
-==Une solution consiste à encapsuler chaque appel à `Parse()` dans un bloc `try-catch`== (la gestion des exceptions est traitée en détail au [[Chapitre 7#Les éléments constitutifs de la gestion des exceptions .NET|Chapitre 7]]), ce qui peut ajouter beaucoup de code, ==ou à utiliser une instruction `TryParse()`==. **L'instruction `TryParse()` prend un paramètre `out`** (le modificateur out est décrit en détail au [[Chapitre 4#Utilisation du modificateur `out` (C 7.0)|Chapitre 4]]) **et renvoie une valeur booléenne si la conversion a réussi**. Créez une nouvelle méthode nommée `ParseFromStringWithTryParse()` et ajoutez le code suivant :
+==Une solution consiste à encapsuler chaque appel à `Parse()` dans un bloc `try-catch`== (la gestion des exceptions est traitée en détail au [[Chapitre 7#Les éléments constitutifs de la gestion des exceptions .NET|Chapitre 7]]), ce qui peut ajouter beaucoup de code, ==ou à utiliser une instruction `TryParse()`==. **L'instruction `TryParse()` prend un paramètre `out`** (le modificateur out est décrit en détail au [[Chapitre 4#Utilisation du modificateur `out` (MaJ C 7.0)|Chapitre 4]]) **et renvoie une valeur booléenne si la conversion a réussi**. Créez une nouvelle méthode nommée `ParseFromStringWithTryParse()` et ajoutez le code suivant :
 
 ```cs
 static void ParseFromStringsWithTryParse()
@@ -1082,7 +1078,7 @@ using System.Numerics;
 
 À ce stade, vous pouvez créer une variable `BigInteger` à l'aide de opérateur `new`. **Dans le constructeur, vous pouvez spécifier une valeur numérique, y compris des données à virgule flottante**. ==Cependant, C# type implicitement les nombres sans virgule flottant comme `int` et les nombres à virgule flottante comme `double`==. Comment, alors, pouvez-vous définir `BigInteger` sur une valeur massive sans *déborder (Overflow)* les types de données par défaut utilisés pour les valeurs numériques brutes ?
 
-**L'approche la plus simple consiste à définir la valeur numérique massive comme un *littéral de texte***, qui peut être converti en variable `BigInteger` via la méthode statique `Parse()`. *Si nécessaire, vous pouvez également passer un tableau d'octets (`byte[]`) directement au constructeur de la classe `BigInteger`.
+**L'approche la plus simple consiste à définir la valeur numérique massive comme un *littéral de texte***, qui peut être converti en variable `BigInteger` via la méthode statique `Parse()`. *Si nécessaire, vous pouvez également passer un tableau d'octets (`byte[]`) directement au constructeur de la classe `BigInteger`.*
 
 >[!Attention] Changer la valeur d'une variable `BigInteger`.
 >Une fois que vous avez attribué une valeur à une variable `BigInteger`, vous ne pouvez plus la modifier, car les données sont ***immuables***.
@@ -1107,7 +1103,7 @@ static void UseBigInteger()
 }
 ```
 
-Il est également important de noter que le type de données `BigInteger` *répond aux opérateurs mathématiques intrinsèques de C#*, tels que +, - et * . **Par conséquent, plutôt que d'appeler `BigInteger.Multiply()` pour multiplier deux grands nombres, vous pouvez écrire le code suivant :
+Il est également important de noter que le type de données `BigInteger` *répond aux opérateurs mathématiques intrinsèques de C#*, tels que `+`, `-` et `*` . **Par conséquent, plutôt que d'appeler `BigInteger.Multiply()` pour multiplier deux grands nombres, vous pouvez écrire le code suivant :**
 
 ```cs
 BigInteger reallyBig2 = biggy * reallyBig;
@@ -1185,7 +1181,7 @@ static void BinaryLiterals()
 
 L'utilisation des membres de `System.String` se fait comme vous pouvez vous y attendre. Il suffit de déclarer une variable `string` et d' utiliser les fonctionnalités fournies via l'opérateur *point*(`.`). **Notez que certains membres de `System.String` sont des membres statiques et sont donc appelés au niveau de la classe** (plutôt qu'au niveau de l'objet). 
 
-Supposons que vous ayez créé un nouveau projet d'application console nommé `FunWithStrings` et que vous l'ayez ajouté à votre solution. Effacez le code existant et ajoutez ce qui suit :
+Supposons que vous ayez créé un nouveau projet d'application console nommé *FunWithStrings* et que vous l'ayez ajouté à votre solution. Effacez le code existant et ajoutez ce qui suit :
 
 ```cs
 using System.Runtime.CompilerServices;
@@ -1220,7 +1216,7 @@ firstName contains the letter y?: True
 firstName after replace: Fred
 ```
 
-Bien que ce résultat puisse sembler peu surprenant, le résultat obtenu en appelant la méthode `Replace()` est un peu trompeur. En réalité, la variable `firstName` n'a pas changé du tout; **vous recevez plutôt une nouvelle chaîne dans un format modifié**. ==Vous reviendrez sur la nature immuable des chaînes dans quelques instants
+Bien que ce résultat puisse sembler peu surprenant, le résultat obtenu en appelant la méthode `Replace()` est un peu trompeur. En réalité, la variable `firstName` n'a pas changé du tout; **vous recevez plutôt une nouvelle chaîne dans un format modifié**. ==Vous reviendrez sur la nature immuable des chaînes dans quelques instants.==
 
 ## Effectuer une concaténation de `String`
 
@@ -1346,7 +1342,7 @@ string greeting = string.Format("Hello {0} you are {1} years old.",
 string greeting2 = $"Hello {name.ToUpper()} you are {age} years old.";
 ```
 
-Ici, j'ai mis le nom en majuscules via un appel à `ToUpper()`. ==Notez que dans l'approche par interpolation de chaîne, vous n'ajoutez pas de terminateur point-virgule lorsque vous appelez cette méthode==. **Dans ce cas, vous ne pouvez pas utiliser la portée des accolades comme une portée de méthode complète contenant de nombreuses lignes de code exécutable**. ==Vous pouvez plutôt invoquer un seul membre de l'objet à l'aide de l'opérateur point et définir une expression générale simple telle que {age += 1}==.
+Ici, j'ai mis le nom en majuscules via un appel à `ToUpper()`. ==Notez que dans l'approche par interpolation de chaîne, vous n'ajoutez pas de terminateur point-virgule lorsque vous appelez cette méthode==. **Dans ce cas, vous ne pouvez pas utiliser la portée des accolades comme une portée de méthode complète contenant de nombreuses lignes de code exécutable**. ==Vous pouvez plutôt invoquer un seul membre de l'objet à l'aide de l'opérateur point et définir une expression générale simple telle que {`age += 1`}==.
 
 Toujours bon à notez que l'interpolation de chaîne est compatible avec les *caractères d'échappement.*
 
@@ -1483,7 +1479,7 @@ string myLongString2 = $@"This is a very
 
 ## Travailler avec l'égalité des chaînes.
 
-Comme cela sera expliqué en détail au [[Chapitre 4#Comprendre les types de valeur et les types de référence|Chapitre 4]], un **type de référence est un objet alloué dans le tas**(*heap*), **géré avec ramasse-miettes** (*Garbage Collector*). ==Par défaut, lorsque vous effectuez un test d'égalité sur des types de référence (via les opérateurs C# `= =` et `!=`), vous obtenez la valeur `true` si les références pointent vers le même objet en mémoire==. Cependant, même si le type de données `string` est effectivement un *type de référence*, ==les opérateurs d'égalité ont été redéfinis pour comparer les valeurs des objets chaîne, et non l'objet en mémoire auquel ils font référence==. [^2]
+Comme cela sera expliqué en détail au [[Chapitre 4#Comprendre les types de valeur et les types de référence|Chapitre 4]], un **type de référence est un objet alloué dans le tas** (*heap*), **géré avec ramasse-miettes** (*Garbage Collector*). ***==Par défaut, lorsque vous effectuez un test d'égalité sur des types de référence (via les opérateurs C# `= =` et `!=`), vous obtenez la valeur `true` si les références pointent vers le même objet en mémoire==***. Cependant, même si le type de données `string` est effectivement un *type de référence*, ==les opérateurs d'égalité ont été redéfinis pour comparer les valeurs des objets chaîne, et non l'objet en mémoire auquel ils font référence==. [^2]
 
 ```cs
 static void StringEquality()
@@ -1505,7 +1501,7 @@ static void StringEquality()
 }
 ```
 
-==Les opérateurs d'égalité C# effectuent par défaut un test d'égalité caractère par caractère, sensible à la casse et insensible à la culture, sur les objets chaîne==. Par conséquent, « Hello! » n'est pas égal à « HELLO! », qui est également différent de « hello! ». ==De plus, en gardant à l'esprit le lien entre `string` et `System.String`, notez que vous pouvez tester l'égalité à l'aide de la méthode `Equals()` de `String` ainsi que des opérateurs d'égalité(`= =`) ==. Enfin, étant donné que chaque littéral de chaîne (tel que `"Yo !"`) est une instance `System.String` valide, ==vous pouvez accéder à des fonctionnalités centrées sur les chaînes à partir d'une séquence fixe de caractères==.
+***==Les opérateurs d'égalité C# effectuent par défaut un test d'égalité caractère par caractère, sensible à la casse et insensible à la culture, sur les objets chaîne==***. **Par conséquent, « Hello! » n'est pas égal à « HELLO! », qui est également différent de « hello! »**. De plus, en gardant à l'esprit le lien entre `string` et `System.String`, notez que **==vous pouvez tester l'égalité à l'aide de la méthode `Equals()` de `String` ainsi que des opérateurs d'égalité(`= =`)==**. Enfin, **étant donné que chaque littéral de chaîne (tel que `"Yo !"`) est une instance `System.String` valide, vous pouvez accéder à des fonctionnalités centrées sur les chaînes à partir d'une séquence fixe de caractères.**
 
 ### Modification du comportement de comparaison des chaînes
 
@@ -1699,7 +1695,7 @@ La méthode `Add()` doit recevoir 2 `int`. Elle reçoit 2 `short` mais ne renvoi
 
 **Le terme employé pour cette opération est "*upcast*".**
 
-En se référant au [[#Tableau 3-4 Tous les types de donnée primitifs de C|tableau 3-4]], on peut voir qu'un `short` à une taille de 16 bits alors qu'un `int` à une taille de 32 bits.
+En se référant au [[#Tableau 3-4 Tous les types de donnée primitifs de C|Tableau 3-4]], on peut voir qu'un `short` à une taille de 16 bits alors qu'un `int` à une taille de 32 bits.
 
 > [!Info]- Les conversions autorisés selon les types.
 > Consultez les «[Tables de conversion de types](https://learn.microsoft.com/en-us/dotnet/standard/base-types/conversion-tables)» dans la documentation .NET Core si vous souhaitez connaître les conversions autorisées (élargissement et rétrécissement, abordés ci-après) pour chaque type de données C#.
@@ -1724,8 +1720,7 @@ static int Add(int x, int y)
 Dans ce cas, le compilateur renvois l'erreur suivante:
 
 ```
-Cannot implicitly convert type 'int' to 'short'. An explicit conversion exists (are you
-missing a cast?)
+Cannot implicitly convert type 'int' to 'short'. An explicit conversion exists (are you missing a cast?)
 ```
 
 Le problème est: bien que la méthode `Add()` soit capable de renvoyer un entier de valeur $60\;000$ (qui s'inscrit dans la plage d'un `System.Int32`), cette valeur ne peut pas être stockée dans un `short`, car **elle dépasse les limites de ce type de données** ==Formellement parlant, le `CoreCLR` n'a pas pu appliquer d'opération de réduction==. Comme vous pouvez le deviner, ==le rétrécissement est l'opposé logique de l'élargissement, dans la mesure où une valeur plus grande est stockée dans une variable de type de données plus petit==.
@@ -1815,7 +1810,7 @@ static void ProcessByte()
 
 **Heureusement, C# fournit le mot-clé `checked`**. ==Lorsque vous encapsulez une instruction (ou un bloc d'instructions) dans la portée du mot-clé `checked`, le compilateur C# émet des instructions `CIL` supplémentaires qui testent les conditions de dépassement pouvant survenir lors de l'addition, la multiplication, la soustraction ou la division de deux types de données numériques==.
 
-**Si un débordement s'est produit, vous recevrez une exception d'exécution : `System.OverflowException`**. Le [[Chapitre 7#Tableau 7-1 Membres principaux du type `System.Exception`|Chapitre 7]] examinera tous les détails de la gestion structurée des exceptions et l'utilisation des mots-clés `try` et `catch`. Sans trop s'attarder sur les détails à ce stade, observez la mise à jour suivante :
+**Si un débordement s'est produit, vous recevrez une exception d'exécution : `System.OverflowException`**. Le [[Chapitre 7#Le rôle de la gestion des exceptions .NET|Chapitre 7]] examinera tous les détails de la gestion structurée des exceptions et l'utilisation des mots-clés `try` et `catch`. Sans trop s'attarder sur les détails à ce stade, observez la mise à jour suivante :
 
 ```cs
 static void ProcessByte()
@@ -1947,7 +1942,7 @@ static void DeclareImplicitVars()
 >[!Info]- La sémantique derrière `var`
 >À proprement parler, `var` n'est pas un mot-clé C#. Il est possible de déclarer des variables, des paramètres et des champs nommés `var` sans erreur de compilation. Cependant, lorsque le token `var` est utilisé comme type de données, il est traité contextuellement comme un mot-clé par le compilateur.
 
-**dans ce cas, le compilateur est capable de déduire, à partir de la valeur initialement attribuée, que `myint` est en fait un `system.int32`, `mybool` un `system.boolean` et `mystring` est bien un `system.string`.** ==vous pouvez le vérifier en affichant le nom du type via la réflexion==. comme vous le verrez plus en détail au [[Chapitre 17|chapitre 17]], ==la réflexion consiste à déterminer la composition d'un type lors de l'exécution==. Par exemple, à l'aide de la réflexion, vous pouvez déterminer le type de données d'une variable locale implicitement typée. Mettez à jour votre méthode avec les instructions de code suivantes:
+**dans ce cas, le compilateur est capable de déduire, à partir de la valeur initialement attribuée, que `myint` est en fait un `system.int32`, `mybool` un `system.boolean` et `mystring` est bien un `system.string`.** ==vous pouvez le vérifier en affichant le nom du type via la réflexion==. comme vous le verrez plus en détail au [[Chapitre 17#Comprendre la réflexion|Chapitre 17]], ==la réflexion consiste à déterminer la composition d'un type lors de l'exécution==. Par exemple, à l'aide de la réflexion, vous pouvez déterminer le type de données d'une variable locale implicitement typée. Mettez à jour votre méthode avec les instructions de code suivantes:
 
 ```cs
 static void DeclareImplicitVars()
@@ -2066,7 +2061,7 @@ static int GetAnInt()
 
 Sachez que le typage implicite des variables locales donne lieu à des *données fortement typées*. Par conséquent, **l'utilisation du mot-clé `var` *n'est pas* la même technique que celle utilisée avec les langages de script** (tels que JavaScript ou Perl) ou le type de données `COM Variant`, où une variable peut contenir des valeurs de différents types au cours de son existence dans un programme (souvent appelé typage dynamique (*dynamic typing*)).
 
->[!note] C# autorise le typage dynamique à l'aide d'un mot-clé appelé `dynamic`. Vous découvrirez cet aspect du langage au [[Chapitre 17|Chapitre 17]].
+>[!note] C# autorise le typage dynamique à l'aide d'un mot-clé appelé `dynamic`. Vous découvrirez cet aspect du langage au [[Chapitre 17#Le rôle du mot-clé `dynamic` en C|Chapitre 17]].
 
 Au contraire, l'inférence de types **conserve l'aspect fortement typé du langage C#** et n'affecte que la déclaration des variables au moment de la compilation. Après cela, **le point de données est traité comme s'il avait été déclaré avec ce type ; l'attribution d'une valeur d'un type différent à cette variable entraînera une erreur de compilation**.
 
@@ -2087,9 +2082,9 @@ static void ImplicitTypingIsStrongTyping()
 
 ## Comprendre l'utilité des variables locales implicitement typées
 
-Maintenant que vous connaissez la syntaxe utilisée pour déclarer des variables locales implicitement typées, vous vous demandez certainement quand utiliser cette construction. ==Tout d'abord, utiliser `var` pour déclarer des variables locales simplement pour le plaisir de le faire n'apporte pas grand-chose==. ==Cela peut prêter à confusion pour les autres personnes qui lisent votre code, car il devient plus difficile de déterminer rapidement le type de données sous-jacent et, par conséquent, de comprendre la fonctionnalité globale de la variable==. **Donc, si vous savez que vous avez besoin d'un `int`, déclarez un `int`!**
+Maintenant que vous connaissez la syntaxe utilisée pour déclarer des variables locales implicitement typées, vous vous demandez certainement quand utiliser cette construction. Tout d'abord, **utiliser `var` pour déclarer des variables locales simplement pour le plaisir de le faire n'apporte pas grand-chose**. *==Cela peut prêter à confusion pour les autres personnes qui lisent votre code, car il devient plus difficile de déterminer rapidement le type de données sous-jacent et, par conséquent, de comprendre la fonctionnalité globale de la variable==*. **Donc, si vous savez que vous avez besoin d'un `int`, déclarez un `int`!**
 
-Cependant, comme vous le verrez à partir du [[Chapitre 13|Chapitre 13]], **la technologie `LINQ` utilise des *expressions de requêtes* qui peuvent produire des ensembles de résultats créés dynamiquement en fonction du format de la requête elle-même.** ==Dans ces cas, le typage implicite est extrêmement utile, car vous n'avez pas besoin de définir explicitement le type qu'une requête peut renvoyer, ce qui serait littéralement impossible à faire dans certains cas==. Sans vous attarder sur l'exemple de code `LINQ` suivant, voyez si vous pouvez déterminer le type de données sous-jacent de `subset` :
+Cependant, comme vous le verrez à partir du [[Chapitre 13#Comprendre le rôle de LINQ|Chapitre 13]], **la technologie `LINQ` utilise des *expressions de requêtes* qui peuvent produire des ensembles de résultats créés dynamiquement en fonction du format de la requête elle-même.** ==Dans ces cas, le typage implicite est extrêmement utile, car vous n'avez pas besoin de définir explicitement le type qu'une requête peut renvoyer, ce qui serait littéralement impossible à faire dans certains cas==. Sans vous attarder sur l'exemple de code `LINQ` suivant, voyez si vous pouvez déterminer le type de données sous-jacent de `subset` :
 
 ```cs
 static void LinqQuerryOverInts()
@@ -2116,7 +2111,10 @@ static void LinqQuerryOverInts()
 
 Vous pensez peut-être que le type de données sous-ensemble est un tableau d'entiers `int[]`. Cela semble être le cas, mais **en réalité, il s'agit d'un type de données `LINQ` de bas niveau que vous ne connaîtriez jamais si vous n'utilisez pas `LINQ` depuis longtemps ou si vous n'ouvrez pas l'image compilée dans *ildasm.exe***. ==La bonne nouvelle, c'est que lorsque vous utilisez `LINQ`, vous vous souciez rarement (voire jamais) du type sous-jacent de la valeur de retour de la requête ; vous attribuez simplement la valeur à une variable locale implicitement typée==.
 
-**En fait, on pourrait dire que le seul cas où vous utiliseriez le mot-clé `var` serait pour définir les données renvoyées par une requête `LINQ`**. ==N'oubliez pas : si vous savez que vous avez besoin d'un int, déclarez simplement un int ! La plupart des développeurs considèrent que la sur-utilisation du typage implicite (via le mot-clé var) est un mauvais style dans le code de production==.
+**En fait, on pourrait dire que le seul cas où vous utiliseriez le mot-clé `var` serait pour définir les données renvoyées par une requête `LINQ`**. ==N'oubliez pas : si vous savez que vous avez besoin d'un `int`, déclarez simplement un `int` ! La plupart des développeurs considèrent que la sur-utilisation du typage implicite (via le mot-clé `var`) est un mauvais style dans le code de production==.
+
+>[!note] les commentaires de l'auteur sur l'utilisation du mot clé `var` n'est plus d'actualité.
+>Les développeur modernes laissent les EDI déterminer le type induis à la variable par souci de consicion.
 
 # Utilisation des constructions d'itération en C#
 
@@ -2132,7 +2130,7 @@ Examinons rapidement chaque construction de boucle à tour de rôle, à l'aide d
 > [!Note]
 > Je vais rester bref et concis dans cette section du chapitre, car je pars du principe que vous avez déjà utilisé des mots-clés similaires (`if`, `for`, `switch`, etc.) dans votre langage de programmation actuel. 
 >>[!example] La documentation
->>Si vous avez besoin de plus d'informations, consultez les rubriques [Instructions d'itération (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/iteration-statements), [Instructions de saut (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/jump-statements) et [Instructions de sélection (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/selection-statements)  dans la documentation C#.
+>>Si vous avez besoin de plus d'informations, consultez les rubriques [Instructions d'itération (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/iteration-statements), [Instructions de saut (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/jump-statements) et [Instructions de sélection (référence C#)](https://learn.microsoft.com/fr-fr/dotnet/csharp/language-reference/statements/selection-statements)  de la documentation C#.
 
 ## Utilisation de la boucle `for`
 
@@ -2285,7 +2283,7 @@ Maintenant que vous savez itérer sur un bloc d'instructions, le concept suivant
 
 Les instructions `if/else` en C# impliquent généralement l'utilisation des opérateurs C# présentés dans le [[#Tableau 3-8 les opérateurs relationnels et d'égalité|Tableau 3-8]] pour obtenir une valeur booléenne littérale.
 
-##### Tableau 3-8: les opérateurs relationnels et d'égalité
+###### Tableau 3-8: les opérateurs relationnels et d'égalité
 
 | Opérateur | Example             | Description                                                                                             |
 | --------- | ------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -2453,7 +2451,7 @@ stringData.Length > 0
 	: Console.WriteLine("string is not greater than 0 characters);
 ```
 
-==Nouveauté dans C# 7.2, l'opérateur conditionnel peut être utilisé pour renvoyer une référence au résultat de la condition==. Prenons l'exemple suivant, qui utilise deux formes de l'opérateur conditionnel par référence :
+==**Nouveauté dans C# 7.2**, l'opérateur conditionnel peut être utilisé pour renvoyer une référence au résultat de la condition==. Prenons l'exemple suivant, qui utilise deux formes de l'opérateur conditionnel par référence :
 
 ```cs
 static void ConditionalRefExample()
@@ -2720,7 +2718,7 @@ switch (choice)
 }
 ```
 
-En plus d'évaluer le type de l'expression de correspondance, **des clauses `when` peuvent être ajoutées aux instructions `case` pour évaluer les conditions sur la variable. Dans cet exemple, en plus de vérifier le type, la valeur du type converti est également vérifiée pour une correspondance :
+En plus d'évaluer le type de l'expression de correspondance, **des clauses `when` peuvent être ajoutées aux instructions `case` pour évaluer les conditions sur la variable**. **==Dans cet exemple, en plus de vérifier le type, la valeur du type converti est également vérifiée pour une correspondance==** :
 
 ```cs
 static void ExecutePatternMatchingSwitchWithWhen()
@@ -2841,7 +2839,7 @@ static string FromRainboxClassic(string colorBand)
 
 Cet exemple comporte de nombreux éléments à décortiquer, ==des expressions lambda (`=>`) aux expressions de suppression (`_`). Tous ces éléments seront abordés plus en détail dans les chapitres suivants==, tout comme cet exemple. 
 
-Il y a un autre exemple avant de terminer le sujet des expressions `switch`, et il concerne **les tuples**. Les tuples sont abordés en détail au [[Chapitre 4#Comprendre les tuples (C 7.0)|Chapitre 4]], alors pour l'instant, considérez un tuple comme une construction simple contenant plusieurs valeurs et définie par des parenthèses, comme ce tuple qui contient un `string` et un `int` :
+Il y a un autre exemple avant de terminer le sujet des expressions `switch`, et il concerne **les tuples**. Les tuples sont abordés en détail au [[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ C 7.0)|Chapitre 4]], alors pour l'instant, considérez un tuple comme une construction simple contenant plusieurs valeurs et définie par des parenthèses, comme ce tuple qui contient un `string` et un `int` :
 
 ```cs
 (string, int)

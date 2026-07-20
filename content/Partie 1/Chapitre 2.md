@@ -5,8 +5,9 @@ publish: true
 
 # <big><big><big><b><font color =green>Construire des Applications C# </font></b></big></big></big>
 
-Pour commencer à programmer en C#, il faut installer le *Kit de Développement Logiciel (SDK)* que 'on veut / à besoin (à l'heure actuelle: `.NET 9` et à partir de novembre 2025 `.NET 10`).
->  `.NET 9` est une version STS tandis que `.NET 10` est une version LTS.
+Pour commencer à programmer en C#, il faut installer le *Kit de Développement Logiciel (SDK)* que 'on veut / à besoin).
+
+>  `.NET 10` est une version LTS tandis que `.NET 11` est une version STS.
 
 Pour télécharger le SDK, il y a deux façons:
 1. Allez sur www.dot.net et télécharger "à la main" 
@@ -24,7 +25,7 @@ Au moment de la traduction de cet article, le *SDK .NET* est à la version *10.0
 
 ## Confirmation de l'installation de .NET
 
-Pour confirmer l'installation du SDK et des runtimes, **ouvrez une fenêtre de commande et utilisez l'interface de ligne de commande (CLI) .NET**, ```dotnet.exe``` (**juste `dotnet` pour les versions plus récente**). Le CLI propose des options et des commandes SDK. Les commandes permettent notamment de créer, de compiler, d'exécuter et de publier des projets et des solutions. Vous trouverez des exemples de ces commandes plus loin dans ce document. Dans cette section, nous allons examiner les options SDK, qui sont au nombre de quatre, comme le montre le [[#Tableau 2-1 .NET CLI SDK options|tableau 2-1]].
+Pour confirmer l'installation du SDK et des runtimes, **ouvrez une fenêtre de commande et utilisez l'interface de ligne de commande (CLI) .NET**, ```dotnet.exe``` (**juste `dotnet` pour les versions plus récente**). Le CLI propose des options et des commandes SDK. Les commandes permettent notamment de créer, de compiler, d'exécuter et de publier des projets et des solutions. Vous trouverez des exemples de ces commandes plus loin dans ce document. Dans cette section, nous allons examiner les options SDK, qui sont au nombre de quatre, comme le montre le [[#Tableau 2-1 Options de .NET CLI SDK|Tableau 2-1]].
 
 ###### Tableau 2-1: Options de .NET CLI SDK
 
@@ -198,8 +199,7 @@ Console.ReadLine();
 > [!Info]- Remarque:
 >  Lorsque vous tapez, Visual Studio tente de compléter les mots à votre place. Cette fonctionnalité s'appelle **IntelliSense** (aide à la complétion de code) et est intégrée à Visual Studio et Visual Studio Code.
 
-Ici, vous utilisez la classe `Console` définie dans l'espace de noms `System`. L'espace de noms `System` est
-inclus dans les instructions *using implicites globales*, il n'est donc pas nécessaire de le spécifier explicitement. Ce programme ne fait rien de très intéressant, mais notez l'appel final à `Console.ReadLine()`. Il sert simplement à garantir que l'utilisateur doit appuyer sur une touche pour fermer l'application.
+Ici, vous utilisez la classe `Console` définie dans l'espace de noms `System`. L'espace de noms `System` est inclus dans les instructions *using implicites globales*, il n'est donc pas nécessaire de le spécifier explicitement. Ce programme ne fait rien de très intéressant, mais notez l'appel final à `Console.ReadLine()`. Il sert simplement à garantir que l'utilisateur doit appuyer sur une touche pour fermer l'application.
 
 ### Modification du framework .NET Core cible
 
@@ -340,7 +340,7 @@ Maintenant, réactivez le fichier du concepteur et faites glisser une nouvelle c
 
 ![[Figure 2.13.png|Dérivé visuellement d'une classe existante]]
 
->[!info] Le concept d’héritage sera étudié en détail au [[Chapitre 6]].
+>[!info] Le concept d’héritage sera étudié en détail au [[Chapitre 6#Comprendre les mécanismes fondamentaux de l'héritage|Chapitre 6]].
 
 Pour compléter cet exemple, mettez à jour la classe `SportsCar` générée avec une méthode publique nommée `GetPetName()`, écrite comme suit :
 
@@ -385,15 +385,16 @@ Deux manières différentes (pour les versions récentes):
 2. Naviguer dans la fenêtre de l'explorateur jusqu'à l'emplacement souhaité
     1. [cmd + j] pour ouvrir le terminal (il se positionnera ou on à besoin)
     2. Entrez cette commande:
-	```bash
-	dotnet new sln -n SimpleCSharpConsoleApp -o .\VisualStudioCode
-	```
+	
+		```bash
+		dotnet new sln -n SimpleCSharpConsoleApp -o .\VisualStudioCode
+		```
 
 Cela crée un nouveau fichier de solution nommé (*-n*) *SimpleCSharpConsoleApp* dans un sous-répertoire (du répertoire actuel) nommé *VisualStudioCode*. Lorsque vous utilisez Visual Studio Code avec une application à projet unique, il n'est pas nécessaire de créer un fichier de solution. ==Visual Studio est centré sur les solutions; Visual Studio Code est centré sur le code==. Nous avons créé un fichier de solution afin de reproduire le processus de l'exemple Visual Studio.
 
 > [!warning] les examples fournis utilisent les séparateur de dossier Windows. Il faut utiliser les séparateurs selon le système d'exploitation utilisé.
 
-Ensuite, créez une nouvelle application console C# 9/.NET 5 (-f net6.0) nommée (*-n*) *SimpleCSharpConsoleApp* dans un sous-répertoire (*-o*) du même nom (notez que cette commande doit être saisie sur une seule ligne) :
+Ensuite, créez une nouvelle application console C# 9/.NET 5 (`-f net6.0`) nommée (`-n`) *SimpleCSharpConsoleApp* dans un sous-répertoire (`-o`) du même nom (notez que cette commande doit être saisie sur une seule ligne) :
 
 ```bash
 dotnet new console -lang c# -n SimpleCSharpConsoleApp -o .\VisualStudioCode\
@@ -442,9 +443,7 @@ Pour exécuter votre projet sans déboggage, exécutez la commande CLI .NET suiv
 dotnet run
 ```
 
-#### La différence sémantique entre restaurer et compiler
-
-Parce que les deux commandes font les deux ... (==Réponse fournie par IA Google==)
+#### La différence sémantique entre restaurer et compiler (Gemini)
 
  **Restaurer**
  
