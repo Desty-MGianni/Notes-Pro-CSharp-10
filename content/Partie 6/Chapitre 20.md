@@ -129,7 +129,7 @@ Le fournisseur de données Microsoft SQL Server offre un accès direct aux magas
 
 Le fournisseur ODBC (`System.Data.Odbc`) permet d'accéder aux connexions ODBC. **Les types ODBC définis dans l'espace de noms `System.Data.Odbc` ne sont généralement utiles que si vous devez communiquer avec un SGBD donné pour lequel il n'existe pas de fournisseur de données .NET personnalisé**. Ceci s'explique par le fait qu'ODBC est un modèle répandu qui permet d'accéder à plusieurs sources de données.
 
-Le fournisseur de données OLE DB, composé des types définis dans l'espace de noms `System.Data.OleDb`, vous permet d'accéder aux données situées dans n'importe quelle source de données prenant en charge le protocole OLE DB classique basé sur COM. *==Du fait de sa dépendance à COM, ce fournisseur ne fonctionne que sous Windows et est obsolète dans l'environnement multiplateforme .NET.=**
+Le fournisseur de données OLE DB, composé des types définis dans l'espace de noms `System.Data.OleDb`, vous permet d'accéder aux données situées dans n'importe quelle source de données prenant en charge le protocole OLE DB classique basé sur COM. *==Du fait de sa dépendance à COM, ce fournisseur ne fonctionne que sous Windows et est obsolète dans l'environnement multiplateforme .NET.==*
 
 Le fournisseur de données PostgreSQL, composé des types définis dans l'espace de noms tiers `Npgsql`, vous permet d'accéder aux données situées dans n'importe quel système de gestion de base de données PostgreSQL. **==Contrairement aux modèles génériques ou dépendants de Windows, `Npgsql` est un pilote managé natif, entièrement écrit en C# et optimisé spécifiquement pour le protocole réseau de PostgreSQL. Du fait de son architecture moderne, il offre des performances exceptionnelles, prend nativement en charge l'asynchronisme de bout en bout requis par l'environnement multiplateforme .NET, et s'impose comme le choix incontournable pour les développements modernes sous macOS, Linux et Windows.==**
 
@@ -593,12 +593,12 @@ Puisque PostgreSQL est déjà installé nativement sur mes machine, l'utilisatio
 2. Une fois installé, on peut lancer le conteneur comme ceci :
 
 	```bash
-	docker run --name AutoLot -e POSTGRES_PASSWORD=monMotDePasse -p 5433:5432 -d postgres
+	docker run --name AutoLot -e POSTGRES_PASSWORD=monMotDePasse -p 5432:5432 -d postgres
 	```
 	
 	- `--name` : Donne un nom convivial au conteneur.
 	- `-e POSTGRES_PASSWORD=...` : Définit le mot de passe du super-utilisateur `postgres`.
-	- `-p 5432:5432` : Redirige le port 5432 du conteneur vers le port 5432 de la machine hôte (le PC Arch Linux), le rendant accessible sur votre réseau local pour votre Mac.
+	- `-p 5432:5432` : Redirige le port 5432 du conteneur vers le port 5433 de la machine hôte (le PC Arch Linux), le rendant accessible sur votre réseau local pour votre Mac.
 	- `-d` : (*Detached*) Lance le conteneur en arrière-plan pour ne pas bloquer le terminal.
 	- `postgres` : Indique à Docker d'utiliser l'image officielle de PostgreSQL.
 
@@ -637,6 +637,8 @@ Puisque le conteneur PostgreSQL est actif sur ma deuxième machine, je dois util
 ```bash
 psql -h XXX -p 5432 -U postgres -d postgres
 ```
+
+>[!tip] Si le port du conteneur utilise le port par défaut, alors il n'est pas nécessaire d'entrer l'argument `-p 5432` dans la chaîne de connexion
 
 **Si tout fonctionne parfaitement, nous voilà connecté dans la base de donnée `postgres` via l'utilisateur `postgres` sur la deuxième machine.**
 
@@ -1010,14 +1012,89 @@ psql -h IP_PC_ARCH -U postgres -d autolot -f main.sql
 
 # Le modèle de fabrique de fournisseurs de données ADO.NET
 
+**Le modèle de fabrique de fournisseurs de données .NET permet de créer une base de code unique utilisant des types d'accès aux données généralisés**. Pour comprendre l'implémentation de la fabrique de fournisseurs de données, **rappelez-vous du [[#Tableau 20-1 Les objets clé d'un fournisseur de donnée ADO.NET|Tableau 20-1]] que les classes d'un fournisseur de données dérivent toutes des mêmes classes de base définies dans l'espace de noms `System.Data.Common`.**
 
+- `DbCommand` : Classe de base abstraite pour toutes les classes de commandes
+- `DbConnection` : Classe de base abstraite pour toutes les classes de connexion
+- `DbDataAdapter` : Classe de base abstraite pour toutes les classes d’adaptateurs de données
+- `DbDataReader` : Classe de base abstraite pour toutes les classes de lecteurs de données
+- `DbParameter` : Classe de base abstraite pour toutes les classes de paramètres
+- `DbTransaction` : Classe de base abstraite pour toutes les classes de transactions
 
+**Chaque fournisseur de données compatible .NET contient un type de classe dérivé de `System.Data.Common.DbProviderFactory`.** ***==Cette classe de base définit plusieurs méthodes permettant de récupérer des objets de données spécifiques au fournisseur. Voici les membres de `DbProviderFactory` :==***
 
-## La chaîne de connexion
+```cs
+public abstract class DbProviderFactory
+{
+	..public virtual bool CanCreateDataAdapter { get;};
+	..public virtual bool CanCreateCommandBuilder { get;};
+	public virtual DbCommand CreateCommand();
+	public virtual DbCommandBuilder CreateCommandBuilder();
+	public virtual DbConnection CreateConnection();
+	public virtual DbConnectionStringBuilder
+		CreateConnectionStringBuilder();
+	public virtual DbDataAdapter CreateDataAdapter();
+	public virtual DbParameter CreateParameter();
+	public virtual DbDataSourceEnumerator
+		CreateDataSourceEnumerator();
+}
+```
 
-C'est le seul endroit où votre code C# (ou votre outil `pgcli`) va changer. Au lieu de cibler `localhost` (votre Mac), vous devez cibler **l'adresse IP locale de votre PC Arch Linux** sur votre réseau Wi-Fi/Ethernet domestique.
+==Pour obtenir le type dérivé de `DbProviderFactory` pour votre fournisseur de données, chaque fournisseur fournit une propriété statique utilisée pour renvoyer le type correct==. Pour renvoyer la version SQL Server de `DbProviderFactory`, utilisez le code suivant :
 
-La première étape consiste à trouvez l'IP du PC Arch (ex: `192.168.1.50`) en tapant ceci sur le PC
+```cs
+// Obtenir la fabrique pour le fournisseur de données SQL.
+DbProviderFactory sqlFactory =
+	Microsoft.Data.SqlClient.SqlClientFactory.Instance;
+```
+
+**Pour rendre le programme plus polyvalent, vous pouvez créer une fabrique `DbProviderFactory` qui renvoie une version spécifique de `DbProviderFactory` en fonction d'un paramètre du fichier** *appsettings.json* de l'application. Vous apprendrez bientôt comment procéder ; **==pour l'instant, vous pouvez obtenir les objets de données spécifiques au fournisseur (par exemple, les connexions, les commandes et les lecteurs de données) une fois que vous aurez obtenu la fabrique correspondant à votre fournisseur de données.==**
+
+## Exemple complet de fabrique de fournisseur de données
+
+Pour un exemple complet, créez un nouveau projet d'application console C# (nommé *DataProviderFactory*) qui affiche l'inventaire automobile de la base de données AutoLot. Pour cet exemple initial, vous intégrerez directement la logique d'accès aux données dans l'application console (par souci de simplicité). Au fil de ce chapitre,
+vous découvrirez des méthodes plus efficaces.
+
+Ajoutez les packages `Microsoft.Extensions.Configuration.Json` , `System.Data.Odbc`, `Npgsql` et `Microsoft.Data.SqlClient` au projet. Ensuite, ajoutez un nouveau fichier nommé *DataProviderEnum.cs* et mettez à jour le code comme suit :
+
+>[!important] Rappel
+> - `System.Data.Common` -> Déjà présent de base dans les versions moderne de .NET
+> - `System.Data.OleDb` -> Uniquement pour Windows -> retiré
+
+```cs
+namespace DataProviderFactory;
+
+public enum DataProviderEnum
+{
+    Postgres,
+    SqlServer,
+    Odbc,
+}
+```
+
+Ajoutez un nouveau fichier JSON nommé *appsettings.json* au projet et mettez à jour son contenu comme suit :
+
+>[!warning] Gross différence avec le livre
+>Comme le livre est un livre d'apprentisage, les information sensible sont écris en durs dans le fichier *appsettings.json*.
+>
+> Comme ces notes ansi que les projet seront publié sur mes repo GitHub, je dois **Absolument évité**  cela.
+
+```json
+{
+  "ProviderName": "Postgres",
+  "Postgres": {
+    "ConnectionString": "Secret"
+  },
+  "SqlServer": {
+    "ConnectoinString": "Secret"
+  },
+  "Odbc": {
+    "ConectionString": "Secret"
+  }
+}
+```
+
+Ensuite, il faut trouvez l'IP du PC Arch (ex: `192.168.1.50`) en tapant ceci sur le PC
 
 ```bash
 ip -a
@@ -1025,9 +1102,7 @@ ip -a
 fastfetch
 ```
 
-Ensuite, **pour des questions de sécurité**, je vais isoler les informations sensible (adresse IP, mot de passe, clé API, ...) dans un fichier *.env* qui se trouve à la racine de chaque projet.
-
->[!info] pas à la racine du repo pour simplifier le code.
+**Pour des questions de sécurité**, je vais isoler les chaîne de connexion aux différents fournisseurs de données dans un fichier *.env*. Ce fichier sera lus par les différents application crée dans ce chapitre et dans les chapitres suivants pour extraire la bonne chaîne de connexion selon la base de donnée à laquelle on veut se connecter. **En harmonisant les noms dans les deux fichier, le code sera plus simple ensuite.
 
 >[!warning] Il faut veillé à ce qu'un fichier *.gitignore* existe dans un des dossier plus élevé et que le fichier *.env* soit listé dedans pour éviter de le deployé sur *GitHub*. (Pour les autres système de cloud, à éffectuer au cas par cas)
 
@@ -1036,4 +1111,208 @@ Le framework .NET utilise un système de configuration modulaire. Pour lire les 
 ```bash
 dotnet add package Microsoft.Extensions.Configuration.EnvironmentVariables
 ```
+
+>[!attention] Dans le fichier *appsettings.json*, l'arborescence est séparée par des `:`. dans le fichier *.env*, il faut **ABSOLUMENT** séparer en utilisant `__` sinon .NET ne pourra pas lier la chaîne de connexion. 
+
+Configurez MSBuild pour qu'il copie le fichier de paramètres JSON dans le répertoire de sortie à chaque compilation. Mettez à jour le fichier projet en ajoutant les lignes suivantes :
+
+```xml
+<ItemGroup>
+  <None Update="appsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+>[!note] La commande `CopyToOutputDirectory` est sensible aux espaces. Assurez-vous qu'elle figure sur une seule ligne, sans espaces autour du mot *PreserveNewest*
+
+**Maintenant que vous disposez d'un fichier** *appsettings.json* **correct, vous pouvez lire les valeurs `ProviderName` et `ConnectionString` à l'aide de la configuration .NET**. Commencez par supprimer tout le code du fichier et ajoutez les instructions `using` suivantes en haut du fichier *Program.cs* :
+
+```cs
+using System.Data.Common;
+using System.Data.Odbc;
+using DataProviderFactory;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
+```
+
+Puisque le fichier *.env* va rester sagement à la racine du projet, la détection de celui ci par l'application sera plus ardue.
+
+Pour résoudre ce problème de manière universelle (que l'on lance l'app depuis le   terminal ou depuis un IDE), on cherche d'abord dans le dossier d'exécution, puis dans le dossier parent si nécessaire :
+
+```cs
+Console.Title = "Fun with Data Provider Factories";
+Console.WriteLine("***** Fun with Data Provider Factories *****\n");
+
+// Récupèration du fournisseur et de la chaîne de connexion.
+var (provider, connectionString) = GetProviderFromConfiguration();
+
+// Initialisation de la fabrique
+DbProviderFactory factory = GetDbProviderFactory(provider);
+
+// Récupération de l'objet de connexion
+using (DbConnection connection = factory.CreateConnection())
+{
+    Console.WriteLine(
+        $"Your connection object is a: {connection.GetType().Name}"
+    );
+    connection.ConnectionString = connectionString;
+    connection.Open();
+
+    // Création de l'objet de commande
+    DbCommand command = factory.CreateCommand();
+    Console.WriteLine($"Your command object is a: {command.GetType().Name}");
+    command.Connection = connection;
+    command.CommandText =
+        "SELECT i.Id, m.Name FROM Inventory i INNER JOIN Makes m ON m.Id = i.MakeId;";
+
+    // Affiche les donnée avec DbDatareader
+    // Pas besoin de rajouter une nouvelle portée pour lire le fichier
+    using DbDataReader dataReader = command.ExecuteReader();
+    Console.WriteLine(
+        $"Your data reader object is a: {dataReader.GetType().Name}"
+    );
+    Console.WriteLine("\n**** Current Inventory ****");
+    while (dataReader.Read())
+    {
+        Console.WriteLine(
+            $"-> Car #{dataReader["Id"]} is a {dataReader["Name"]}."
+        );
+    }
+}
+Console.ReadLine();
+
+```
+
+Ensuite, ajoutez le code suivant à la fin du fichier *Program.cs*. **Ces méthodes lisent la configuration et le fichier** *.env*, **définissent l'énumération `DataProviderEnum` sur la valeur correcte, obtiennent la chaîne de connexion et renvoient une instance de `DbProviderFactory` :**
+
+```cs
+static (
+    DataProviderEnum provider,
+    string connectionString
+) GetProviderFromConfiguration()
+{
+    // 1. RECHERCHE INTELLIGENTE ET CHARGEMENT DU .ENV EN PREMIER
+    string currentDir = Directory.GetCurrentDirectory();
+    string envFilePath = Path.Combine(currentDir, ".env");
+
+    while (!File.Exists(envFilePath) && Directory.GetParent(currentDir) != null)
+    {
+        currentDir = Directory.GetParent(currentDir)!.FullName;
+        envFilePath = Path.Combine(currentDir, ".env");
+    }
+
+    if (File.Exists(envFilePath))
+    {
+        foreach (var line in File.ReadAllLines(envFilePath))
+        {
+            var parts = line.Split('=', 2);
+            if (parts.Length == 2)
+            {
+                Environment.SetEnvironmentVariable(
+                    parts[0].Trim(),
+                    parts[1].Trim().Trim('"')
+                );
+            }
+        }
+    }
+    else
+    {
+        throw new FileNotFoundException("the .env file couldn't be found");
+    }
+
+    // 2. CONSTRUCTION DU CONFIGURATIONBUILDER
+    // .AddEnvironmentVariables() va maintenant capter TOUTES nos variables chargées juste avant
+    var configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddEnvironmentVariables()
+        .Build();
+
+    // 3. LECTURE DU PROVIDER ET CONVERSION EN ENUM
+    string providerName = configuration["ProviderName"];
+
+    if (!Enum.TryParse(providerName, true, out DataProviderEnum provider))
+        throw new Exception("Invalid data provider value supplie;");
+
+    // 4. RÉCUPÉRATION DE LA CHAÎNE DE CONNEXION FUSIONNÉE
+    // On utilise GetSection() pour éviter d'avoir des problèmes de casse
+    string connectionString =
+        configuration
+            .GetSection(providerName)
+            .GetSection("ConnectionString")
+            .Value
+        ?? string.Empty;
+    if (string.IsNullOrEmpty(connectionString))
+        throw new InvalidOperationException(
+            $"the connection string for {providerName} is not found"
+        );
+
+    return (provider, connectionString);
+}
+
+// Sélection de la fabrique
+static DbProviderFactory GetDbProviderFactory(DataProviderEnum provider) =>
+    provider switch
+    {
+        DataProviderEnum.Postgres => NpgsqlFactory.Instance,
+        DataProviderEnum.SqlServer => SqlClientFactory.Instance,
+        DataProviderEnum.Odbc => OdbcFactory.Instance,
+        _ => null,
+    };
+```
+
+**Notez que, pour des raisons de diagnostic, vous utilisez les services de réflexion pour afficher le nom de la connexion, de la commande et du lecteur de données sous-jacents**. ***==Si vous exécutez cette application, vous trouverez les données actuelles suivantes dans la table `Inventory` de la base de données `AutoLot`, affichées dans la console :==***
+
+```
+***** Fun with Data Provider Factories *****
+
+Your connection object is a: NpgsqlConnection
+Your command object is a: NpgsqlCommand
+Your data reader object is a: NpgsqlDataReader
+
+**** Current Inventory ****
+-> Car #1 is a VW.
+-> Car #2 is a Ford.
+-> Car #3 is a Saab.
+-> Car #4 is a Yugo.
+-> Car #5 is a BMW.
+-> Car #6 is a BMW.
+-> Car #7 is a BMW.
+-> Car #8 is a Pinto.
+-> Car #9 is a Yugo.
+```
+
+***==Modifiez maintenant le fichier de configuration pour spécifier un autre fournisseur. Le code détectera la chaîne de connexion correspondante et produira le même résultat qu'auparavant, à l'exception des informations spécifiques au type.==**
+
+**Bien sûr, compte tenu de votre expérience avec ADO.NET, vous n'êtes peut-être pas certain du rôle exact des objets de connexion, de commande et de lecteur de données.** **==Ne vous préoccupez pas des détails pour le moment (il reste encore de nombreuses pages dans ce chapitre !).==** **À ce stade, il suffit de savoir que vous pouvez utiliser le modèle de fabrique de fournisseurs de données ADO.NET pour créer une base de code unique capable d'utiliser différents fournisseurs de données de manière déclarative.**
+
+## Un inconvénient potentiel du modèle de fabrique de fournisseurs de données
+
+Bien que ce modèle soit puissant, *==vous devez vous assurer que le code utilise uniquement des types et des méthodes communs à tous les fournisseurs via les membres des classes de base abstraites==*. Par conséquent, **lors de la création de votre code, vous êtes limité aux membres exposés par `DbConnection`, `DbCommand` et les autres types de l'espace de noms `System.Data.Common`.**
+
+De ce fait, ***==cette approche généralisée peut vous empêcher d'accéder directement à certaines fonctionnalités avancées d'un SGBD particulier.==*** **Si vous devez pouvoir appeler des membres spécifiques du fournisseur sous-jacent (par exemple, `SqlConnection`), vous pouvez le faire en utilisant une conversion explicite, comme dans cet exemple :**
+
+```cs
+if (connection is SqlConnection sqlConnection)
+{ 
+	// Afficher la version de SQL Server utilisée.
+	WriteLine(sqlConnection.ServerVersion);
+}
+```
+
+Toutefois, *==cette approche complexifie la maintenance du code (et réduit sa flexibilité) car il faut ajouter plusieurs vérifications d'exécution==*. **Néanmoins, si vous souhaitez créer des bibliothèques d'accès aux données ADO.NET avec une flexibilité maximale, le modèle de fabrique de fournisseurs de données offre une solution idéale.**
+
+>[!note]
+>Entity Framework Core et sa prise en charge de l'injection de dépendances simplifient considérablement la création de bibliothèques d'accès aux données qui doivent accéder à des sources de données disparates.
+
+Ce premier exemple étant derrière vous, vous pouvez maintenant vous plonger dans les détails de l'utilisation d'ADO.NET.
+
+# Approfondissement des `Connections`, `Commands` et `DataReader`
+
+
+
+
+
 
