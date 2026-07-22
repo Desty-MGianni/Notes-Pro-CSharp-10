@@ -1711,7 +1711,373 @@ Avant de créer la classe qui effectuera les opérations sur les données, nous 
 
 ## Créez les classes `Car` et `CarViewModel`.
 
-Les bibliothèques modernes d'accès aux données utilisent des classes (communément appelées modèles ou entités) qui servent à représenter et à transporter les données depuis la base de données. De plus, les classes peuvent être utilisées pour représenter une vue des données combinant deux tables ou plus afin de rendre les données plus significatives. Les classes d'entités servent à interagir avec le répertoire de la base de données (pour les instructions UPDATE), et les classes de modèles de vue servent à afficher les données de manière pertinente. Vous verrez dans le chapitre suivant que ces concepts constituent la base des ORM (Object-Relational Mappers) tels qu'Entity Framework Core, mais pour l'instant, vous allez simplement créer un modèle (pour une ligne d'inventaire brute) et un modèle de vue (combinant une ligne d'inventaire avec les données associées dans la table Makes). Ajoutez un nouveau dossier à votre projet nommé Models, et ajoutez-y deux nouveaux fichiers, nommés *Car.cs* et *CarViewModel.cs*. Mettez à jour le code comme suit :
+**Les bibliothèques modernes d'accès aux données utilisent des classes** (communément appelées *modèles* ou *entités*) **qui servent à représenter et à transporter les données depuis la base de données**. De plus, ***==les classes peuvent être utilisées pour représenter une vue des données combinant deux tables ou plus afin de rendre les données plus significatives==***. **==Les classes d'entités servent à interagir avec le répertoire de la base de données==** (pour les instructions `UPDATE`), **==et les classes de modèles de vue servent à afficher les données de manière pertinente==**. **Vous verrez dans le chapitre suivant que ces concepts constituent la base des ORM** (*Object-Relational Mappers*) **tels qu'Entity Framework Core, mais pour l'instant, vous allez simplement créer un modèle** (==pour une ligne d'inventaire brute==) **et un modèle de vue** (==combinant une ligne d'inventaire avec les données associées dans la table `Makes`==). Ajoutez un nouveau dossier à votre projet nommé `Models`, et ajoutez-y deux nouveaux fichiers, nommés *Car.cs* et *CarViewModel.cs*. Mettez à jour le code comme suit :
+
+```cs
+// Car.cs
+namespace AutoLot.Dal.Models;
+
+public class Car
+{
+    public int Id { get; set; }
+    public int MakeId { get; set; }
+    public string Color { get; set; }
+    public string PetName { get; set; }
+    public DateTime TimeStamp { get; set; }
+}
+
+```
+
+>[!important] Je n'utiliserai pas la colonne système masquée `xmin` pour simplifier le code. Cela signifie que le comportement sera un peu différent avec le code de l'auteur. ([[#Création de la table `Inventory`|Voir callout de cette section]])
+
+```cs
+// CarviewModel.cs
+namespace AutoLot.Dal.Models;
+
+public class CarViewModel : Car
+{
+    public string Make { get; set; }
+}
+```
+
+Ces classes seront utilisées prochainement, mais commencez par ajouter l'espace de noms `AutoLot.Dal.Models` au fichier *GlobalUsings.cs* :
+
+```cs
+global using System.Data;
+global using System.Reflection;
+global using AutoLot.Dal.Models;
+global using Npgsql;
+```
+
+## Ajout de la classe `InventoryDal`
+
+Ensuite, créez un dossier nommé `DataOperations`. Dans ce dossier, créez une classe nommée *InventoryDal.cs* et rendez-la publique. Cette classe définira différents membres permettant d'interagir avec la table `Inventory` de la base de données `AutoLot`.
+
+### Ajout de constructeurs
+
+```cs
+namespace AutoLot.Dal.DataOperations;
+
+// Ce code peut être raccourcis avec l'utilisation 
+// d'un constructeur primaire (C# 12)
+public class InventoryDal(string connectionString)
+{
+    private readonly string _connectionString;
+
+    public InventoryDal(string connectionString)
+    {
+        _connectionString = string.IsNullOrWhiteSpace(connectionString)
+            ? throw new ArgumentNullException(
+                paramName: nameof(connectionString),
+                message: "the connection string can't be null or empty"
+            )
+            : connectionString;
+    }
+}
+```
+
+>[!important] Cette partie est différente par rapport au livre
+>
+> **Dans mon cas, pour rester sécurisé et propre, je dois forcer le passage par le constructeur paramétré (c'est à dire omettre le constructeur par défaut).**
+> 
+>Si je laisse un constructeur par défaut sans paramètre, n'importe quel développeur pourrait instancier la classe via `new InventoryDal()`. L'application lèverait alors une erreur de connexion car elle tenterait de cibler les identifiants SQL Server par défaut de l'auteur au lieu de votre base PostgreSQL. 
+>
+>De plus, forcer le passage de la chaîne de connexion au constructeur (`public InventoryDal(string connectionString)`) respecte le principe d'**injection de dépendances**. C'est exactement de cette manière que fonctionnent les applications modernes en production.
+
+### Ouverture et fermeture de la connexion
+
+**Ajoutez ensuite une variable de classe pour stocker la connexion qui sera utilisée par le code d'accès aux données**. Ajoutez également deux méthodes : une pour ouvrir la connexion (`OpenConnection()`) et l'autre pour la fermer (`CloseConnection()`). Dans la méthode `CloseConnection()`, vérifiez l'état de la connexion et, si elle n'est pas fermée, appelez la méthode `Close()` sur la connexion. Voici le code :
+
+```cs
+private NpgsqlConnection? _sqlConnection;
+
+private void OpenConnection()
+{
+	_sqlConnection = new NpgsqlConnection
+	{
+		ConnectionString = _connectionString,
+	};
+	_sqlConnection.Open();
+}
+
+private void CloseConnection()
+{
+	if (_sqlConnection?.State != ConnectionState.Closed)
+		_sqlConnection?.Close();
+}
+
+```
+
+**Par souci de concision, la plupart des méthodes de la classe `InventoryDal` n'utilisent pas de blocs `try`/`catch` pour gérer les exceptions éventuelles, ni ne lèvent d'exceptions personnalisées pour signaler divers problèmes d'exécution**. ***==Si vous deviez concevoir une bibliothèque d'accès aux données robuste , vous auriez absolument besoin d'utiliser des techniques structurées de gestion des exceptions==*** (comme celles présentées au [[Chapitre 7#Gestion des exceptions|Chapitre 7]]) ***==afin de prendre en compte toute anomalie d'exécution.==***
+
+#### Ajout de `IDisposable`
+
+Ajoutez l'interface `IDisposable` à la définition de la classe, comme ceci :
+
+```cs
+public class InventoryDal : IDisposable
+{
+	...
+}
+```
+
+Ensuite, implémentez le modèle jetable en appelant `Dispose` sur l'objet `SqlConnection`.
+
+```cs
+private bool _disposed = false;
+
+protected virtual void Dispose(bool disposing)
+{
+	if (_disposed)
+		return;
+	if (disposing)
+		_sqlConnection?.Dispose();
+	_disposed = true;
+}
+
+public void Dispose()
+{
+	Dispose(true);
+	GC.SuppressFinalize(this);
+}
+```
+
+### Ajout des méthodes de sélection
+
+Vous commencez par combiner vos connaissances sur les objets `Command`, les `DataReaders` et les collections génériques pour obtenir les enregistrements de la table `Inventory`. Comme vu précédemment dans ce chapitre, **l'objet `DataReader` d'un fournisseur de données permet de sélectionner des enregistrements en lecture seule et à défilement vers l'avant uniquement** (*Read-only* et *Forward-only*), **grâce à la méthode `Read()`.** **==Dans cet exemple, la propriété `CommandBehavior` du `DataReader` est configurée pour fermer automatiquement la connexion à la fermeture du lecteur. La méthode `GetAllInventory()` renvoie une `List<CarViewModel>` pour représenter toutes les données de la table `Inventory`.==**
+
+```cs
+public List<CarViewModel> GetAllInventory()
+{
+	// Pas besoin d'ajouter this devant, le compilateur 
+	// est assez inteligent
+	OpenConnection();
+	
+	// Ceci contiendra les enregistrements.
+	var inventory = new List<CarViewModel>();
+
+	// Prépare l'objet de commande
+	string sql =
+		@"SELECT i.Id, i.Color, i.PetName, m.Name as Make
+			FROM Inventory i
+			INNER JOIN Makes m in m.Id = i.MakeId";
+	using var command = new NpgsqlCommand(sql, _sqlConnection)
+	{
+		CommandType = CommandType.Text,
+	};
+	// Le paramètre fournis permet d'éviter l'appel à dataReader.Close()
+	// à la fin de la boucle while (dataReader.Read())
+	NpgsqlDataReader dataReader = command.ExecuteReader(
+		CommandBehavior.CloseConnection
+	);
+
+	while (dataReader.Read())
+	{
+		inventory.Add(
+			new CarViewModel
+			{
+				Id = (int)dataReader["Id"],
+				Color = (string)dataReader["Color"],
+				Make = (string)dataReader["Make"],
+				PetName = (string)dataReader["PetName"],
+			}
+		);
+	}
+	return inventory;
+}
+```
+
+La méthode de sélection suivante obtient un seul `CarViewModel` basé sur le `CarId`.
+
+
+```cs
+public CarViewModel GetCar(int id)
+{
+	// Pas besoin d'ajouter this devant, le compilateur
+	// est assez intelligent.
+	OpenConnection();
+	CarViewModel car = null;
+
+	// Ceci devrait utiliser des paramètres pour des raisons de sécurité
+	string sql =
+		$@"SELECT i.Id, i.Color, i.PetName, m.Name as Make
+		FROM Inventory i
+		INNER JOIN Makes m on m.Id = i.MakeId
+		WHERE i.Id = {id}";
+	using NpgsqlCommand command = new(sql, _sqlConnection)
+	{
+		CommandType = CommandType.Text,
+	};
+
+	// Avec l'argument passé ici, on peut omettre
+	// dataReader.Close() à la fin de la boucle.
+	var dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+
+	while (dataReader.Read())
+	{
+		car = new CarViewModel
+		{
+			Id = (int)dataReader["Id"],
+			Color = (string)dataReader["Color"],
+			Make = (string)dataReader["Make"],
+			PetName = (string)dataReader["PetName"],
+		};
+	}
+	return car;
+}
+```
+
+>[!warning] Note
+>**Il est généralement déconseillé d'accepter des données saisies par l'utilisateur directement dans des requêtes SQL, comme c'est le cas ici**. 
+>
+>**Plus loin dans ce chapitre, ce code sera mis à jour pour utiliser des paramètres.**
+
+### Insérer un nouvel objet `Car`
+
+**Insérer un nouvel enregistrement dans la table `Inventory` est aussi simple que de formater l'instruction SQL `INSERT`** (en fonction des données saisies par l'utilisateur), **d'ouvrir la connexion, d'appeler la méthode `ExecuteNonQuery()` à l'aide de votre objet de commande, puis de fermer la connexion**. **==Vous pouvez observer ce processus en ajoutant une méthode publique à votre type `InventoryDal`, nommée `InsertAuto()`, qui prend trois paramètres correspondant aux colonnes non-identité de la table `Inventory` (`Color`, `Make` et `PetName`).==** Ces arguments permettent de formater une chaîne de caractères pour insérer le nouvel enregistrement. **Enfin, utilisez votre objet `NpgsqlConnection` pour exécuter l'instruction SQL.**
+
+```cs
+public void InsertAuto(string color, int makeId, string petName)
+{
+	// Pas besoin d'ajouter this devant, le compilateur
+	// est assez intelligent.
+	OpenConnection();
+
+	// Formate et exécute la déclaration SQL
+	//
+	string sql =
+		$"INSERT INTO Inventory (MakeId, Color, PetName) VALUES ({makeId}, '{color}', '{petName}')";
+
+	// Exécute en utilisant notre connexion.
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		command.CommandType = CommandType.Text;
+		command.ExecuteNonQuery();
+	}
+	CloseConnection();
+}
+```
+
+>[!attention] 
+>Avec Postgres, les valeurs numériques ne doivent pas être entouré de `'` dans la chaîne de commande (ici `sql`). C'est pour cela que, comparé à l'exemple du livre, `{makeId}` n'est pas entouré de ceux-ci.
+
+
+**La méthode précédente prend trois valeurs pour `Car` et fonctionne tant que le code appelant transmet les valeurs dans le bon ordre**. ***==Une meilleure méthode utilise `Car` pour créer une méthode fortement typée, garantissant que toutes les propriétés sont transmises à la méthode dans le bon ordre.==***
+
+#### Créez la méthode `InsertCar()` fortement typée.
+
+Ajoutez une autre méthode `InsertAuto()` qui prend `Car` comme paramètre à votre classe `InventoryDal`, comme indiqué ici :
+
+```cs
+public void InsertAuto(Car car)
+{
+	// Pas besoin d'ajouter this devant, le compilateur
+	// est assez intelligent.
+	OpenConnection();
+
+	// Formate et exécute la déclaration SQL
+	//
+	string sql =
+		$"INSERT INTO Inventory (MakeId, Color, PetName) VALUES ({car.MakeId}, '{car.Color}', '{car.PetName}')";
+
+	// Exécute en utilisant notre connexion.
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		command.CommandType = CommandType.Text;
+		command.ExecuteNonQuery();
+	}
+	CloseConnection();
+}
+```
+
+## Ajout de la logique de suppression
+
+**Supprimer un enregistrement existant est aussi simple qu'en insérer un nouveau**. Contrairement à la création du code pour `InsertAuto()`, ***==vous allez découvrir ici l'importance du bloc `try`/`catch` qui gère la possibilité de tenter de supprimer une voiture actuellement commandée pour un client dans la table `Customers`==***. **Les options `INSERT` et `UPDATE` par défaut pour les clés étrangères empêchent la suppression des enregistrements liés dans les tables liées**. ==Lorsque cela se produit, une exception `NpgsqlException` est levée.== 
+
+>[!info]
+>Un programme réel gérerait cette erreur intelligemment ; cependant, dans cet exemple, vous levez simplement une nouvelle exception. 
+>
+>>[!tip]- La bonne pratique
+>>La couche d'accès aux données (DAL) doit laisser remonter l'exception technique brute (`throw;`), ou encapsuler l'erreur dans une exception personnalisée dédiée à la persistance (ex: `DataAccessException`). C'est à la **couche supérieure** (l'interface utilisateur ou la couche métier API) de lire le code d'erreur Postgres (comme le code `23503` pour une violation de clé étrangère) et de décider d'afficher un message poli à l'utilisateur.
+
+Ajoutez la méthode suivante au type de classe `InventoryDal` :
+
+```cs
+public void DeleteCar(int id)
+{
+	OpenConnection();
+	// Récupère l'ID de l'entrée à supprimer puis l'effectue.
+	string sql = $"DELETE from Inventory WHERE Id = {id}";
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		try
+		{
+			command.CommandType = CommandType.Text;
+			command.ExecuteNonQuery();
+		}
+		catch (NpgsqlException ex)
+		{
+			// Très mauvaise pratique (plus d'infos au Chapitre 7)
+			Exception error = new("Sorry! That car is in order!", ex);
+			throw error;
+		}
+	}
+	CloseConnection();
+}
+```
+
+## Ajout de la logique de mise à jour
+
+**Lorsqu'il s'agit de mettre à jour un enregistrement existant dans la table `Inventory`, la première chose à faire est de déterminer les éléments que l'appelant peut modifier** : la couleur de la voiture, le nom de l'animal de compagnie, la marque, ou tous ces éléments. *==Une solution pour offrir une flexibilité totale consiste à définir une méthode prenant un type `string` en paramètre pour représenter n'importe quelle instruction SQL, mais cette approche est risquée.==*
+
+**Idéalement, il est préférable de disposer d'un ensemble de méthodes permettant à l'appelant de mettre à jour un enregistrement de différentes manières**. ***==Cependant, pour cette bibliothèque d'accès aux données simplifiée, vous définirez une seule méthode permettant à l'appelant de mettre à jour le nom familier associé à une automobile==***, comme suit :
+
+```cs
+public void UpdateCarPetName(int id, string newPetName)
+{
+	OpenConnection();
+	// Récupère l'ID de la voiture pour modifier son nom familier
+	string sql =
+		$"UPDATE Inventory SET PetName = '{newPetName}' WHERE Id = {id}";
+
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		command.ExecuteNonQuery();
+	}
+	CloseConnection();
+}
+```
+
+## Utilisation des objets de commande paramétrés
+
+==Actuellement, la logique d'insertion, de mise à jour et de suppression du type `InventoryDal` utilise des chaînes de caractères littérales codées en dur pour chaque requête SQL==. **Avec les** *requêtes paramétrées*, **les paramètres SQL sont des objets, et non de simples blocs de texte.** **==Un traitement plus orienté objet des requêtes SQL permet de réduire le nombre d'erreurs de frappe (grâce à des propriétés fortement typées)==** ; de plus, les requêtes paramétrées s'exécutent généralement beaucoup plus rapidement qu'une chaîne SQL littérale, car elles sont analysées une seule fois (au lieu d'être traitées à chaque affectation de la chaîne SQL à la propriété `CommandText`). 
+
+***Les requêtes paramétrées contribuent également à protéger contre les attaques par injection SQL (un problème de sécurité bien connu lié à l'accès aux données).***
+
+**Pour prendre en charge les requêtes paramétrées, les objets de commande ADO.NET conservent une collection d'objets de paramètres individuels**. ==Par défaut, cette collection est vide, mais vous pouvez y insérer autant d'objets de paramètres que nécessaire, correspondant à un *paramètre d'espace réservé* dans la requête SQL==. **==Lorsque vous souhaitez associer un paramètre d'une requête SQL à un membre de la collection de paramètres de l'objet de commande, vous pouvez préfixer le paramètre de texte SQL avec le symbole `@`==** (***==du moins lors de l'utilisation de Microsoft SQL Server ; tous les SGBD ne prennent pas en charge cette notation==***).
+
+>[!tip]- Compte rendu moderne (avec Gemini)
+>
+> 1. **Ce qui reste 100 % VRAI (Les piliers immuables)**
+>
+>	- **La sécurité contre l'injection SQL** : C'est le bénéfice numéro un. Transformer les chaînes en objets de paramètres empêche l'injection de code malveillant.
+>	- **Le traitement orienté objet** : Passer par une collection de paramètres (`command.Parameters.Add...`) évite de manipuler des apostrophes et réduit drastiquement les erreurs de frappe.
+>	- **La collection de paramètres** : Les objets de commande maintiennent toujours une liste interne (`DbParameterCollection`) qui est vide par défaut et que vous devez remplir.
+>
+> 2. **Ce qui a évolué : La vitesse d'exécution (Performance)**
+>
+>	Le texte affirme que les requêtes paramétrées s'exécutent généralement beaucoup plus rapidement car elles sont analysées une seule fois en base de données.
+>	
+>	- **La nuance moderne** : C'est de moins en moins vrai de manière automatique. Aujourd'hui, les moteurs de bases de données modernes (comme PostgreSQL ou SQL Server) intègrent des optimiseurs de requêtes extrêmement intelligents. Même si vous envoyez une chaîne de caractères littérale (non paramétrée), le SGBD va souvent essayer de l'auto-paramétrer et de la mettre en cache lui-même.
+>	- **Cependant**, l'utilisation des paramètres reste indispensable pour aider le moteur à réutiliser le plan d'exécution de manière stable, surtout pour des requêtes complexes.
+>
+> 3. **Ce qui a changé : Le symbole `@` pour PostgreSQL**
+>
+>	C'est la phrase la plus importante pour vous : 
+>
+>	*"(...) vous pouvez préfixer le paramètre de texte SQL avec le symbole `@` (du moins lors de l'utilisation de Microsoft SQL Server ; tous les SGBD ne prennent pas en charge cette notation)"*.
+>
+>	- **La mise à jour pour PostgreSQL** : Historiquement, PostgreSQL utilisait des jetons de position comme `$1`, `$2`, `$3` dans son code natif. **Mais la bonne nouvelle**, c'est que le fournisseur moderne `Npgsql` que vous utilisez fait un travail formidable d'abstraction. **Vous pouvez utiliser le symbole `@` avec PostgreSQL exactement comme si vous étiez sur SQL Server.** `Npgsql` se charge de traduire le `@MonParametre` en syntaxe native Postgres en arrière-plan.
 
 
 
