@@ -1263,6 +1263,8 @@ static DbProviderFactory GetDbProviderFactory(DataProviderEnum provider) =>
     };
 ```
 
+>[!tip] La méthode de chargement et d'extraction du fichier *.env* peut être effectué en utilisant la méthode `Env.Load()` du package NuGet `DotNetEnv`. J'ai choisi de ne pas le faire pour une question de d'apprentissage
+
 **Notez que, pour des raisons de diagnostic, vous utilisez les services de réflexion pour afficher le nom de la connexion, de la commande et du lecteur de données sous-jacents**. ***==Si vous exécutez cette application, vous trouverez les données actuelles suivantes dans la table `Inventory` de la base de données `AutoLot`, affichées dans la console :==***
 
 ```
@@ -1309,9 +1311,407 @@ Toutefois, *==cette approche complexifie la maintenance du code (et réduit sa f
 
 Ce premier exemple étant derrière vous, vous pouvez maintenant vous plonger dans les détails de l'utilisation d'ADO.NET.
 
-# Approfondissement des `Connections`, `Commands` et `DataReader`
+# Approfondissement des `Connections`, `Commands` et `DataReaders`
+
+Comme illustré dans l'exemple précédent, **ADO.NET vous permet d'interagir avec une base de données à l'aide des objets de connexion, de commande et de lecteur de données de votre fournisseur de données**. ***==Nous allons maintenant créer un exemple plus complet afin de mieux comprendre ces objets dans ADO.NET.==***
+
+Dans l'exemple précédent, pour vous connecter à une base de données et lire les enregistrements à l'aide d'un objet lecteur de données, vous devez effectuer les étapes suivantes :
+
+1. Allouer, configurer et ouvrir votre objet de connexion.
+2. Allouer et configurer un objet de commande, en spécifiant l'objet de connexion comme argument du constructeur ou via la propriété Connection.
+3. Appeler la méthode ExecuteReader() sur la classe de commande configurée.
+4. Traiter chaque enregistrement à l'aide de la méthode Read() du lecteur de données.
+
+Pour commencer, créez un nouveau projet d'application console nommé *AutoLot.DataReader* et ajoutez les packages suivant : 
+
+- ~~`Microsoft.Data.SqlClient`~~ 
+- `Npgsql`. 
+- `Microsoft.Extensions.Configuration
+- `Microsoft.Extensions.Configuration.EnvironmentVariables
+
+Voici le code complet dans le fichier *Program.cs* (l'analyse suivra) :
 
 
+```cs
+using Microsoft.Extensions.Configuration;
+using Npgsql;
+
+Console.Title = "Fun with Data Readers";
+Console.WriteLine("***** Fun with Data Readers *****\n");
+
+LoadEnvVariables();
+
+var config = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+
+// Crée et ouvre une connection
+using (NpgsqlConnection connection = new())
+{
+    // Dans le fichier .env, __ = :.
+    // (En gros, on fait l'étape inverse de l'exercise précédent)
+    connection.ConnectionString = config["Postgres:ConnectionString"];
+    connection.Open();
+
+    // Crée un objet de commande SQL
+    string sql =
+        @"Select i.id, m.Name as Make, i.Color, I.PetName
+            FROM Inventory i
+            INNER JOIN Makes m on m.Id = i.MakeId";
+
+    NpgsqlCommand myComand = new(sql, connection);
+
+    // Obtient un lecteur de données à la manière de ExecuteReader().
+    using NpgsqlDataReader myDataReader = myComand.ExecuteReader();
+
+    // Parcours les résultats.
+    while (myDataReader.Read())
+    {
+        Console.WriteLine(
+            $"-> Make: {myDataReader["Make"]}, PetName: {myDataReader["PetName"]}, Color: {myDataReader["Color"]}."
+        );
+    }
+}
+Console.ReadLine();
+
+static void LoadEnvVariables()
+{
+    // 1. RECHERCHE INTELLIGENTE ET CHARGEMENT DU .ENV EN PREMIER
+    string currentDir = Directory.GetCurrentDirectory();
+    string envFilePath = Path.Combine(currentDir, ".env");
+
+    while (!File.Exists(envFilePath) && Directory.GetParent(currentDir) != null)
+    {
+        currentDir = Directory.GetParent(currentDir)!.FullName;
+        envFilePath = Path.Combine(currentDir, ".env");
+    }
+
+    if (File.Exists(envFilePath))
+    {
+        foreach (var line in File.ReadAllLines(envFilePath))
+        {
+            // SÉCURITÉ : Ignore les lignes vides,
+            // les espaces ou les lignes de commentaires #
+            if (string.IsNullOrWhiteSpace(line) || line.Trim().StartsWith('#'))
+                continue;
+
+            var parts = line.Split('=', 2);
+            if (parts.Length == 2)
+            {
+                Environment.SetEnvironmentVariable(
+                    parts[0].Trim(),
+                    parts[1].Trim().Trim('"')
+                );
+            }
+        }
+    }
+    else
+    {
+        throw new FileNotFoundException("the .env file couldn't be found");
+    }
+}
+```
+
+>[!tip] La méthode de chargement et d'extraction du fichier *.env* peut être effectué en utilisant la méthode `Env.Load()` du package NuGet `DotNetEnv`. J'ai choisi de ne pas le faire pour une question de d'apprentissage
+
+## Utilisation des objets de connexion
+
+**La première étape lors de l'utilisation d'un fournisseur de données consiste à établir une session avec la source de données à l'aide de l'objet de connexion** (==qui hérite de `DbConnection`==). ***==Pour PostgreSQL, cet objet se nomme `NpgsqlConnection`==***. Les objets de connexion .NET sont fournis avec une *chaîne de connexion formatée* ; **==cette chaîne contient plusieurs paires nom-valeur, séparées par des points-virgules. Vous utilisez ces informations pour identifier l'adresse de la machine à laquelle vous souhaitez vous connecter, les paramètres de sécurité requis, le nom de la base de données sur cette machine et d'autres paramètres spécifiques à PostgreSQL.==**
+
+**Comme vous pouvez le déduire du code, le paramètre `Database`** (ou `Initial Catalog`) **fait référence à la base de données PostgreSQL avec laquelle vous souhaitez établir une session. Le paramètre `Host` (ou `Server`, ou `Data Source`) identifie la machine qui héberge la base de données.**
+
+**Dans le cas d'un conteneur Docker ou d'une installation locale, on utilise souvent `localhost` ou `127.0.0.1` pour faire référence à la machine hôte. Pour le port, PostgreSQL utilise le port par défaut `5432`** (*==contrairement à SQL Server qui utilise généralement `1433`==*). ***==Si votre base de données se trouve sur une machine distante, vous devez simplement remplacer `localhost` par l'adresse IP publique ou le nom de domaine de ce serveur distant (par exemple, `Host=192.168.1.50`).==***
+
+Contrairement à SQL Server, **PostgreSQL ne gère pas le concept d'instances nommées** (comme `SERVEUR\INSTANCE`). **==Si vous souhaitez exécuter plusieurs bases de données PostgreSQL indépendantes sur une même machine, vous devez simplement les configurer pour qu'elles écoutent sur des *ports différents* (par exemple, `Host=localhost;Port=5433`).==**
+
+De plus, **vous devez fournir les informations d'identification requises via les paramètres `Username` (ou `User Id`) et `Password`**. ***==Par défaut, l'administrateur d'un serveur PostgreSQL se nomme `postgres`.==*** **Notez que PostgreSQL n'utilise pas la "Sécurité Intégrée Windows" de la même manière que SQL Server ; l'authentification se fait majoritairement par couple utilisateur/mot de passe, ou via des certificats SSL sécurisés si la base est distante.**
+
+**Une fois votre chaîne de connexion établie, vous utilisez un appel à `Open()` pour établir la connexion avec le SGBD (*DBMS*)**. Outre les membres `ConnectionString`, `Open()` et `Close()`, un objet `DbConnection` fournit plusieurs membres permettant de configurer des paramètres supplémentaires (tels que le délai d'attente `CommandTimeout`, le chiffrement `SSL Mode`, ou la gestion des transactions). Le [[#Tableau 20-4 Membre du type `DbConnection`|Tableau 20-4]] liste certains (mais pas tous) des membres de la classe de base `DbConnection`.
+
+###### Tableau 20-4: Membre du type `DbConnection`
+
+| Membre               | Description                                                                                                                                                                                                                                                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BeginTransaction()` | Vous utilisez cette méthode pour démarrer une transaction de base de données.                                                                                                                                                                                                                                  |
+| `ChangeDatabase()`   | Cette méthode permet de modifier la base de données sur une connexion ouverte.                                                                                                                                                                                                                                 |
+| `ConnectionTimeout`  | Cette propriété en lecture seule indique le délai d'attente avant l'établissement d'une connexion et la génération d'une erreur (la valeur par défaut dépend du fournisseur). Pour modifier ce délai, spécifiez un segment `Connect Timeout` dans la chaîne de connexion (par exemple : `Connect Timeout=30`). |
+| `Database`           | Cette propriété en lecture seule récupère le nom de la base de données gérée par l'objet de connexion.                                                                                                                                                                                                         |
+| `DataSource`         | Cette propriété en lecture seule récupère l'emplacement de la base de données gérée par l'objet de connexion.                                                                                                                                                                                                  |
+| `GetSchema()`        | Cette méthode renvoie un objet `DataTable` contenant les informations de schéma de la source de données.                                                                                                                                                                                                       |
+| `State`              | Cette propriété en lecture seule récupère l'état actuel de la connexion, représenté par l'énumération `ConnectionState`.                                                                                                                                                                                       |
+
+**Les propriétés du type `DbConnection` sont généralement en lecture seule et ne sont utiles que lorsque vous souhaitez obtenir les caractéristiques d'une connexion lors de l'exécution**. **==Lorsque vous devez remplacer les paramètres par défaut, vous devez modifier la chaîne de connexion elle-même.==** Par exemple, la chaîne de connexion suivante définit le délai d'expiration de la connexion de la valeur par défaut (15 secondes pour SQL Server) à 30 secondes :
+
+>[!info] La chaîne de connexion de sera pas affiché 
+>-> Pour Postgres, on rajoute `Timeout=...;` à la fin de la chaîne.
+>-> Pour Sql Server, on rajoute `Connect Timeout=...;`
+
+Le code suivant affiche des détails sur la connexion `NpgsqlConnection` qui lui est transmise :
+
+```cs
+static void ShowConnectionStatus(DbConnection connection)
+{
+    // Affiche différentes donnée à propos de l'objet de connexion
+    Console.WriteLine("**** Info about your connection ****");
+    Console.WriteLine($"Database location: {connection.DataSource}");
+    Console.WriteLine($"Database name: {connection.Database}");
+    Console.WriteLine($"Timeout: {connection.ConnectionTimeout}");
+    Console.WriteLine($"ConnectionState: {connection.State}");
+}
+```
+
+**Bien que la plupart de ces propriétés soient explicites, la propriété `State` mérite une mention particulière. Vous pouvez lui attribuer n'importe quelle valeur de l'énumération `ConnectionState`, comme illustré ici :
+
+```cs
+public enum ConnectionState
+{
+	Broken,
+	Closed,
+	Connecting,
+	Executing,
+	Fetching,
+	Open
+}
+```
+
+**Cependant, les seules valeurs valides pour `ConnectionState` sont `ConnectionState.Open`, `ConnectionState.Connecting`, et `ConnectionState.Closed` (les autres membres de cette énumération sont réservés pour un usage futur).** De plus, ==il est toujours possible de fermer une connexion, même si son état actuel est `ConnectionState.Closed`.
+
+### Utilisation des objets `ConnectionStringBuilder`
+
+>[!success] Beaucoup plus modulaire et claire dans tous les cas de figure
+
+*==La gestion programmatique des chaînes de connexion peut s'avérer complexe, car elles sont souvent représentées sous forme de chaînes littérales, difficiles à maintenir et, au mieux, sujettes aux erreurs==*. **Les fournisseurs de données compatibles .NET prennent en charge les objets `ConnectionStringBuilder`, qui permettent d'établir les paires nom-valeur à l'aide de propriétés fortement typées**. Voici une mise à jour possible du code actuel :
+
+>[!important] Les éléments présenté dans le `ConnectionStringbuilder` proviennent du livre (Sql Server) et doivent donc êtres modifié selon la configuration utilisé par le lecteur.
+
+>[!warning] Si on utilise un fichier *.env*, il faut alors crée des variables d'environnement pour chaque élément nécessaire/voulus dans la chaîne de connection
+
+```cs
+var connectionStringBuilder = new SqlConnectionStringBuilder
+{
+	InitialCatalog = "AutoLot",
+	DataSource = ".,5433",
+	UserID = "sa",
+	Password = "P@ssw0rd",
+	ConnectTimeout = 30,
+	Encrypt=false
+};
+connection.ConnectionString =
+	connectionStringBuilder.ConnectionString;
+```
+
+**Dans cette itération, vous créez une instance de `NpgsqlConnectionStringBuilder`, définissez ses propriétés en conséquence, et obtenez la chaîne interne à l'aide de la propriété `ConnectionString`**. ***==Notez également que vous utilisez le constructeur par défaut du type==***. Si vous le souhaitez, **==vous pouvez aussi créer une instance de l'objet générateur de chaîne de connexion de votre fournisseur de données en lui fournissant une chaîne de connexion existante comme point de départ==** (cela peut s'avérer utile lorsque vous lisez ces valeurs dynamiquement à partir d'une source externe). **Une fois l'objet initialisé avec les données de chaîne initiales, vous pouvez modifier des paires nom-valeur spécifiques à l'aide des propriétés correspondantes.**
+
+>[!tldr] 
+>On peut fournir une chaîne de connexion complète aux différents  `ConnectionStringBuilder` pour ensuite modifier chaque éléments séparément et ainsi gardé la bonne syntaxe correspondant au fournisseur de données.
+>
+>C'est une technique extrêmement puissante dans le monde professionnel, notamment pour injecter des identifiants temporaires ou modifier le comportement d'une application selon l'environnement (Dev, Test, Production) sans jamais altérer la structure de base.
+
+## Utilisation des objets de commande
+
+Maintenant que vous comprenez mieux le rôle de l'objet de connexion, **l'étape suivante consiste à examiner comment soumettre des requêtes SQL à la base de données concernée**. **==Le type `NpgsqlCommand` (qui hérite de `DbCommand`) est une représentation orientée objet d'une requête SQL, d'un nom de table ou d'une procédure stockée==**. **Vous spécifiez le type de commande à l'aide de la propriété `CommandType`, qui peut prendre n'importe quelle valeur de l'énumération `CommandType`, comme illustré ici :**
+
+```cs
+public enum CommandType
+{
+	StoredProcedure,
+	TableDirect,
+	Text // Valeur par défaut
+}
+```
+
+Lorsque vous créez un objet commande, vous pouvez définir la requête SQL comme paramètre du constructeur ou directement via la propriété `CommandText`. De même, lors de la création d'un objet commande, vous devez spécifier la connexion à utiliser. Là encore, vous pouvez le faire comme paramètre du constructeur ou via la propriété `Connection`. Voici un exemple de code :
+
+```cs
+    // Crée un objet de commande SQL via les arguments du
+    // constructeur
+    string sql =
+        @"Select i.id, m.Name as Make, i.Color, i.PetName
+            FROM Inventory i
+            INNER JOIN Makes m on m.Id = i.MakeId";
+
+    NpgsqlCommand myComand = new(sql, connection);
+
+    // Crée une autre objet de commande via les propriétés
+    // var testCommand = new NpgsqlCommand();
+    // testComamnd.Connection = connection;
+    // testCommand.commandText = sql;
+```
+
+**Notez qu'à ce stade, vous n'avez pas encore soumis la requête SQL à la base de données `AutoLot`**, mais ***==vous avez plutôt préparé l'état de l'objet commande pour une utilisation ultérieure==***. Le [[#Tableau 20-5 Membres du type `DbCommand`|Tableau 20-5]] présente quelques membres supplémentaires du type `DbCommand`.
+
+###### Tableau 20-5: Membres du type `DbCommand`
+
+
+| Membre              | Description                                                                                                                                                                                                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CommandTimeout`    | Définit ou obtient le délai d'attente avant l'arrêt de l'exécution de la commande et la génération d'une erreur. La valeur par défaut est de 30 secondes.                                                                                                                                                          |
+| `Connection`        | Obtient ou définit l'objet `DbConnection` utilisée par cette instance de `DbCommand`.                                                                                                                                                                                                                              |
+| `Parameters`        | Obtient la collection d'objets `DbParameter` utilisés pour une requête paramétrés.                                                                                                                                                                                                                                 |
+| `Cancel()`          | Annule l'exécution d'une commande.                                                                                                                                                                                                                                                                                 |
+| `ExecuteReader()`   | Exécute une requête SQL et renvoie l’objet `DbDataReader` du fournisseur de données, qui offre un accès en lecture seule et en avant uniquement au résultat de la requête.                                                                                                                                         |
+| `ExecuteNonQuery()` | Exécute une opération SQL autre qu'une requête (par exemple, une insertion, une mise à jour, une suppression ou une création de table).                                                                                                                                                                            |
+| `ExecuteScalar()`   | Une version allégée de la méthode `ExecuteReader()` conçue spécifiquement pour les requêtes singleton (par exemple, obtenir le nombre d'enregistrements).                                                                                                                                                          |
+| `Prepare()`         | Crée une version préparée (ou compilée) de la commande sur la source de données. Comme vous le savez peut-être, une requête préparée s'exécute légèrement plus rapidement et s'avère utile lorsque vous devez exécuter la même requête plusieurs fois (généralement avec des paramètres différents à chaque fois). |
+
+## Utilisation des lecteurs de données
+
+>[!important]- Depuis l'époque où ce chapitre a été écrit, les bonnes pratiques de développement en C# ont évolué sur la syntaxe et la gestion des ressources. (plus)
+>
+>1. **L'accès par index textuel (`reader["Make"]`) a un coût**
+>
+>	Le texte mentionne l'accès aux colonnes via la syntaxe `[]` en utilisant le nom de la colonne. C'est très pratique, mais techniquement, cela force .NET à faire une recherche textuelle en arrière-plan à chaque ligne lue pour trouver à quel index numérique correspond le mot `"Make"`. 
+>
+>	- **Optimisation moderne** : Si vous lisez des milliers de lignes, il est préférable d'utiliser la méthode `GetOrdinal()` avant la boucle pour récupérer l'index numérique une seule fois, puis d'utiliser les méthodes typées dans la boucle (`GetInt32`, `GetString`, etc.) :
+>		```cs
+>		int makeIdx = myDataReader.GetOrdinal("Make");
+>		while (myDataReader.Read())
+>		{
+> 			// Bien plus rapide et sécurisé en termes de typage
+>			string make = myDataReader.GetString(makeIdx); 
+>		}
+>		```
+>	
+>2. **Le monde moderne utilise l'Asynchronisme (`ExecuteReaderAsync`)**
+>
+>	C'est le plus gros changement par rapport aux anciens codes. Le texte décrit un traitement synchrone (qui bloque le thread en attendant que la base réponde). Dans les applications modernes (.NET Core / .NET 6+), on utilise massivement les versions **asynchrones** pour ne pas bloquer les ressources, surtout avec une base de données sur une machine distante :
+>
+>	- `await connection.OpenAsync();`
+>	- `using NpgsqlDataReader myDataReader = await myComand.ExecuteReaderAsync();`
+>	- `while (await myDataReader.ReadAsync()) { ... }`
+>
+>3. **DataSet vs DataReader : Le match a changé**
+>
+>	Le livre compare le `DataReader` au `DataSet` (en mémoire). Cette comparaison reste vraie, mais dans la réalité d'aujourd'hui, le `DataSet` est une technologie obsolète issue des années 2000 que plus personne n'utilise dans les nouveaux projets. Aujourd'hui, si on ne veut pas de `DataReader`, on utilise des ORM comme **Entity Framework Core (EF Core)** ou **Dapper**, qui chargent les données dans des listes d'objets C# fortement typés (des `List<Car>`), et non plus dans des `DataSet`
+>
+>---
+>
+>*Gardez précieusement ce texte en tête : le concept de "flux connecté, en lecture seule et vers l'avant uniquement (forward-only)" est l'un des piliers les plus importants de l'accès aux données en .NET.*
+
+**Après avoir établi la connexion active et la commande SQL, l'étape suivante consiste à soumettre la requête à la source de données**. Comme vous pouvez l'imaginer, plusieurs méthodes permettent de procéder. **==Le type `DbDataReader` (qui implémente `IDataReader`) est la méthode la plus simple et la plus rapide pour obtenir des informations d'une base de données==**. **Rappelons que les lecteurs de données représentent un flux de données en lecture seule, transmis enregistrement par enregistrement.** De ce fait, les lecteurs de données sont utiles uniquement lors de l'envoi d'instructions de sélection SQL à la base de données sous-jacente.
+
+***==Les lecteurs de données sont utiles lorsque vous devez parcourir rapidement de grandes quantités de données et que vous n'avez pas besoin de conserver une représentation en mémoire.==*** Par exemple, **si vous demandez 20 000 enregistrements d'une table pour les stocker dans un fichier texte, il serait très gourmand en mémoire de stocker ces informations dans un `DataSet` (car un `DataSet` stocke simultanément l'intégralité du résultat de la requête en mémoire).**
+
+**==Une meilleure approche consiste à créer un lecteur de données qui traite chaque enregistrement aussi rapidement que possible==**. *==Notez cependant que les objets de lecture de données==* (contrairement aux objets d'adaptateur de données, que vous examinerez plus tard) *==maintiennent une connexion ouverte à leur source de données jusqu'à ce que vous la fermiez explicitement.==*
+
+**Vous obtenez les objets de lecture de données à partir de l'objet de commande en appelant la méthode `ExecuteReader()`**. ==Le lecteur de données représente l'enregistrement courant lu dans la base de données.== **Il possède une méthode d'indexation (par exemple, la syntaxe `[]` en C#) qui vous permet d'accéder à une colonne de l'enregistrement courant. Vous pouvez accéder à la colonne par son nom ou par un entier commençant à zéro.**
+
+***==L'utilisation suivante du lecteur de données exploite la méthode `Read()` pour déterminer quand vous avez atteint la fin de vos enregistrements (en retournant `false`).==*** **Pour chaque enregistrement entrant lu dans la base de données, vous utilisez l'indexeur de type pour afficher la marque, le nom de l'animal et la couleur de chaque véhicule**. ~~Notez également que vous appelez `Close()` dès que vous avez terminé le traitement des enregistrements, ce qui libère l'objet de connexion.~~
+
+```cs
+// Obtient un lecteur de données à la manière de ExecuteReader().
+using NpgsqlDataReader myDataReader = myComand.ExecuteReader();
+
+// Parcours les résultats.
+while (myDataReader.Read())
+{
+	Console.WriteLine(
+		$"-> Make: {myDataReader["Make"]}, PetName: {myDataReader["PetName"]}, Color: {myDataReader["Color"]}."
+	);
+}
+```
+
+**Dans l'extrait de code précédent, vous surchargez l'indexeur d'un objet lecteur de données pour qu'il accepte soit une chaîne de caractères** (représentant le nom de la colonne), **soit un entier** (représentant la position ordinale de la colonne). **==Ainsi, vous pouvez supprimer la logique du lecteur actuel (et éviter les noms de chaînes de caractères codés en dur) avec la mise à jour suivante (notez l'utilisation de la propriété `FieldCount`)==** :
+
+```cs
+// Parcours les résultats.
+while (myDataReader.Read())
+{
+	for (int i = 0; i < myDataReader.FieldCount; i++)
+	{
+		Console.Write(
+			i != myDataReader.FieldCount - 1
+				? $"{myDataReader.GetName(i)} = {myDataReader.GetValue(i)}, "
+				: $"{myDataReader.GetName(i)} = {myDataReader.GetValue(i)} "
+		);
+	}
+	Console.WriteLine();
+}
+```
+
+Si vous compilez et exécutez votre projet à ce stade, vous devriez voir une liste de toutes les automobiles dans la table `Inventory` de la base de données `AutoLot`.
+
+```
+***** Fun with Data Readers *****
+
+**** Info about your connection ****
+Database location: tcp://192.168.50.40:5432
+Database name: autolot
+Timeout: 23
+ConnectionState: Open
+
+**** Query ****
+id = 1, make = VW, color = Black, petname = Zippy
+id = 2, make = Ford, color = Rust, petname = Rusty
+id = 3, make = Saab, color = Black, petname = Mel
+id = 4, make = Yugo, color = Yellow, petname = Clunker
+id = 5, make = BMW, color = Black, petname = Bimmer
+id = 6, make = BMW, color = Green, petname = Hank
+id = 7, make = BMW, color = Pink, petname = Pinky
+id = 8, make = Pinto, color = Black, petname = Pete
+id = 9, make = Yugo, color = Brown, petname = Brownie
+```
+
+### Obtention de plusieurs ensembles de résultats à l'aide d'un lecteur de données
+
+**Les objets de type lecteur de données peuvent obtenir plusieurs ensembles de résultats à l'aide d'un seul objet de commande**. Par exemple, **==si vous souhaitez obtenir toutes les lignes de la table `Inventory`, ainsi que toutes les lignes de la table `Customers`, vous pouvez spécifier les deux instructions SQL `SELECT` en utilisant un point-virgule comme délimiteur, comme ceci :==**
+
+
+```cs
+sql += ";Select * form customers;";
+```
+
+>[!note]
+>Le point-virgule initial n'est pas une faute de frappe. Lorsqu'on utilise plusieurs instructions, elles doivent être séparées par des points-virgules. Et comme la première instruction n'en contenait pas, il est ajouté ici au début de la seconde instruction.
+
+**Une fois le lecteur de données obtenu, vous pouvez parcourir chaque ensemble de résultats à l'aide de la méthode `NextResult()`**. ***==Notez que le premier ensemble de résultats est toujours renvoyé automatiquement. Ainsi, si vous souhaitez parcourir les lignes de chaque table, vous pouvez construire la structure d'itération suivante :==***
+
+```cs
+do
+{
+	// Parcours les résultats.
+	while (myDataReader.Read())
+	{
+		// Console.WriteLine(
+		//     $"-> Make: {myDataReader["Make"]}, PetName: {myDataReader["PetName"]}, Color: {myDataReader["Color"]}."
+		// );
+
+		for (int i = 0; i < myDataReader.FieldCount; i++)
+		{
+			Console.Write(
+				i != myDataReader.FieldCount - 1
+					? $"{myDataReader.GetName(i)} = {myDataReader.GetValue(i)}, "
+					: $"{myDataReader.GetName(i)} = {myDataReader.GetValue(i)} "
+			);
+		}
+		Console.WriteLine();
+	}
+	Console.WriteLine();
+} while (myDataReader.NextResult());
+```
+
+À ce stade, vous devriez mieux comprendre les fonctionnalités offertes par les objets de lecture de données. **N'oubliez jamais qu'un lecteur de données ne peut traiter que les instructions SQL `SELECT` ; vous ne pouvez pas l'utiliser pour modifier une table de base de données existante à l'aide de requêtes `INSERT`, `UPDATE` ou `DELETE`**. La modification d'une base de données existante nécessite une étude plus approfondie des objets de commande.
+
+# Utilisation des requêtes de création, de mise à jour et de suppression
+
+**La méthode `ExecuteReader()` extrait un objet lecteur de données permettant d'examiner les résultats d'une instruction SQL `SELECT` en utilisant un flux d'informations en lecture seule**. ***==Cependant, pour exécuter des instructions SQL modifiant une table (ou toute autre instruction SQL non liée à une requête, comme la création de tables ou l'octroi d'autorisations), vous devez appeler la méthode `ExecuteNonQuery()` de votre objet commande==***. **Cette méthode unique effectue les insertions, mises à jour et suppressions en fonction du format de votre texte de commande.**
+
+>[!note]
+>Techniquement parlant, une instruction SQL *non-requête* ne renvoie aucun résultat. Ainsi, les instructions `SELECT` sont des requêtes, contrairement aux instructions `INSERT`, `UPDATE` et `DELETE`. Par conséquent, la méthode `ExecuteNonQuery()` renvoie un entier représentant le nombre de lignes affectées, et non un nouvel ensemble d'enregistrements.
+
+**Tous les exemples d'interaction avec une base de données présentés jusqu'ici dans ce chapitre se sont limités à l'ouverture de connexions et à leur utilisation pour récupérer des données**. ***==Ce n'est qu'une partie du travail avec une base de données ; un framework d'accès aux données serait peu utile s'il ne prenait pas également en charge l'intégralité des fonctionnalités CRUD==*** (*Create*, *Read*, *Update* et *Delete*). Vous apprendrez ensuite à réaliser ces opérations à l'aide d'appels à la méthode `ExecuteNonQuery()`.
+
+Commencez par créer un nouveau projet de bibliothèque de classes C# nommé *AutoLot.Dal* (abréviation de *AutoLot data access layer*), supprimez le fichier de classe par défaut et ajoutez le package `Npgsql` au projet. Ajoutez un nouveau fichier de classe nommé *GlobalUsings.cs* au projet et mettez-le à jour avec les instructions `global using` suivantes :
+
+```cs
+global using System.Data;
+global using System.Reflection;
+global using Npgsql;
+```
+
+Avant de créer la classe qui effectuera les opérations sur les données, nous allons d'abord créer une classe C# qui représente un enregistrement de la table `Inventory` avec ses informations de `Make` associées.
+
+## Créez les classes `Car` et `CarViewModel`.
+
+Les bibliothèques modernes d'accès aux données utilisent des classes (communément appelées modèles ou entités) qui servent à représenter et à transporter les données depuis la base de données. De plus, les classes peuvent être utilisées pour représenter une vue des données combinant deux tables ou plus afin de rendre les données plus significatives. Les classes d'entités servent à interagir avec le répertoire de la base de données (pour les instructions UPDATE), et les classes de modèles de vue servent à afficher les données de manière pertinente. Vous verrez dans le chapitre suivant que ces concepts constituent la base des ORM (Object-Relational Mappers) tels qu'Entity Framework Core, mais pour l'instant, vous allez simplement créer un modèle (pour une ligne d'inventaire brute) et un modèle de vue (combinant une ligne d'inventaire avec les données associées dans la table Makes). Ajoutez un nouveau dossier à votre projet nommé Models, et ajoutez-y deux nouveaux fichiers, nommés *Car.cs* et *CarViewModel.cs*. Mettez à jour le code comme suit :
 
 
 
