@@ -5,18 +5,18 @@ publish: true
 
 # <big><big><big><b><font color =green>Accès aux Données avec ADO.NET</font></b></big></big></big>
 
->[!Attention]- ADO.NET est une fondation invisible
+>[!Attention]- ADO.NET est une fondation invisible (Avec Gemini)
 >
->Dans le monde professionnel, plus personne n'écrit du code ADO.NET brut pour créer des applications (comme ouvrir manuellement une connexion, écrire une chaîne SQL en dur et boucler sur les lignes). [[1](https://www.c-sharpcorner.com/blogs/overview-of-entity-framework)]
+>Dans le monde professionnel, plus personne n'écrit du code ADO.NET brut pour créer des applications (comme ouvrir manuellement une connexion, écrire une chaîne SQL en dur et boucler sur les lignes).
 >
->Cependant, **ADO.NET n'est pas obsolète** : c'est la brique de base fondamentale sur laquelle sont construits les outils modernes que vous utiliserez tous les jours, comme **Entity Framework Core (EF Core)** ou **Dapper**. [[1](https://www.sciencedirect.com/science/chapter/edited-volume/pii/B9781928994503500135), [2](https://www.devart.com/blog/ado-net-vs-dapper.html), [3](https://www.devart.com/blog/ado-net-vs-entity-framework.html), [4](https://www.devart.com/dotconnect/getting-started-with-ef-core.html)]
+>Cependant, **ADO.NET n'est pas obsolète** : c'est la brique de base fondamentale sur laquelle sont construits les outils modernes que vous utiliserez tous les jours, comme **Entity Framework Core (EF Core)** ou **Dapper**.
 >
 >## Ce qui est toujours d'actualité (Le Mode Connecté)
 >
 >La première moitié du chapitre 20 (généralement axée sur le **mode connecté**) est indispensable à comprendre pour votre culture de développeur :
 >
->- **Les Fournisseurs de données (_Data Providers_) :** Des classes comme `SqlConnection` ou `SqlCommand` sont toujours utilisées par les ORM pour dialoguer avec SQL Server, MySQL ou PostgreSQL. [[1](https://dev.to/maurizio8788/the-comprehensive-guide-to-entity-framework-core-l5a), [2](https://www.codemag.com/Article/2207021/Simplifying-ADO.NET-Code-in-.NET-6-Part-1)]
->- **Le `DbDataReader` :** C'est l'outil le plus rapide de .NET pour lire de gros volumes de données de manière asynchrone et linéaire. Si vous devez optimiser une importation de données ultra-rapide, vous utiliserez un `DataReader`. [[1](https://stackoverflow.com/questions/59265580/c-sharp-acces-first-recorset-item-from-adodb), [2](https://www.scribd.com/document/854562842/Unit-V-Introduction)]
+>- **Les Fournisseurs de données (_Data Providers_) :** Des classes comme `SqlConnection` ou `SqlCommand` sont toujours utilisées par les ORM pour dialoguer avec SQL Server, MySQL ou PostgreSQL.
+>- **Le `DbDataReader` :** C'est l'outil le plus rapide de .NET pour lire de gros volumes de données de manière asynchrone et linéaire. Si vous devez optimiser une importation de données ultra-rapide, vous utiliserez un `DataReader`.
 >- **La gestion des transactions :** Comprendre comment sécuriser des écritures avec `DbTransaction` reste une compétence clé.
 >
 >## Ce qui n'est plus d'actualité (Le Mode Déconnecté)
@@ -24,13 +24,13 @@ publish: true
 >La seconde moitié du chapitre (axée sur le **mode déconnecté**) a très mal vieilli et ne doit pas retenir toute votre attention :
 >
 >- **La `DataTable` et le `DataSet` :** Ces objets (que vous avez croisés brièvement au chapitre 11 avec les indexeurs en cascade) servent à recréer une mini base de données en mémoire RAM. Ils sont aujourd'hui considérés comme des monstres de verbosité, très lourds pour la mémoire RAM.
->- **Le `SqlDataAdapter` :** Cet outil de synchronisation automatique entre la RAM et la base de données est totalement remplacé par la puissance d'EF Core. [[1](https://www.youtube.com/watch?v=ty-UGMqbYxA), [2](https://www.simplilearn.com/ado-net-interview-questions-answers-article)]
+>- **Le `SqlDataAdapter` :** Cet outil de synchronisation automatique entre la RAM et la base de données est totalement remplacé par la puissance d'EF Core. 
 >
 >## Le verdict pour le chapitre
 >
 >1. **Faites les exercices sur le Mode Connecté** (`SqlConnection`, `SqlCommand`, `SqlDataReader`) : cela vous permettra de comprendre la plomberie réseau et la sécurité (comme éviter les injections SQL avec les paramètres).
->2. **Survolez le Mode Déconnecté** (`DataSet`, `DataTable`) sans vous y attarder : considérez-le comme de l'histoire ancienne nécessaire pour maintenir du vieux code en entreprise. [[1](https://www.slideshare.net/slideshow/ado-net-81972565/81972565)]
->3. **Gardez en tête la suite logique** : Tout ce que vous apprenez ici servira à comprendre pourquoi **EF Core** (que le livre aborde généralement juste après) est une bénédiction qui vous évitera d'écrire cette plomberie manuelle. [[1](https://www.simplilearn.com/tutorials/asp-dot-net-tutorial/ado-dot-net)]
+>2. **Survolez le Mode Déconnecté** (`DataSet`, `DataTable`) sans vous y attarder : considérez-le comme de l'histoire ancienne nécessaire pour maintenir du vieux code en entreprise.
+>3. **Gardez en tête la suite logique** : Tout ce que vous apprenez ici servira à comprendre pourquoi **EF Core** (que le livre aborde généralement juste après) est une bénédiction qui vous évitera d'écrire cette plomberie manuelle.
 
 >[!important] Modification des technologie utilisés avec ADO.NET
 >
@@ -40,11 +40,9 @@ publish: true
 >
 > En plus, **je vais utilise une deuxième machine (sous Arch Linux) pour évité de consommer la RAM de mon mac et ainsi avoir une architecture plus proche de l'industrie.**
 >
-> Aux sections du livre décrivant les marches à suivre pour installer les différents programmes, un lien vers [[Note annexe au chapitre 20|la note annexe]] sera affiché.
->
 >>[!success] *Sql Server* et *PostgreSQL* s'utilisent de la même manière (avec Gemini)
 >>
->>Comme on verra plus tard dans ce chapitre, **tout fournisseur de base de données DOIVENT implémentent exactement les mêmes interfaces, partager la même logique et posséder les mêmes membres**. Le mot `Connection` (tout comme `Command` ou `DataReader`) est imposé par les contrats de Microsoft.
+>>Comme on verra plus tard dans ce chapitre, **tout fournisseur de base de données DOIVENT implémenter exactement les mêmes interfaces, partager la même logique et posséder les mêmes membres**. Le mot `Connection` (tout comme `Command` ou `DataReader`) est imposé par les contrats de Microsoft.
 >>
 >>- `NpgsqlConnection` ➔ hérite de `DbConnection` 
 >>	- ➔ qui implémente `IDbConnection`, `IDisposable` et `IAsyncDisposable`
@@ -60,7 +58,7 @@ publish: true
 
 ==La plateforme .NET définit plusieurs espaces de noms permettant d'interagir avec les systèmes de bases de données relationnelles==. ***==Ces espaces de noms sont collectivement appelés ADO.NET==***. Dans ce chapitre, **vous découvrirez le rôle global d'ADO.NET, ses principaux types et espaces de noms, puis vous aborderez les fournisseurs de données ADO.NET**. **==La plateforme .NET prend en charge de nombreux fournisseurs de données (intégrés au framework .NET et disponibles auprès de fournisseurs tiers), chacun étant optimisé pour communiquer avec un système de gestion de base de données spécifique==** (par exemple, Microsoft SQL Server, PostgreSQL, Oracle et MySQL).
 
-Après avoir compris les fonctionnalités communes offertes par les différents fournisseurs de données, **vous étudierez le modèle de conception « fabrication de fournisseurs de données »**. Comme vous le verrez, **==en utilisant les types des espaces de noms `System.Data`,==** (notamment `System.Data.Common` et les espaces de noms spécifiques aux fournisseurs de bases de données comme `Npgsql` pour PostgreSQL,   `Microsoft.Data.SqlClient`, `System.Data.Odbc` et l'espace de noms `System.Data.Oledb`, propre à Windows), **==vous pouvez créer une base de code unique capable de sélectionner dynamiquement le fournisseur de données sous-jacent sans avoir besoin de recompiler ni de redéployer le code de l'application.==**
+Après avoir compris les fonctionnalités communes offertes par les différents fournisseurs de données, **vous étudierez le modèle de conception « fabrication de fournisseurs de données »**. Comme vous le verrez, **==en utilisant les types des espaces de noms `System.Data`==**,(**notamment `System.Data.Common`** et les espaces de noms spécifiques aux fournisseurs de bases de données comme `Npgsql` pour PostgreSQL,   `Microsoft.Data.SqlClient`, `System.Data.Odbc` et l'espace de noms `System.Data.Oledb`, propre à Windows), **==vous pouvez créer une base de code unique capable de sélectionner dynamiquement le fournisseur de données sous-jacent sans avoir besoin de recompiler ni de redéployer le code de l'application.==**
 
 Vous apprendrez ensuite à ==interagir directement avec le fournisseur de base de données, à créer et ouvrir des connexions pour récupérer des données, puis à insérer, mettre à jour et supprimer des données, avant d'aborder les transactions de base de données==. Enfin, **vous exécuterez la fonctionnalité de copie en bloc de SQL Server / PostgreSQL à l'aide d'ADO.NET pour charger une liste d'enregistrements dans la base de données.**
 
@@ -72,7 +70,7 @@ Vous apprendrez ensuite à ==interagir directement avec le fournisseur de base d
 > * **Équivalence Bulk Copy :** Le `SqlBulkCopy` du livre se traduira par l'utilisation de `NpgsqlBinaryImporter` (Commande SQL `COPY` de PostgreSQL).
 
 >[!note]
->Ce chapitre est consacré à ADO.NET en détail. À partir du [[chapitre 21#|Chapitre 21 A FAIREEEEE]], j'aborde Entity Framework (EF) Core, le framework de mappage objet-relationnel (ORM) de Microsoft. EF Core utilisant ADO.NET en interne pour l'accès aux données, une solide compréhension de son fonctionnement est essentielle pour le dépannage de ces accès. Certains scénarios ne sont pas pris en charge par EF Core (comme l'exécution d'une copie SQL en bloc), et vous devrez connaître ADO.NET pour les résoudre.
+>Ce chapitre est consacré à ADO.NET en détail. À partir du [[chapitre 21#Comprendre le rôle d'Entity Framework Core|Chapitre 21]], j'aborde Entity Framework (EF) Core, le framework de mappage objet-relationnel (ORM) de Microsoft. EF Core utilisant ADO.NET en interne pour l'accès aux données, une solide compréhension de son fonctionnement est essentielle pour le dépannage de ces accès. Certains scénarios ne sont pas pris en charge par EF Core (comme l'exécution d'une copie SQL en bloc), et vous devrez connaître ADO.NET pour les résoudre.
 
 # ADO.NET vs. ADO
 
@@ -100,7 +98,7 @@ Si vous avez une expérience du modèle d'accès aux données COM précédent de
 ***Bien que les noms spécifiques de ces classes principales diffèrent selon les fournisseurs de données (par exemple, `SqlConnection` et `OdbcConnection`), chaque classe hérite de la même classe de base (`DbConnection`, dans le cas des objets de connexion) qui implémente des interfaces identiques (par exemple, `IDbConnection`). De ce fait, vous pouvez raisonnablement supposer qu'une fois que vous aurez appris à utiliser un fournisseur de données, les autres seront relativement simples à appréhender.***
 
 >[!note]
->Lorsque vous faites référence à un objet de connexion sous ADO.NET, vous faites en réalité référence à un type spécifique dérivé de `DbConnection` ; **il n’existe pas de classe nommée** *Connection*. **Il en va de même pour un** *objet de commande*, **un** *objet adaptateur de données*, etc. **==Par convention, les objets d’un fournisseur de données donné sont préfixés par le nom du SGBD associé (par exemple, `SqlConnection`, `SqlCommand` et `SqlDataReader`).
+>Lorsque vous faites référence à un objet de connexion sous ADO.NET, vous faites en réalité référence à un type spécifique dérivé de `DbConnection` ; **il n’existe pas de classe nommée** *Connection*. **Il en va de même pour un** *objet de commande*, **un** *objet adaptateur de données*, etc. **==Par convention, les objets d’un fournisseur de données donné sont préfixés par le nom du SGBD associé (par exemple, `SqlConnection`, `SqlCommand` et `SqlDataReader`).==**
 
 **L'image suivante présente le fonctionnement global des fournisseurs de données ADO.NET. L'assembly client peut être de tout type application .NET : programme console, Windows Forms, WPF/Avalonia, ASP.NET Core, bibliothèque de code .NET, etc.**
 
@@ -110,10 +108,9 @@ Si vous avez une expérience du modèle d'accès aux données COM précédent de
 
 ## Fournisseurs de données ADO.NET
 
-**Comme pour l'ensemble des composants .NET, les fournisseurs de données sont distribués sous forme de packages NuGet**. Plusieurs sont pris en charge par Microsoft, ainsi qu'une multitude de fournisseurs tiers. Le tableau 20-2 répertorie certains des fournisseurs de données pris en charge par Microsoft.
+**Comme pour l'ensemble des composants .NET, les fournisseurs de données sont distribués sous forme de packages NuGet**. Plusieurs sont pris en charge par Microsoft, ainsi qu'une multitude de fournisseurs tiers. Le [[#Tableau 20-2 Certains fournisseurs de données pris en charge par Microsoft|Tableau 20-2]] répertorie certains des fournisseurs de données pris en charge par Microsoft.
 
 ###### Tableau 20-2: Certains fournisseurs de données pris en charge par Microsoft
-
 
 | Fournisseur de données     | Espace de noms/Nom du package NuGet |
 | -------------------------- | ----------------------------------- |
@@ -136,7 +133,6 @@ Le fournisseur de données PostgreSQL, composé des types définis dans l'espace
 # Types de l'espace de noms `System.Data`
 
 **Parmi tous les espaces de noms ADO.NET, `System.Data` est le plus commun**. ***==Cet espace de noms contient des types partagés par tous les fournisseurs de données ADO.NET, quel que soit le système de stockage de données sous-jacent==***. Outre un certain nombre d'exceptions spécifiques aux bases de données (par exemple, `NoNullAllowedException`, `RowNotInTableException` et `MissingPrimaryKeyException`), **`System.Data` contient des types représentant diverses primitives de base de données** (par exemple, tables, lignes, colonnes et contraintes), **ainsi que les interfaces communes implémentées par les objets fournisseurs de données**. Le [[#Tableau 20-3 Membres clé de l'espace de noms `System.Data`|Tableau 20-3]] répertorie certains des types principaux à connaître.
-
 
 ###### Tableau 20-3: Membres clé de l'espace de noms `System.Data`
 
@@ -341,9 +337,9 @@ public interface IDataRecord
 ```
 
 >[!note]
->Vous pouvez utiliser la méthode `IDataReader.IsDBNull()` pour déterminer par programmation si un champ spécifié est `null` avant de tenter d'obtenir une valeur du lecteur de données (afin d'éviter de déclencher une exception d'exécution). Rappelons également que C# prend en charge les types de données pouvant être nullable (voir le [[Chapitre 4#Comprendre les types nullable en C|Chapitre.4]]), qui sont idéaux pour interagir avec les colonnes de données susceptibles d'être `null` dans la table de base de données.
+>Vous pouvez utiliser la méthode `IDataReader.IsDBNull()` pour déterminer par programmation si un champ spécifié est `null` avant de tenter d'obtenir une valeur du lecteur de données (afin d'éviter de déclencher une exception d'exécution). Rappelons également que C# prend en charge les types de données pouvant être nullable (voir le [[Chapitre 4#Comprendre les types nullable en C|Chapitre 4]]), qui sont idéaux pour interagir avec les colonnes de données susceptibles d'être `null` dans la table de base de données.
 
-## Synthèse Architecturale d'ADO.NET
+## Synthèse des explications précédente (avec Gemini)
 
 L'architecture d'ADO.NET repose sur un ensemble d'interfaces standardisées définies dans `System.Data`. Ces interfaces imposent des contrats stricts à tous les fournisseurs de bases de données, garantissant une logique de programmation identique, que vous utilisiez `Npgsql` (PostgreSQL) ou `Microsoft.Data.SqlClient` (SQL Server).
 
@@ -387,7 +383,7 @@ Représente un argument injecté dynamiquement dans la requête. C'est le boucli
 		* `.ParameterName` (ex: `@id`)
 		* `.Value`
 
-* **`IDbDataParameter` (Relationnel) :** Hérite de la base et ajoute les contraintes strictes des SGBDR.
+* **`IDbDataParameter` (Relationnel) :** Hérite de la base et ajoute les contraintes strictes des SGBD.
 	* *Membres :* 
 		* `.Size` (Taille max)
 		* `.Precision`
@@ -652,7 +648,7 @@ Plutôt que d'exécuter chaque commande SQL les unes à la suite des autres dans
 
 
 -- Nettoyage complet de la base à chaque exécution du script maître (très utilse si on a fait des bétises)
-DROP PROCEDURE IF EXISTS GetPetName;
+DROP FUNCTION IF EXISTS GetPetName;
 DROP TABLE IF EXISTS CreditRisks CASCADE;
 DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Inventory CASCADE;
@@ -882,31 +878,66 @@ ADD CONSTRAINT FK_CreditRisks_Customers FOREIGN KEY (CustomerId) REFERENCES Cust
 >[!note]
 >Si vous vous demandez pourquoi il y a des colonnes pour `FirstName` et `LastName` *et* une relation avec le table client, c'est simplement à des fins de démonstration. Je pourrais trouver une raison créative à cela, mais en fin de compte, ils sont utilisés dans des exemples ultérieurs du livre.
 
-## Création de la procédure stockée `GetPetName()`
+## Création de la procédure stockée / fonction  `GetPetName()`
 
 Plus loin dans ce chapitre, vous apprendrez à utiliser ADO.NET pour appeler des procédures stockées. Comme vous savez peut-être déjà, **les procédures stockées sont des routines de code stockées dans une base de données qui font quelque chose. Comme les méthodes C#, les procédures stockées peuvent renvoyer des données ou simplement opérer sur des données sans rien renvoyer**. ***==Vous ajouterez une seule procédure stockée qui renverra le nom familier d’une automobile, en fonction du `carId` fourni==***. Pour ce faire, créez un nouvelle requête / script et entrez la commande SQL suivante :
 
 ```sql
--- Très pratique en phase de test. Si vous lancez le script plusieurs fois, il écrasera l'ancienne version au lieu de planter en disant "la procédure existe déjà"
-CREATE OR REPLACE PROCEDURE GetPetName(
-    carID INT,
-    OUT petName VARCHAR(50)
+CREATE OR REPLACE FUNCTION GetPetName(
+    carID INT
 )
--- Le mot-clé OUT se place avant le nom du paramètre en PostgreSQL, alors que SQL Server le place après (output).
+RETURNS VARCHAR(50) -- On déclare explicitement le type de données retourné
 LANGUAGE plpgsql
 AS $$
--- Le bloc BEGIN ... END; : Obligatoire en PostgreSQL pour délimiter le corps exécutable de la procédure.
+DECLARE
+    -- On crée une variable interne pour stocker le résultat avant le RETURN
+    result_petName VARCHAR(50);
 BEGIN
     SELECT Inventory.PetName 
-    INTO petName 
+    INTO result_petName 
     FROM Inventory 
     WHERE Inventory.Id = carID;
+
+    -- On renvoie explicitement la valeur
+    RETURN result_petName;
 END;
 $$;
--- Les symboles $$ servent de délimiteurs de texte de niveau supérieur pour éviter que PostgreSQL ne se mélange les pinceaux avec les points-virgules ; qui se trouvent à l'intérieur du bloc de code
+
 ```
 
+> [!warning] Ultra important pour éviter des problèmes plus tard avec la base de donnée Postgres (avec Gemini) 
+> ## Il faut migrer vers une `FUNCTION` avec PostgreSQL
+> 
+> Si on garde une `PROCEDURE` avec Postgres, plus tard lorsque l'on voudra l'exécuter, l'utilisation de `CommandType.StoredProcedure` avec un paramètre `OUT` (technique standard de SQL Server présentée dans le livre) se transforme en un enfer technique insoluble sous PostgreSQL en raison de contraintes architecturales profondes.
+> 
+> ### 1. La différence fondamentale : FUNCTION vs PROCEDURE (Postgres)
+> * **`FUNCTION`** : Conçue pour calculer, transformer et **renvoyer des données** via une clause `RETURNS`. C'est l'équivalent d'une méthode C# qui retourne un type (ex: `string MyMethod()`).
+> * **`PROCEDURE`** : Conçue pour exécuter des scripts d'action ou des tâches de maintenance (comme des batchs). Elle a la capacité unique de gérer ses propres transactions internes (`COMMIT`/`ROLLBACK`), mais elle n'est pas faite à l'origine pour retourner des données à une application.
+> 
+> ### 2. Le choc des philosophies : SQL Server vs PostgreSQL
+> * **SQL Server** : Ne fait pas de distinction stricte. Les procédures stockées sont l'outil universel. Il traite les paramètres `OUTPUT` comme des variables d'objets C# classiques que l'on déclare à l'entrée et que l'on récupère à la sortie via la collection `.Parameters`.
+> * **PostgreSQL** : Très rigide sur son protocole réseau. Il considère un argument `OUT` comme une **colonne de résultat** (un jeu de données). Pour Postgres, un paramètre `OUT` ne se déclare pas lors de l'appel depuis l'application ; il se lit comme si on exécutait un `SELECT`.
+> 
+> ### 3. Le tournant historique de PostgreSQL 11
+> * **Avant Postgres 11** : Les "vraies" procédures n'existaient pas. On simulait tout avec des `FUNCTION`. Le pilote .NET (`Npgsql`) arrivait à tricher en convertissant de force `CommandType.StoredProcedure` en un `SELECT` en arrière-plan.
+> * **Depuis Postgres 11** : Les vraies `PROCEDURE` sont apparues, s'exécutant obligatoirement avec le mot-clé natif **`CALL`**. 
+> * **Le conflit .NET** : L'équipe de `Npgsql` a refusé de modifier le comportement historique de `CommandType.StoredProcedure` pour préserver la rétrocompatibilité. Résultat : utiliser `CommandType.StoredProcedure` sur une procédure Postgres 11+ génère une syntaxe invalide et lève systématiquement l'erreur `procedure does not exist`.
+> 
+> ---
+> 
+> ##  L'enfer de code que l'on évite en fuyant la procédure
+> 
+> Si on s'obstine à vouloir appeler la procédure avec son paramètre `OUT` depuis C# en passant par du texte brut (`CALL getpetname(...)`), on entre dans une impasse de bugs croisés :
+> 1. **Erreur d'incompatibilité de type** : Si on nomme les paramètres avec des `@`, le parseur de `Npgsql` détecte une variable textuelle et décrète que c'est une donnée d'**entrée** obligatoire. En voyant votre configuration C# `Direction = Output`, il lève l'exception : `Parameter referenced in SQL but is an out-only parameter`.
+> 2. **Erreur de mode de position** : Si on tente de nettoyer le texte SQL en utilisant la syntaxe positionnelle native de Postgres (`$1, $2`), le pilote bloque le code et lève : `Output parameters are not supported in positional mode`.
+> 
+> ### La Solution Élégante : La Règle d'Or sous Postgres
+> Pour rester serein, la règle est simple : dès qu'une routine SQL doit **renvoyer une valeur unique** à votre code .NET, **bannissez la `PROCEDURE` et créez une `FUNCTION`**.
+> * **En SQL** : Un script propre avec un `RETURNS VARCHAR`.
+> * **En C#** : Un simple `SELECT ma_fonction(@id)` en mode texte, exécuté via une seule ligne de code propre grâce à **`command.ExecuteScalar()`**. Plus aucun paramètre `OUT` ne vient polluer votre code C#.
+
 ## Ajout d'entrées de test
+
 Les bases de données sont plutôt ennuyeuses sans données, et c'est une bonne idée d'avoir des scripts capables de charger rapidement les tests.
 
 ### Entrées pour la table `Makes`
@@ -999,14 +1030,16 @@ On peut lancer la commande suivante (depuis le mac où le pc Linux, cela n'à pa
 >Pour que tout fonctionne parfaitement, on doit sortir la création de la base de donnée  du fichier `main.sql`
 
 ```bash
-cat CreateDatabase.sql | pgcli -h IP_PC_ARCH -U postgres -d postgres
+cat CreateDatabase.sql | pgcli -h XXXX -U postgres -d postgres
 ```
 
 Enfin, on peut exécuter le fichier *main.sql* pour créer les tables et les peupler : 
 
 ```bash
-psql -h IP_PC_ARCH -U postgres -d autolot -f main.sql
+psql -h XXXX -U postgres -d autolot -f main.sql
 ```
+
+>Remplacez `XXXX` par `localhost` si la base de donnée est stocké sur votre machine ou l'adresse IP de la machine qui héberge.
 
 **Voilà, la base de données `AutoLot` est terminée !** ***==Bien sûr, elle est loin d'être une base de données d'application réelle, mais elle répondra à vos besoins pour ce chapitre et sera complétée dans les chapitres consacrés à Entity Framework Core==***. Maintenant que vous disposez d'une base de données pour vos tests, vous pouvez explorer en détail le modèle de fabrique de fournisseurs de données ADO.NET.
 
@@ -1077,7 +1110,7 @@ Ajoutez un nouveau fichier JSON nommé *appsettings.json* au projet et mettez à
 >[!warning] Gross différence avec le livre
 >Comme le livre est un livre d'apprentisage, les information sensible sont écris en durs dans le fichier *appsettings.json*.
 >
-> Comme ces notes ansi que les projet seront publié sur mes repo GitHub, je dois **Absolument évité**  cela.
+> Comme ces notes ansi que les différents projets seront publié sur mes repo GitHub, je dois **Absolument évité**  cela.
 
 ```json
 {
@@ -1102,7 +1135,7 @@ ip -a
 fastfetch
 ```
 
-**Pour des questions de sécurité**, je vais isoler les chaîne de connexion aux différents fournisseurs de données dans un fichier *.env*. Ce fichier sera lus par les différents application crée dans ce chapitre et dans les chapitres suivants pour extraire la bonne chaîne de connexion selon la base de donnée à laquelle on veut se connecter. **En harmonisant les noms dans les deux fichier, le code sera plus simple ensuite.
+**Pour des questions de sécurité**, **je vais isoler les chaîne de connexion aux différents fournisseurs de données dans un fichier** *.env*. ***==Ce fichier sera lus par les différents application crée dans ce chapitre et dans les chapitres suivants pour extraire la bonne chaîne de connexion selon la base de donnée à laquelle on veut se connecter.==*** **En harmonisant les noms dans les deux fichier, le code sera plus simple ensuite.**
 
 >[!warning] Il faut veillé à ce qu'un fichier *.gitignore* existe dans un des dossier plus élevé et que le fichier *.env* soit listé dedans pour éviter de le deployé sur *GitHub*. (Pour les autres système de cloud, à éffectuer au cas par cas)
 
@@ -1137,9 +1170,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 ```
 
-Puisque le fichier *.env* va rester sagement à la racine du projet, la détection de celui ci par l'application sera plus ardue.
-
-Pour résoudre ce problème de manière universelle (que l'on lance l'app depuis le   terminal ou depuis un IDE), on cherche d'abord dans le dossier d'exécution, puis dans le dossier parent si nécessaire :
+Puisque le fichier *.env* va rester sagement à la racine du projet, le code de l'application pour le détecter sera plus comlexe. Pour résoudre ce problème de manière universelle (que l'on lance l'app depuis le   terminal ou depuis un IDE), on cherche d'abord dans le dossier d'exécution, puis dans le dossier parent si nécessaire :
 
 ```cs
 Console.Title = "Fun with Data Provider Factories";
@@ -1234,7 +1265,7 @@ static (
     string providerName = configuration["ProviderName"];
 
     if (!Enum.TryParse(providerName, true, out DataProviderEnum provider))
-        throw new Exception("Invalid data provider value supplie;");
+        throw new Exception("Invalid data provider value supplied");
 
     // 4. RÉCUPÉRATION DE LA CHAÎNE DE CONNEXION FUSIONNÉE
     // On utilise GetSection() pour éviter d'avoir des problèmes de casse
@@ -1286,7 +1317,7 @@ Your data reader object is a: NpgsqlDataReader
 -> Car #9 is a Yugo.
 ```
 
-***==Modifiez maintenant le fichier de configuration pour spécifier un autre fournisseur. Le code détectera la chaîne de connexion correspondante et produira le même résultat qu'auparavant, à l'exception des informations spécifiques au type.==**
+**Modifiez maintenant le fichier de configuration pour spécifier un autre fournisseur.** ***==Le code détectera la chaîne de connexion correspondante et produira le même résultat qu'auparavant, à l'exception des informations spécifiques au type.==***
 
 **Bien sûr, compte tenu de votre expérience avec ADO.NET, vous n'êtes peut-être pas certain du rôle exact des objets de connexion, de commande et de lecteur de données.** **==Ne vous préoccupez pas des détails pour le moment (il reste encore de nombreuses pages dans ce chapitre !).==** **À ce stade, il suffit de savoir que vous pouvez utiliser le modèle de fabrique de fournisseurs de données ADO.NET pour créer une base de code unique capable d'utiliser différents fournisseurs de données de manière déclarative.**
 
@@ -1326,8 +1357,8 @@ Pour commencer, créez un nouveau projet d'application console nommé *AutoLot.D
 
 - ~~`Microsoft.Data.SqlClient`~~ 
 - `Npgsql`. 
-- `Microsoft.Extensions.Configuration
-- `Microsoft.Extensions.Configuration.EnvironmentVariables
+- `Microsoft.Extensions.Configuration`
+- `Microsoft.Extensions.Configuration.EnvironmentVariables`
 
 Voici le code complet dans le fichier *Program.cs* (l'analyse suivra) :
 
@@ -1410,21 +1441,22 @@ static void LoadEnvVariables()
 }
 ```
 
->[!tip] La méthode de chargement et d'extraction du fichier *.env* peut être effectué en utilisant la méthode `Env.Load()` du package NuGet `DotNetEnv`. J'ai choisi de ne pas le faire pour une question de d'apprentissage
+>[!tip] Rappel :
+>La méthode de chargement et d'extraction du fichier *.env* peut être effectué en utilisant la méthode `Env.Load()` du package NuGet `DotNetEnv`. J'ai choisi de ne pas le faire pour une question de d'apprentissage
 
 ## Utilisation des objets de connexion
 
-**La première étape lors de l'utilisation d'un fournisseur de données consiste à établir une session avec la source de données à l'aide de l'objet de connexion** (==qui hérite de `DbConnection`==). ***==Pour PostgreSQL, cet objet se nomme `NpgsqlConnection`==***. Les objets de connexion .NET sont fournis avec une *chaîne de connexion formatée* ; **==cette chaîne contient plusieurs paires nom-valeur, séparées par des points-virgules. Vous utilisez ces informations pour identifier l'adresse de la machine à laquelle vous souhaitez vous connecter, les paramètres de sécurité requis, le nom de la base de données sur cette machine et d'autres paramètres spécifiques à PostgreSQL.==**
+**La première étape lors de l'utilisation d'un fournisseur de données consiste à établir une session avec la source de données à l'aide de l'objet de connexion** (==qui hérite de `DbConnection`==). ***==Pour PostgreSQL, cet objet se nomme `NpgsqlConnection`==***. Les objets de connexion .NET sont fournis avec une *chaîne de connexion formatée* ; **cette chaîne contient plusieurs paires nom-valeur, séparées par des points-virgules.** **==Vous utilisez ces informations pour identifier l'adresse de la machine à laquelle vous souhaitez vous connecter, les paramètres de sécurité requis, le nom de la base de données sur cette machine et d'autres paramètres spécifiques à PostgreSQL.==**
 
 **Comme vous pouvez le déduire du code, le paramètre `Database`** (ou `Initial Catalog`) **fait référence à la base de données PostgreSQL avec laquelle vous souhaitez établir une session. Le paramètre `Host` (ou `Server`, ou `Data Source`) identifie la machine qui héberge la base de données.**
 
 **Dans le cas d'un conteneur Docker ou d'une installation locale, on utilise souvent `localhost` ou `127.0.0.1` pour faire référence à la machine hôte. Pour le port, PostgreSQL utilise le port par défaut `5432`** (*==contrairement à SQL Server qui utilise généralement `1433`==*). ***==Si votre base de données se trouve sur une machine distante, vous devez simplement remplacer `localhost` par l'adresse IP publique ou le nom de domaine de ce serveur distant (par exemple, `Host=192.168.1.50`).==***
 
-Contrairement à SQL Server, **PostgreSQL ne gère pas le concept d'instances nommées** (comme `SERVEUR\INSTANCE`). **==Si vous souhaitez exécuter plusieurs bases de données PostgreSQL indépendantes sur une même machine, vous devez simplement les configurer pour qu'elles écoutent sur des *ports différents* (par exemple, `Host=localhost;Port=5433`).==**
+**Contrairement à SQL Server, PostgreSQL ne gère pas le concept d'instances nommées** (comme `SERVEUR\INSTANCE`). **==Si vous souhaitez exécuter plusieurs bases de données PostgreSQL indépendantes sur une même machine, vous devez simplement les configurer pour qu'elles écoutent sur des *ports différents* (par exemple, `Host=localhost;Port=5433`).==**
 
 De plus, **vous devez fournir les informations d'identification requises via les paramètres `Username` (ou `User Id`) et `Password`**. ***==Par défaut, l'administrateur d'un serveur PostgreSQL se nomme `postgres`.==*** **Notez que PostgreSQL n'utilise pas la "Sécurité Intégrée Windows" de la même manière que SQL Server ; l'authentification se fait majoritairement par couple utilisateur/mot de passe, ou via des certificats SSL sécurisés si la base est distante.**
 
-**Une fois votre chaîne de connexion établie, vous utilisez un appel à `Open()` pour établir la connexion avec le SGBD (*DBMS*)**. Outre les membres `ConnectionString`, `Open()` et `Close()`, un objet `DbConnection` fournit plusieurs membres permettant de configurer des paramètres supplémentaires (tels que le délai d'attente `CommandTimeout`, le chiffrement `SSL Mode`, ou la gestion des transactions). Le [[#Tableau 20-4 Membre du type `DbConnection`|Tableau 20-4]] liste certains (mais pas tous) des membres de la classe de base `DbConnection`.
+**Une fois votre chaîne de connexion établie, vous utilisez un appel à `Open()` pour établir la connexion avec le SGBD** (*DBMS*). Outre les membres `ConnectionString`, `Open()` et `Close()`, ==un objet `DbConnection` fournit plusieurs membres permettant de configurer des paramètres supplémentaires== (tels que le délai d'attente `CommandTimeout`, le chiffrement `SSL Mode`, ou la gestion des transactions). Le [[#Tableau 20-4 Membre du type `DbConnection`|Tableau 20-4]] liste certains (mais pas tous) des membres de la classe de base `DbConnection`.
 
 ###### Tableau 20-4: Membre du type `DbConnection`
 
@@ -1458,7 +1490,7 @@ static void ShowConnectionStatus(DbConnection connection)
 }
 ```
 
-**Bien que la plupart de ces propriétés soient explicites, la propriété `State` mérite une mention particulière. Vous pouvez lui attribuer n'importe quelle valeur de l'énumération `ConnectionState`, comme illustré ici :
+**Bien que la plupart de ces propriétés soient explicites, la propriété `State` mérite une mention particulière. Vous pouvez lui attribuer n'importe quelle valeur de l'énumération `ConnectionState`, comme illustré ici :**
 
 ```cs
 public enum ConnectionState
@@ -1472,7 +1504,7 @@ public enum ConnectionState
 }
 ```
 
-**Cependant, les seules valeurs valides pour `ConnectionState` sont `ConnectionState.Open`, `ConnectionState.Connecting`, et `ConnectionState.Closed` (les autres membres de cette énumération sont réservés pour un usage futur).** De plus, ==il est toujours possible de fermer une connexion, même si son état actuel est `ConnectionState.Closed`.
+**Cependant, les seules valeurs valides pour `ConnectionState` sont `ConnectionState.Open`, `ConnectionState.Connecting`, et `ConnectionState.Closed` (les autres membres de cette énumération sont réservés pour un usage futur).** De plus, ==il est toujours possible de fermer une connexion, même si son état actuel est `ConnectionState.Closed`.==
 
 ### Utilisation des objets `ConnectionStringBuilder`
 
@@ -1860,7 +1892,7 @@ public List<CarViewModel> GetAllInventory()
 	string sql =
 		@"SELECT i.Id, i.Color, i.PetName, m.Name as Make
 			FROM Inventory i
-			INNER JOIN Makes m in m.Id = i.MakeId";
+			INNER JOIN Makes m ON m.Id = i.MakeId";
 	using var command = new NpgsqlCommand(sql, _sqlConnection)
 	{
 		CommandType = CommandType.Text,
@@ -1902,7 +1934,7 @@ public CarViewModel GetCar(int id)
 	string sql =
 		$@"SELECT i.Id, i.Color, i.PetName, m.Name as Make
 		FROM Inventory i
-		INNER JOIN Makes m on m.Id = i.MakeId
+		INNER JOIN Makes m ON m.Id = i.MakeId
 		WHERE i.Id = {id}";
 	using NpgsqlCommand command = new(sql, _sqlConnection)
 	{
@@ -2079,6 +2111,948 @@ public void UpdateCarPetName(int id, string newPetName)
 >
 >	- **La mise à jour pour PostgreSQL** : Historiquement, PostgreSQL utilisait des jetons de position comme `$1`, `$2`, `$3` dans son code natif. **Mais la bonne nouvelle**, c'est que le fournisseur moderne `Npgsql` que vous utilisez fait un travail formidable d'abstraction. **Vous pouvez utiliser le symbole `@` avec PostgreSQL exactement comme si vous étiez sur SQL Server.** `Npgsql` se charge de traduire le `@MonParametre` en syntaxe native Postgres en arrière-plan.
 
+### Spécification des paramètres à l'aide du type `DbParameter`
+
+**Avant de créer une requête paramétrée, vous devez vous familiariser avec le type `DbParameter` (qui est la classe de base à l’objet paramètre spécifique d’un fournisseur)**. ***==Cette classe conserve un certain nombre de propriétés qui permettent vous de configurer le nom, la taille et le type de données du paramètre, ainsi que d'autres caractéristiques, y compris le la direction de déplacement du paramètre==***. Le [[#Tableau 20-6 Membres clés du type `DbParameter`|Tableau 20-6]] décrit certaines propriétés clés du type `DbParameter`.
+
+###### Tableau 20-6: Membres clés du type `DbParameter`
+
+| Propriété       | Description                                                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `DbType`        | Obtient ou définit le type de données natif du paramètre, représenté sous la forme d'un type de données CLR                            |
+| `Direction`     | Obtient ou définit si le paramètre est un paramètre d'entrée uniquement, de sortie uniquement, bidirectionnel ou une valeur de retour. |
+| `IsNullable`    | Obtient ou définit si le paramètre accepte les valeurs nulles                                                                          |
+| `ParameterName` | Obtient ou définit le nom du `DbParameter`                                                                                             |
+| `Size`          | Obtient ou définit la taille maximale des paramètres des données en octets ; ceci n'est utile que pour les données textuelles          |
+| `Value`         | Obtient ou définit la valeur du paramètre                                                                                              |
+
+Voyons maintenant comment remplir la collection d'objets compatibles `DBParameter` d'un objet de commande en remaniant les méthodes `InventoryDal` pour utiliser des paramètres.
+
+### Mise à jour de la méthode `GetCar`
+
+**L'implémentation originale de la méthode `GetCar()` utilisait l'interpolation de chaînes C# lors de la construction de la chaîne SQL pour récupérer les données du véhicule.** Pour mettre à jour cette méthode, créez une instance de `NpgsqlParameter` avec les valeurs appropriées, comme suit :
+
+```cs
+NpgsqlParameter param = new()
+{
+	// Le nom du paramètre est sensible à la casse
+	ParameterName = "@carId",
+	Value = id,
+	DbType = DbType.Int32,
+	Direction = ParameterDirection.Input,
+};
+```
+
+***==La valeur de `ParameterName` doit correspondre au nom utilisé dans la requête SQL (vous la mettrez à jour ensuite)==***, **==le type doit correspondre au type de colonne de la base de données, et la direction dépend du fait que le paramètre soit utilisé pour envoyer des données à la requête==** (`ParameterDirection.Input`) **==ou pour renvoyer des données de la requête==** (`ParameterDirection.Output`). Les paramètres peuvent également être définis comme entrées/sorties ou comme valeurs de retour (par exemple, d'une procédure stockée). 
+
+Ensuite, mettez à jour la chaîne SQL pour utiliser le nom du paramètre (`@carId`) au lieu de la construction d'interpolation de chaîne C# (`{id}`).
+
+```cs
+string sql =
+	@"SELECT i.Id, i.Color, i.PetName, m.Name as Make
+		  FROM Inventory i
+		  INNER JOIN Makes m ON m.Id = i.MakeId
+		  WHERE i.Id = @carId";
+```
+
+**La dernière mise à jour consiste à ajouter le nouveau paramètre à la collection `Parameters` de l'objet de commande.**
+
+```cs
+command.Parameters.Add(param);
+```
+
+### Mise à jour de la méthode `DeleteCar`
+
+De même, l'implémentation originale de la méthode `DeleteCar()` utilisait l'interpolation de chaînes C#. Pour mettre à jour cette méthode, créez une instance de `SqlParameter` avec les valeurs appropriées, comme suit :
+
+```cs
+var param = new NpgsqlParameter
+{
+	ParameterName = "@carId",
+	Value = id,
+	DbType = DbType.Int32,
+	Direction = ParameterDirection.Input,
+};
+```
+
+Ensuite, mettez à jour la chaîne SQL pour utiliser le nom du paramètre (`@carId`).
+
+```cs
+...
+try
+{
+	command.CommandType = CommandType.Text;
+	command.Parameters.Add(param);
+	command.ExecuteNonQuery();
+}
+...
+```
+
+### Mise à jour de la méthode `UpdateCarPetName`
+
+Cette méthode requiert deux paramètres : l’`Id` du véhicule et le nouveau `PetName`. Le premier paramètre est créé comme dans les deux exemples précédents (à l’exception du nom de la variable), et **==le second crée un paramètre qui correspond au type `NVarChar` de la base de données (le type du champ `PetName` de la table Inventory)==**. **Notez qu’une valeur `Size` est définie. Il est important que cette taille corresponde à celle de votre champ de base de données afin d’éviter tout problème lors de l’exécution de la commande.**
+
+```cs
+var paramId = new NpgsqlParameter
+{
+	ParameterName = "@carId",
+	Value = id,
+	DbType = DbType.Int32,
+	Direction = ParameterDirection.Input,
+};
+var paramName = new NpgsqlParameter
+{
+	ParameterName = "@petName",
+	Value = newPetName,
+	DbType = DbType.String,
+	Size = 50,
+	Direction = ParameterDirection.Input,
+};
+```
+
+Ensuite, mettez à jour la chaîne SQL pour utiliser les paramètres.
+
+```cs
+string sql = $"UPDATE Inventory SET PetName = @petName WHERE Id = @carId";
+```
+
+La dernière mise à jour consiste à ajouter les nouveaux paramètres à la collection `Parameters` de l'objet de commande.
+
+```cs
+command.Parameters.Add(paramId);
+command.Parameters.Add(paramName);
+```
+
+### Mise à jour de la méthode `InsertAuto`
+
+Ajoutez la version suivante de la méthode `InsertAuto()` pour utiliser les objets paramètres :
+
+```cs
+public void InsertAuto(Car car)
+{
+	OpenConnection();
+	// Notez les « espaces réservés » dans la requête SQL.
+	string sql =
+		"INSERT INTO Inventory"
+		+ "(MakeId, Color, PetName) VALUES"
+		+ "(@makeId, @color, @petName)";
+
+	// Cette commande aura des paramètre internes
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		// Remplis la collection de paramètres
+		NpgsqlParameter param = new()
+		{
+			ParameterName = "@makeId",
+			Value = car.MakeId,
+			DbType = DbType.Int32,
+			Direction = ParameterDirection.Input,
+		};
+		command.Parameters.Add(param);
+		param = new NpgsqlParameter
+		{
+			ParameterName = "@color",
+			Value = car.Color,
+			DbType = DbType.String,
+			Size = 50,
+			Direction = ParameterDirection.Input,
+		};
+		command.Parameters.Add(param);
+		param = new NpgsqlParameter
+		{
+			ParameterName = "@petName",
+			Value = car.PetName,
+			DbType = DbType.String,
+			Size = 50,
+			Direction = ParameterDirection.Input,
+		};
+		command.Parameters.Add(param);
+
+		command.ExecuteNonQuery();
+	}
+	CloseConnection();
+}
+```
+
+***==Bien que la création d'une requête paramétrée nécessite souvent plus de code, elle offre une méthode plus pratique pour ajuster les instructions SQL par programmation et obtenir de meilleures performances globales. Elle est également très utile pour déclencher une procédure stockée.==***
 
 
+## Utilisation des routines stockées avec PostgreSQL
 
+**Rappelons qu'une fonction stockée est un bloc de code SQL nommé, enregistré directement dans la base de données.** ==Vous pouvez créer des fonctions PostgreSQL pour qu'elles renvoient un ensemble de lignes, des types de données scalaires, ou qu'elles effectuent toute autre opération pertinente== (comme insérer, mettre à jour ou supprimer des enregistrements) ; ==elles peuvent également accepter un nombre quelconque de paramètres.== **Le résultat final est une unité de travail qui se comporte comme une méthode classique, à la différence qu'elle est située dans un magasin de données plutôt que dans un objet métier binaire.** ***==Actuellement, votre base de données `AutoLot` contient une seule fonction stockée nommée `getpetname`.==***
+
+Considérons maintenant la méthode suivante du type `InventoryDal`, qui appelle votre fonction stockée : **un aspect important du développement avec PostgreSQL et le pilote `Npgsql` est de se rappeler qu'il est techniquement préférable de traiter les fonctions comme des instructions SQL textuelles plutôt que via le mode automatique**. ***==Pour appeler une fonction, vous transmettez une requête de sélection (par exemple `SELECT getpetname(@carId)`) à la propriété `CommandText` de l'objet commande et vous laissez la propriété `CommandType` sur sa valeur par défaut, à savoir `CommandType.Text`.==***
+
+>[!note] Rappel
+Bien que .NET propose la valeur `CommandType.StoredProcedure`, son utilisation avec les versions modernes de PostgreSQL — qui séparent strictement les fonctions des procédures — génère de nombreuses incompatibilités de syntaxe avec le mot-clé natif `CALL` et les paramètres de sortie. Utiliser une approche textuelle explicite reste la méthode la plus fiable et la plus performante avec ce fournisseur).
+
+```cs
+public string LookUpPetName(int carId)
+{
+	OpenConnection();
+	string carPetName;
+	string sql = "SELECT GetPetName(@carId)";
+
+	using (var command = new NpgsqlCommand(sql, _sqlConnection))
+	{
+		// StoredProdedure est très différent entre Postgres
+		// et SQL Server. Ici, il ne faut pas l'utiliser
+		command.CommandType = CommandType.Text;
+
+		// Un seul paramiètre d'entrée tout simple
+		command.Parameters.AddWithValue("@carId", carId);
+
+		carPetName = (string)command.ExecuteScalar();
+	}
+	CloseConnection();
+	return carPetName;
+}
+```
+
+==Contrairement à l'architecture historique de SQL Server qui repose sur des objets de paramètres configurés avec `ParameterDirection.Output`, PostgreSQL gère les valeurs de retour des fonctions de manière beaucoup plus naturelle== : **il les renvoie directement sous forme de résultat tabulaire, comme n'importe quel `SELECT`.** De ce fait, votre collection de paramètres en C# n'a besoin de contenir que le paramètre d'entrée (l'identifiant du véhicule). 
+
+**Une fois la requête transmise à la base de données par un appel à `ExecuteScalar()`, vous obtenez directement la valeur de retour unique renvoyée par votre fonction, sans avoir à manipuler ou inspecter manuellement une collection de paramètres de sortie.** 
+
+```cs
+// Récupère le résultat de la routine stokée
+carPetName = (string)command.ExecuteScalar();
+```
+
+**==À ce stade, vous disposez d'une bibliothèque d'accès aux données extrêmement simple que vous pouvez utiliser pour créer un client permettant d'afficher et de modifier vos données.==** ***==Vous n'avez pas encore étudié la création d'interfaces utilisateur graphiques ; vous allez donc maintenant tester votre bibliothèque de données à partir d'une nouvelle application console.==***
+
+# Création d'une application console cliente 
+
+Ajoutez une nouvelle application console (nommée *AutoLot.Client*) à la solution `AutoLot.Dal` et ajoutez une référence au projet *AutoLot.Dal*. Supprimez le code généré dans le fichier *Program.cs* et ajoutez les instructions `using` suivantes en haut du fichier :
+
+```cs
+using AutoLot.Dal.Models;
+using AutoLot.Dal.DataOperations;
+using AutoLot.Dal.BulkImport;
+using Microsoft.Extensions.Configuration;
+```
+
+>[!warning] Si on utilise un fichier *.env* pour la chaîne de connexion, il faut aussi importé les packages suivants:
+> `Microsoft.Extensions.Configuration`  `Microsoft.Extensions.Configuration.EnvironmentVariables`
+
+Ensuite, ajoutez les instructions de niveau supérieur suivantes pour exécuter le code `AutoLot.Dal` :
+
+>[!tip] Le corps de la méthode `LoadEnvVariables()` à été omis par souci de brièveté. Elle est exactement la même que celle utilisé pour le projet *AutoLot.DataReader*.
+ 
+```cs
+// Importe les variables d'environement (dans le fichier .env)
+LoadEnvVariables();
+
+// Crée l'objet permettant d'extraire les différents
+// élément composant la châine de connexion
+var config = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+
+// construit la chaîne de connection
+var conStringbuilder = new NpgsqlConnectionStringBuilder
+{
+    Host = config["Postgres:Host"],
+    Username = config["Postgres:Username"],
+    Database = config["Postgres:Database"],
+    Password = config["Postgres:Password"],
+};
+
+// Choix de sécurité :
+// Il faut fournir obligatoirement une chaine de connection à InventoryDal
+var iDal = new InventoryDal(conStringbuilder.ConnectionString);
+
+List<CarViewModel> list = iDal.GetAllInventory();
+
+Console.WriteLine("*************** All Cars ***************");
+Console.WriteLine("Id\tMake\tColor\tPet Name");
+foreach (var item in list)
+    Console.WriteLine($"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}");
+Console.WriteLine();
+
+CarViewModel car = iDal.GetCar(
+    list.OrderBy(x => x.Color).Select(x => x.Id).First()
+);
+Console.WriteLine("*************** First Car By Color ***************");
+Console.WriteLine("CarId\tMake\tColor\tPet Name");
+Console.WriteLine($"{car.Id}\t{car.Make}\t{car.Color}\t{car.PetName}");
+
+try
+{
+    // Cette opération échouera en raison de données
+    // liées dans la table Orders
+    iDal.DeleteCar(5);
+    Console.WriteLine("Car deleted.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"An exception occured: {ex.Message}");
+}
+
+iDal.InsertAuto(
+    new Car
+    {
+        Color = "Blue",
+        MakeId = 5,
+        PetName = "TowMonster",
+    }
+);
+list = iDal.GetAllInventory();
+var newCar = list.First(x => x.PetName == "TowMonster");
+Console.WriteLine("*************** New Car ***************");
+Console.WriteLine("CarId\tMake\tColor\tPet Name");
+Console.WriteLine(
+    $"{newCar.Id}\t{newCar.Make}\t{newCar.Color}\t{newCar.PetName}"
+);
+iDal.DeleteCar(newCar.Id);
+
+var petName = iDal.LookUpPetName(car.Id);
+Console.WriteLine("*************** New Car ***************");
+Console.WriteLine($"Car pet name: {petName}");
+
+Console.Write("Press enter to continue...");
+Console.ReadLine();
+```
+
+# Comprendre les transactions de base de données
+
+L'outil suivant que nous allons examiner est l'utilisation des transactions de base de données. **En termes simples, une** *transaction* **est un ensemble d'opérations de base de données qui réussissent ou échouent collectivement**. ***==Si l'une des opérations échoue, toutes les autres sont annulées, comme si rien ne s'était passé==***. Comme vous pouvez l'imaginer, **les transactions sont essentielles pour garantir la sécurité, la validité et la cohérence des données des tables.**
+
+**Les transactions sont importantes lorsqu'une opération de base de données implique l'interaction avec plusieurs tables ou plusieurs routines stockées (ou une combinaison d'éléments de base de données)**. ==L'exemple classique de transaction concerne le transfert de fonds entre deux comptes bancaires.== Par exemple, si vous deviez transférer 500 € de votre compte épargne vers votre compte courant, les étapes suivantes se dérouleraient de manière transactionnelle :
+
+1. La banque devrait retirer 500 € de votre compte épargne.
+2. La banque devrait créditer votre compte courant de 500 €.
+
+Il serait extrêmement problématique que l'argent soit retiré du compte épargne mais non transféré vers le compte courant (en raison d'une erreur de la banque), car vous perdriez alors 500 € ! Cependant, **si ces étapes sont regroupées dans une transaction de base de données, le SGBD garantit que toutes les étapes connexes se déroulent comme une seule unité**. ***==Si une partie de la transaction échoue, l'opération entière est annulée et rétablie à son état initial. En revanche, si toutes les étapes réussissent, la transaction est validée.==***
+
+>[!note]
+Vous connaissez peut-être l'acronyme ACID grâce à la documentation sur les transactions. Il représente les quatre propriétés clés d'une transaction bien comme il faut: *atomique* (tout ou rien), *cohérente* (les données restent stables tout au long de la transaction), *isolée* (les transactions n'interfèrent pas avec les autres opérations) et *durable* (les transactions sont enregistrées et consignées).
+
+**Il s'avère que la plateforme .NET prend en charge les transactions de différentes manières.** Ce chapitre abordera l'objet transaction de votre fournisseur de données ADO.NET (`SqlTransaction` ou `NpgsqlTransaction`).
+
+Outre la prise en charge transactionnelle intégrée aux bibliothèques de classes de base .NET, *==il est possible d'utiliser le langage SQL de votre système de gestion de base de données. Par exemple, vous pouvez créer une procédure stockée utilisant les instructions `BEGIN TRANSACTION`, `ROLLBACK` et `COMMIT`.==*
+
+>[!warning] Différence entre Sql Server et PostgresSQL (Avec Gemini)
+>
+>Dans PostgreSQL, il existe une règle absolue concernant l'architecture du moteur : **il est strictement interdit de gérer explicitement des transactions (`BEGIN`, `COMMIT`, `ROLLBACK`) à l'intérieur d'une `FUNCTION`.**
+>
+>Une fonction PostgreSQL est conçue pour être exécutée au milieu d'une autre requête (par exemple : `SELECT GetPetName(id) FROM Inventory`). Si la fonction pouvait fermer ou valider une transaction avec un `COMMIT` en plein milieu du traitement, cela détruirait l'intégrité de la requête principale.
+>
+>Si vous écrivez `COMMIT;` ou `ROLLBACK;` dans le corps de votre fonction PL/pgSQL, PostgreSQL lèvera immédiatement une erreur d'exécution : `ERROR: 2D000: invalid transaction termination`.
+
+
+## Membres clés d'un objet de transaction ADO.NET
+
+**Toutes les transactions que nous utiliserons implémentent l'interface `IDbTransaction`**. Rappelons-nous du début de ce chapitre que `IDbTransaction` définit les membres suivants :
+
+```cs
+public interface IDbTransaction : IDisposable
+{ 
+	IDbConnection Connection { get; }
+	IsolationLevel IsolationLevel { get; }
+	void Commit();
+	void Rollback();
+}
+```
+
+**Notez la propriété `Connection`, qui renvoie une référence à l'objet de connexion ayant initié la transaction courante (comme vous le verrez, vous obtenez un objet transaction à partir d'un objet de connexion donné).** **==Vous appelez la méthode `Commit()` lorsque chacune de vos opérations de base de données a réussi. Cela a pour effet de persister chaque modification en attente dans la base de données.==** *==Inversement, vous pouvez appeler la méthode `Rollback()` en cas d'exception d'exécution, ce qui indique au SGBD d'ignorer toutes les modifications en attente, laissant les données originales intactes.==*
+
+>[!note]
+>La propriété `IsolationLevel` d'un objet transaction permet de spécifier le niveau de protection d'une transaction contre les activités d'autres transactions parallèles. Par défaut, les transactions sont totalement isolées jusqu'à leur validation.
+
+**Outre les membres définis par l'interface `IDbTransaction`, les types `SqlTransaction` et `NpgsqlTransaction` définissent un membre supplémentaire nommé `Save()`, permettant de définir des** *points de sauvegarde*. ***==Ce concept permet d'annuler une transaction ayant échoué jusqu'à un point spécifié, plutôt que d'annuler la transaction entière.==*** ==Concrètement, lorsque vous appelez `Save()`, vous pouvez spécifier un moniker convivial. Lorsque vous appelez `Rollback()`, vous pouvez spécifier ce même moniker comme argument pour effectuer une annulation partielle. L'appel de `Rollback()` sans argument entraîne l'annulation de toutes les modifications en attente.==
+
+>[!info] 
+>Depuis les versions récentes de `Npgsql`, la méthode `Save()` a été intégrée pour s'aligner sur la classe abstraite `DbTransaction` de .NET, rendant le code identique à celui de SQL Server.
+
+# Ajout d'une méthode de transaction à `InventoryDal`
+
+**Voyons maintenant comment gérer les transactions ADO.NET par programmation.** Commencez par ouvrir le projet de bibliothèque de code *AutoLot.Dal* que vous avez créé précédemment et ajoutez une nouvelle méthode publique nommée `ProcessCreditRisk()` à la classe `InventoryDal` pour gérer les risques de crédit perçus. Cette méthode recherchera un client, l'ajoutera à la table `CreditRisks`, puis mettra à jour son nom de famille en ajoutant "(Credit Risk)" à la fin.
+
+```cs
+public void ProcessCreditRisk(bool throwEx, int customerId)
+{
+	OpenConnection();
+
+	// D'abord, charche le nom selon l'id client
+	string fName;
+	string lName;
+
+	var cmdSelect = new NpgsqlCommand(
+		"SELECT * FROM Customers WHERE id = @customerId",
+		_sqlConnection
+	);
+
+	var paramId = new NpgsqlParameter
+	{
+		ParameterName = "@customerId",
+		DbType = DbType.Int32,
+		Value = customerId,
+		Direction = ParameterDirection.Input,
+	};
+	cmdSelect.Parameters.Add(paramId);
+
+	using (var dataReader = cmdSelect.ExecuteReader())
+	{
+		if (dataReader.HasRows)
+		{
+			dataReader.Read();
+			fName = (string)dataReader["FirstName"];
+			lName = (string)dataReader["LastName"];
+		}
+		else
+		{
+			CloseConnection();
+			return;
+		}
+	}
+	cmdSelect.Parameters.Clear();
+
+	// Créer des objets de commande qui représentent
+	// chaque étape de l'opération.
+	var cmdUpdate = new NpgsqlCommand(
+		"UPDATE Customers SET LastName = LastName || ' (CreditRisk) ' WHERE Id = @customerId",
+		_sqlConnection
+	);
+	cmdUpdate.Parameters.Add(paramId);
+
+	var cmdInsert = new NpgsqlCommand(
+		"INSERT INTO CreditRisks (CustomerId, FirstName, LastName) VALUES (@customerId, @firstName, @lastName)",
+		_sqlConnection
+	);
+	var parameterId2 = new NpgsqlParameter
+	{
+		ParameterName = "@customerId",
+		DbType = DbType.Int32,
+		Value = customerId,
+		Direction = ParameterDirection.Input,
+	};
+	var parameterFirstName = new NpgsqlParameter
+	{
+		ParameterName = "@firstName",
+		Value = fName,
+		DbType = DbType.String,
+		Size = 50,
+		Direction = ParameterDirection.Input,
+	};
+	var parameterLastName = new NpgsqlParameter
+	{
+		ParameterName = "@lastName",
+		Value = lName,
+		DbType = DbType.String,
+		Size = 50,
+		Direction = ParameterDirection.Input,
+	};
+	cmdInsert.Parameters.Add(parameterId2);
+	cmdInsert.Parameters.Add(parameterFirstName);
+	cmdInsert.Parameters.Add(parameterLastName);
+
+	// Nous obtiendrons ceci à partir de l'objet de connexion.
+	NpgsqlTransaction tx = null;
+	try
+	{
+		tx = _sqlConnection.BeginTransaction();
+		// Inscrire les commandes dans cette transaction.
+		cmdInsert.Transaction = tx;
+		cmdUpdate.Transaction = tx;
+
+		// Exécute les commandes
+		cmdInsert.ExecuteNonQuery();
+		cmdUpdate.ExecuteNonQuery();
+
+		// Simule une erreur
+		if (throwEx)
+		{
+			throw new Exception("Sorry! Database error! Tx failed...");
+		}
+		// Valide la transaction !
+		tx.Commit();
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine(ex.Message);
+		// Toute erreur entraînera l'annulation de la transaction.
+		// Utilisation du nouvel opérateur d'accès conditionnel
+		// pour vérifier la valeur nulle.
+		tx?.Rollback();
+	}
+	finally
+	{
+		CloseConnection();
+	}
+}
+```
+
+==Ici, vous utilisez un paramètre `bool` entrant pour indiquer si vous devez lever une exception arbitraire lorsque vous tenterez de traiter le client concerné.== **Cela vous permet de simuler une circonstance imprévue qui entraînera l'échec de la transaction de base de données**. Bien entendu, cet exemple est donné à titre illustratif uniquement ; ***==une véritable méthode de transaction de base de données ne permettrait pas à l'appelant de provoquer un échec de la logique sans raison particulière !==***
+
+**Notez que vous utilisez deux objets `NpgsqlCommand` pour représenter chaque étape de la transaction que vous allez lancer.** Après avoir obtenu le prénom et le nom du client à partir du paramètre `customerId` entrant, **==vous pouvez obtenir un objet `NpgsqlTransaction` valide à partir de l'objet de connexion en utilisant `BeginTransaction()`.==** **Ensuite, et surtout, vous *devez lier chaque objet de commande* en assignant la propriété `Transaction` à l'objet transaction que vous venez d'obtenir. Si vous ne le faites pas, la logique d'insertion/mise à jour ne s'exécutera pas dans un contexte transactionnel.**
+
+**Après avoir appelé `ExecuteNonQuery()` sur chaque commande, vous levez une exception si (et seulement si) la valeur du paramètre `bool`  est `true`. Dans ce cas, toutes les opérations de base de données en attente sont annulées. Si vous ne levez pas d'exception, les deux étapes seront validées dans les tables de la base de données une fois que vous aurez appelé `Commit()`.**
+
+## Test de votre transaction de base de données
+
+Sélectionnez un client ajouté à la table `Customers` (par exemple, `Dave Benner, Id = 1`). Ensuite, ajoutez une nouvelle méthode nommée `FlagCustomer()` au fichier *Program.cs* du projet *AutoLot.Client*.
+
+```cs
+static void FlagCustomer(string connectionString)
+{
+    Console.WriteLine("***** Simple Transactio Example *****\n");
+
+    // Une manière simple pour permettre à la transaction de réussir ou non.
+    bool throwEx = true;
+    Console.Write("Do you want to throw an exception? (Y or N): ");
+    var userAnswer = Console.ReadLine();
+    if (
+        string.IsNullOrWhiteSpace(userAnswer)
+        || userAnswer.Equals("N", StringComparison.OrdinalIgnoreCase)
+    )
+    {
+        throwEx = false;
+    }
+    var iDal = new InventoryDal(connectionString);
+
+    // Traitement du client 1 –
+    // saisissez l'identifiant du client à déplacer.
+    iDal.ProcessCreditRisk(throwEx, 1);
+    Console.WriteLine("Check CreditRisk table for results");
+    Console.ReadLine();
+}
+```
+
+**Si vous exécutiez votre programme et choisissiez de lever une exception, vous constateriez que le nom de famille du client n'est pas modifié dans la table `Customers`, car la transaction entière a été annulée. En revanche, si vous ne leviez pas d'exception, vous constateriez que le nom de famille du client est mis à jour dans la table `Customers` et ajouté à la table `CreditRisks`.**
+
+# Exécution de copies en masse avec ADO.NET
+
+Dans les cas où vous devez charger un grand nombre d'enregistrements dans la base de données, les méthodes présentées jusqu'à présent seraient plutôt inefficaces. SQL Server dispose d'une fonctionnalité appelée *copie en bloc* (*Bulk Copy*), conçue spécifiquement pour ce scénario et implémentée dans ADO.NET via la classe `SqlBulkCopy`. Cette section du chapitre explique comment procéder avec ADO.NET.
+
+>[!important] L'équivalent PostgreSQL
+>PostgreSQL utilise la commande native `COPY` pour les transferts massifs de données. Npgsql expose cette fonctionnalité via `NpgsqlBinaryImporter`, qui est l'équivalent le plus rapide et le plus efficace de `SqlBulkCopy`.
+>
+>>[!warning] Pièges courants et différences avec SQL Server
+>>
+>>- **Pas de mapping automatique** : `SqlBulkCopy` permet de lier automatiquement les colonnes par leur nom. Avec Npgsql, vous devez écrire les colonnes dans l'ordre exact défini dans votre instruction `COPY`.
+>>- **Types de données stricts** : Vous devez spécifier explicitement le type Npgsql (`NpgsqlDbType`) lors de l'écriture pour éviter les erreurs de conversion (particulièrement pour les dates et les UUID).
+>>- **Gestion des transactions** : Si une seule ligne échoue pendant le processus `NpgsqlBinaryImporter`, l'intégralité de l'opération `COPY` est annulée par PostgreSQL.
+>>- **Casse des caractères (Case Sensitivity)** : PostgreSQL convertit par défaut les noms de tables et de colonnes en minuscules. Si vos tables contiennent des majuscules, vous devez les entourer de guillemets doubles (ex: `"MaTable"`).
+
+## Exploration des classes  `SqlBulkCopy` et `NpgsqlBinaryImporter`
+
+### SQL Server
+
+La classe `SqlBulkCopy` possède une méthode, `WriteToServer()` (et sa version asynchrone `WriteToServerAsync()`), qui traite une liste d'enregistrements et écrit les données dans la base de données plus efficacement qu'en écrivant une série d'instructions `INSERT` et en les exécutant avec un objet de commande**. Les surcharges de `WriteToServer` acceptent un `DataTable`, un `DataReader` ou un tableau de `DataRows`. 
+
+**Conformément à la thématique de ce chapitre, vous utiliserez la version `DataReader`. Pour cela, vous devez créer un lecteur de données personnalisé.**
+
+### PostgreSQL
+
+**La classe `NpgsqlBinaryImporter`** (obtenue via la méthode `BeginBinaryImport()` de `NpgsqlConnection`) **permet d'écrire des données dans la base de données plus efficacement qu'en écrivant une série d'instructions `INSERT` ou en utilisant un import textuel standard.** ***==Elle exploite le protocole de copie binaire natif de PostgreSQL pour maximiser les performances de traitement en masse.==*** **Contrairement à `SqlBulkCopy`, vous n'utilisez pas de `DataReader` directement avec une méthode dédiée, mais vous écrivez chaque ligne et chaque champ de manière séquentielle à l'aide des méthodes `Write()` et `WriteAsync()`**. 
+
+***vous devez gérer l'ouverture du flux binaire, mapper précisément chaque type de donnée .NET vers le type PostgreSQL correspondant, puis valider la transaction avec la méthode `Complete()` ou `CompleteAsync()`.***
+
+## Création d'un lecteur de données personnalisé
+
+>[!failure] Cette section complète est inutile pour PostgreSQL
+>
+>Au lieu d'extraire des données d'un lecteur (Sql Server), vous insérez activement des données dans une boucle de flux binaire.
+>
+>**Cela signifie que la création d'un objet personnalisé `IDataReader` ne sera utilisé nulle part dans le code qui vise PostgreSQL**
+>
+>---
+>
+> *La section sera gardée (en modifiant les élément Sql Server en Postgres pour éviter les erreurs lors de la compilation) pour complétude mais ne sera pas vérifié ni exécuté.*
+
+Vous souhaitez que votre lecteur de données personnalisé soit générique et contienne une liste des modèles à importer. Commencez par créer un nouveau dossier nommé `BulkImport` dans le projet *AutoLot.Dal*. Dans ce dossier, créez une nouvelle interface
+classe nommée *IMyDataReader.cs* qui implémente `IDataReader`, et mettez à jour le code comme suit : 
+
+```cs
+namespace AutoLot.Dal.BulkImport;
+public interface IMyDataReader<T> : IDataReader
+{ 
+	List<T> Records { get; set; }
+}
+```
+
+L'étape suivante consiste à implémenter le lecteur de données personnalisé. Comme vous l'avez déjà constaté, les lecteurs de données comportent de nombreux éléments. La bonne nouvelle est que, pour `SqlBulkCopy`, vous n'aurez à en implémenter qu'une poignée en quelques-uns. Créez une nouvelle classe nommée *MyDataReader.cs*, rendez-la publique et scellée, et implémentez l'interface `IMyDataReader`. Ajoutez un constructeur pour prendre en paramètre les enregistrements et définir la propriété.
+
+```cs
+public sealed class MyDataReader<T> : IMyDataReader<T>
+{
+	public List<T> Records { get; set; }
+	public MyDataReader(List<T> records)
+	{
+		Records = records;
+	}
+}
+```
+
+Utiliser *rolslyn* pour implémenter toutes les méthodes (ou copiez-les à partir des exemples de code qui suivent le [[#Tableau 20-7 Méthodes clé de `IDataReader` pour `SqlBulkCopy`|Tableau 20-7]]) ; vous disposerez ainsi de votre point de départ pour le lecteur de données personnalisé. Le [[#Tableau 20-7 Méthodes clé de `IDataReader` pour `SqlBulkCopy`|Tableau 20-7]] détaille les seules méthodes à implémenter dans ce scénario.
+
+
+###### Tableau 20-7: Méthodes clé de `IDataReader` pour `SqlBulkCopy`
+
+| Méthode          | Description                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `Read`           | Récupère l'enregistrement suivant ; renvoie vrai s'il existe un autre enregistrement ou faux si c'est la fin de la liste. |
+| `FieldCount`     | Obtient le nombre total de champs dans la source de données                                                               |
+| `GetValue`       | Obtient la valeur d'un champ en fonction de sa position ordinale.                                                         |
+| `GetSchemaTable` | Obtient les informations de schéma pour la table cible                                                                    |
+
+En commençant par la méthode `Read()`, renvoyez `false` si le lecteur est à la fin de la liste, et `true` (et incrémentez un compteur de classe) si le lecteur n'est pas à la fin de la liste. Ajoutez une variable de classe pour stocker l'index actuel de la `List<T>` et mettez à jour la méthode `Read()` comme ceci :
+
+```cs
+private int _currentIndex = -1;
+
+public bool Read()
+{
+	if (_currentIndex + 1 >= Records.Count)
+	{
+		return false;
+	}
+	_currentIndex++;
+	return true;
+}
+```
+
+Chacune des méthodes `get` et `FieldCount` nécessite une connaissance approfondie du modèle spécifique à charger. Voici un exemple de la méthode `GetValue()` (utilisant la classe `Car`) :
+
+```cs
+public object GetValue(int i)
+{
+   Car currentRecord = Records[_currentIndex] as Car;
+   return i switch
+   {
+	   0 => currentRecord.Id,
+	   1 => currentRecord.MakeId,
+	   2 => currentRecord.Color,
+	   3 => currentRecord.PetName,
+	   4 => currentRecord.TimeStamp,
+	   _ => string.Empty,
+   };
+}
+```
+
+La base de données ne comporte que cinq tables, mais cela signifie que vous avez tout de même quatre variantes du lecteur de données. Imaginez une véritable base de données de production avec beaucoup plus de tables ! Vous pouvez faire mieux grâce à la réflexion (traitée au [[Chapitre 17#Comprendre la réflexion|Chapitre 17]]) et LINQ to Objects (traité au [[Chapitre 13#Comprendre le rôle de LINQ|Chapitre 13]]). 
+
+Ajoutez des variables en lecture seule pour stocker les valeurs `PropertyInfo` du modèle, ainsi qu’un dictionnaire qui servira à stocker la position et le nom du champ dans la table SQL Server. Mettez à jour le constructeur pour obtenir les propriétés du type générique et initialisez le `Dictionary`. Voici le code ajouté :
+
+```cs
+private readonly PropertyInfo[] _propertyInfos;
+private readonly Dictionary<int, string> _nameDictionary;
+
+public MyDataReader(List<T> records)
+{
+	Records = records;
+	_propertyInfos = typeof(T).GetProperties();
+	_nameDictionary = new Dictionary<int,string>();
+}
+```
+
+Ensuite, mettez à jour le constructeur pour qu'il prenne en paramètre une `NpgsqlConnection` ainsi que des chaînes de caractères pour le schéma et le nom de la table pour la table dans laquelle les enregistrements seront insérés et ajoutez des variables de classe pour les valeurs.
+
+```cs
+private readonly NpgsqlConnection _connection;
+private readonly string _schema;
+private readonly string _tableName;
+
+public MyDataReader(
+	List<T> records,
+	NpgsqlConnection connection,
+	string schema,
+	string tableName
+)
+{
+	Records = records;
+	_propertyInfos = typeof(T).GetProperties();
+	_nameDictionary = new Dictionary<int, string>();
+
+	_connection = connection;
+	_schema = schema;
+	_tableName = tableName;
+}
+```
+
+Implémentez ensuite la méthode `GetSchemaTable()`. Celle-ci récupère les informations Postgres concernant la table cible.
+
+```cs
+public DataTable GetSchemaTable()
+{
+	using var schemaCommand = new NpgsqlCommand(
+		$"SELECT * FROM {_schema}.{_tableName}",
+		_connection
+	);
+	using var reader = schemaCommand.ExecuteReader(
+		CommandBehavior.SchemaOnly
+	);
+	return reader.GetSchemaTable();
+}
+```
+
+Mettez à jour le constructeur pour utiliser `SchemaTable` afin de construire le dictionnaire contenant les champs de la table cible dans l'ordre de la base de données.
+
+```cs
+public MyDataReader(
+	List<T> records,
+	NpgsqlConnection connection,
+	string schema,
+	string tableName
+)
+{
+	...
+	DataTable schemaTable = GetSchemaTable();
+	for (int x = 0; x < schemaTable?.Rows.Count; x++)
+	{
+		DataRow col = schemaTable.Rows[x];
+		var columnName = col.Field<string>("ColumnName");
+		_nameDictionary.Add(x, columnName);
+	}
+}
+```
+
+Les méthodes suivantes peuvent désormais être implémentées de manière générique, en utilisant les informations réfléchies :
+
+```cs
+public int FieldCount => _propertyInfos.Length;
+
+public object GetValue(int i) =>
+	_propertyInfos
+		.First(x =>
+			x.Name.Equals(
+				_nameDictionary[i],
+				StringComparison.OrdinalIgnoreCase
+			)
+		)
+		.GetValue(Records[_currentIndex]);
+```
+
+Les autres méthodes qui doivent être présentes (mais non implémentées) sont listées ici à titre de référence :
+
+```cs
+    public string GetName(int i) => throw new NotImplementedException();
+    public int GetOrdinal(string name) => throw new NotImplementedException();
+    public string GetDataTypeName(int i) => throw new NotImplementedException();
+    public Type GetFieldType(int i) => throw new NotImplementedException();
+    public int GetValues(object[] values) =>
+        throw new NotImplementedException();
+    public bool GetBoolean(int i) => throw new NotImplementedException();
+    public byte GetByte(int i) => throw new NotImplementedException();
+    public long GetBytes(
+        int i,
+        long fieldOffset,
+        byte[] buffer,
+        int bufferoffset,
+        int length
+    ) => throw new NotImplementedException();
+    public char GetChar(int i) => throw new NotImplementedException();
+    public long GetChars(
+        int i,
+        long fieldoffset,
+        char[] buffer,
+        int bufferoffset,
+        int length
+    ) => throw new NotImplementedException();
+    public Guid GetGuid(int i) => throw new NotImplementedException();
+    public short GetInt16(int i) => throw new NotImplementedException();
+    public int GetInt32(int i) => throw new NotImplementedException();
+    public long GetInt64(int i) => throw new NotImplementedException();
+    public float GetFloat(int i) => throw new NotImplementedException();
+    public double GetDouble(int i) => throw new NotImplementedException();
+    public string GetString(int i) => throw new NotImplementedException();
+    public decimal GetDecimal(int i) => throw new NotImplementedException();
+    public DateTime GetDateTime(int i) => throw new NotImplementedException();
+    public IDataReader GetData(int i) => throw new NotImplementedException();
+    public bool IsDBNull(int i) => throw new NotImplementedException();
+    object IDataRecord.this[int i] => throw new NotImplementedException();
+    object IDataRecord.this[string name] => throw new NotImplementedException();
+    public void Close() => throw new NotImplementedException();
+    public bool NextResult() => throw new NotImplementedException();
+    public int Depth { get; }
+    public bool IsClosed { get; }
+    public int RecordsAffected { get; }
+```
+
+## Exécution de la copie en bloc
+
+Ajoutez une nouvelle classe statique publique nommée *ProcessBulkImport.cs* au dossier `BulkImport`. Ajoutez le code permettant de gérer l'ouverture et la fermeture des connexions (comme dans la classe `InventoryDal`), comme suit :
+
+```cs
+namespace AutoLot.Dal.BulkImport;
+
+public static class ProcessBulkImport
+{
+    private static NpgsqlConnection _sqlConnection = null;
+
+    private static void OpenConnection(string connectionString)
+    {
+        _sqlConnection = new NpgsqlConnection
+        {
+            ConnectionString = connectionString,
+        };
+
+        _sqlConnection.Open();
+    }
+
+    private static void CloseConnection()
+    {
+        if (_sqlConnection?.State != ConnectionState.Closed)
+        {
+            _sqlConnection?.Close();
+        }
+    }
+}
+```
+
+### Pour SQL Server (Microsoft)
+
+>[!info] Je ne sais pas modifié cet exemple de code comparé à ceux présenté précédemment car `SqlBulkCopy` n'existe que pour SQL Server 
+
+La classe `SqlBulkCopy` requiert le nom (et le schéma, s'il est différent de `dbo`) pour traiter les enregistrements. Après avoir créé une nouvelle instance de `SqlBulkCopy` (en lui passant l'objet de connexion), définissez la propriété `DestinationTableName`. Ensuite, créez une nouvelle instance du lecteur de données personnalisé contenant la liste à copier en masse, et appelez `WriteToServer()`. La méthode `ExecuteBulkImport` est présentée ici :
+
+```cs
+public static void ExecuteBulkImport<T>(IEnumerable<T> records, string tableName)
+{
+	OpenConnection();
+	using SqlConnection conn = _sqlConnection;
+	SqlBulkCopy bc = new SqlBulkCopy(conn)
+	{
+		DestinationTableName = tableName
+	};
+	var dataReader = new MyDataReader<T>(records.ToList(), _sqlConnection, "dbo", tableName);
+	try
+	{
+		bc.WriteToServer(dataReader);
+	}
+	catch (Exception ex)
+	{
+		//Should do something here
+	}
+	finally
+	{
+		CloseConnection();
+	}
+}
+```
+
+### PostgresSQL
+
+**Le traitement en masse avec PostgreSQL requiert le nom de la table cible ainsi que la liste des colonnes à alimenter.** Contrairement à `SqlBulkCopy`, **==vous n'avez pas besoin d'un lecteur de données personnalisé. À la place, vous utilisez la réflexion .NET pour inspecter les propriétés de votre type générique `<T>` et générer dynamiquement une commande SQL `COPY`==**. **Après avoir ouvert la connexion via la méthode dédiée, vous initialisez un flux d'importation binaire en appelant `BeginBinaryImport()` directement sur le champ statique `_sqlConnection`.** ***==Il ne vous reste plus qu'à boucler sur vos enregistrements, appeler `StartRow()` pour chaque ligne, et utiliser la méthode `Write()` pour envoyer séquentiellement la valeur de chaque propriété.==*** 
+
+*==Le mot-clé `using` protège uniquement ce flux binaire (`NpgsqlBinaryImporter`) tandis que l'appel à `Complete()` valide l'opération.==* Enfin, **la fermeture de la connexion reste déléguée à la méthode `CloseConnection()` dans le bloc `finally`. La méthode `ExecuteBulkImport` adaptée à PostgreSQL est présentée ici :**
+
+```cs
+public static void ExecuteBulkImport<T>(
+	string connectionString,
+	IEnumerable<T> records,
+	string tableName
+)
+{
+	OpenConnection(connectionString);
+
+	// 1. On récupère les propriétés
+	// EN IGNORANT la clé primaire (sinon une erreur surviendra 
+	// à l'exécution)
+	// Expression de collection (C# 12)
+	PropertyInfo[] properties =
+	[
+		.. typeof(T)
+			.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+			.Where(p =>
+				!p.Name.Equals(
+					"Id",
+					StringComparison.CurrentCultureIgnoreCase
+				)
+			),
+	];
+
+	string columnsList = string.Join(", ", properties.Select(p => p.Name));
+	string copyCommand =
+		$"COPY {tableName} ({columnsList}) FROM STDIN (FORMAT BINARY)";
+
+	// 2. On utilise directement le champ statique. Le 'using'
+	// reste UNIQUEMENT sur le writer
+	using var writer = _sqlConnection.BeginBinaryImport(copyCommand);
+
+	try
+	{
+		foreach (var record in records)
+		{
+			writer.StartRow();
+
+			foreach (var property in properties)
+			{
+				var value = property.GetValue(record);
+				writer.Write(value);
+			}
+		}
+
+		// 4. Validation et envoi des données (équivalent de WriteToServer)
+		writer.Complete();
+	}
+	catch (Exception ex)
+	{
+		// Gérez ou loggez l'exception ici
+		throw;
+	}
+	finally
+	{
+		CloseConnection();
+	}
+}
+```
+
+## Test de la copie en bloc
+
+Dans le projet *AutoLot.Client*, ajoutez une nouvelle méthode nommée `DoBulkCopy()` au fichier *Program.cs*. Créez une liste d'objets `Car` et transmettez-la (ainsi que le nom de la table) à la méthode `ExecuteBulkImport()`. Le reste du code affiche les résultats de la copie en bloc.
+
+```cs
+static void DoBulkCopy(string connectionString)
+{
+    Console.WriteLine("*************** Do Bulk Copy ***************");
+    var cars = new List<Car>
+    {
+        new()
+        {
+            Color = "Blue",
+            MakeId = 1,
+            PetName = "MyCar1",
+        },
+        new()
+        {
+            Color = "Red",
+            MakeId = 2,
+            PetName = "MyCar2",
+        },
+        new()
+        {
+            Color = "White",
+            MakeId = 3,
+            PetName = "MyCar3",
+        },
+        new()
+        {
+            Color = "Yellow",
+            MakeId = 4,
+            PetName = "MyCar4",
+        },
+    };
+    ProcessBulkImport.ExecuteBulkImport(connectionString, cars, "Inventory");
+
+    InventoryDal iDal = new(connectionString);
+    List<CarViewModel> list = iDal.GetAllInventory();
+    Console.WriteLine("*************** All Cars ***************");
+    Console.WriteLine("Carid\tMake\tColor\tPet Name");
+    foreach (var item in list)
+    {
+        Console.WriteLine(
+            $"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}"
+        );
+    }
+    Console.WriteLine();
+}
+```
+
+**L'ajout de quatre nouvelles voitures ne démontre certes pas l'intérêt du travail que représente l'utilisation des  classe `SqlBulkCopy` ou `NpgsqlBinaryImporter`, mais imaginez charger des milliers d'enregistrements.** Je l'ai fait avec des clients, et le temps de chargement n'a été que de quelques secondes, alors que le traitement de chaque enregistrement prenait des heures ! **==Comme pour tout en .NET, il s'agit simplement d'un outil supplémentaire à garder sous la main et à utiliser au moment opportun.==**
+
+# Résumé du chapitre
+
+**ADO.NET est la technologie d'accès aux données native de la plateforme .NET.** Dans ce chapitre, **==vous avez commencé par découvrir le rôle des fournisseurs de données, qui sont essentiellement des implémentations concrètes de plusieurs classes de base abstraites==** (dans l'espace de noms `System.Data.Common`) **==et de types d'interface==** (dans l'espace de noms `System.Data`). **Vous avez également vu qu'il est possible de créer une base de code indépendante des fournisseurs à l'aide du modèle de fabrique de fournisseurs de données ADO.NET.**
+
+**Vous avez aussi appris à utiliser des objets de connexion, des objets de transaction, des objets de commande et des objets de lecture de données pour sélectionner, mettre à jour, insérer et supprimer des enregistrements.** Rappelons également que ***==les objets de commande prennent en charge une collection de paramètres internes, que vous pouvez utiliser pour renforcer la sécurité des types de vos requêtes SQL==*** ; ==ces paramètres s'avèrent également très utiles lors du déclenchement de routines stockées(`FUNCTION` pour Postgres, `PROCEDURE` pour Sql Server).==
+
+**Ensuite, vous avez appris à sécuriser votre code de manipulation de données avec des transactions et conclu ce chapitre par une présentation de l'utilisation des classes  `SqlBulkCopy`  et `NpgsqlBinaryImporter` pour charger de grandes quantités de données dans SQL Server à l'aide d'ADO.NET.**
