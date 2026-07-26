@@ -184,6 +184,7 @@ public class ApplicationDbContext : DbContext
 **==La classe `ApplicationDbContextFactory` suivante utilise la méthode `CreateDbContext()` pour créer un `DbContextOptionsBuilder` fortement typé pour la classe `ApplicationDbContext`, définit le fournisseur de base de données sur le fournisseur PostgreSQL==** (en utilisant la chaîne de connexion de l'instance Docker du [[Chapitre 20#Se connecter à la base de donnée Postgres|Chapitre 20]]), **==puis crée et retourne une nouvelle instance de l'`ApplicationDbContext` :==**
 
 ```cs
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 
 namespace AutoLot.Samples;
@@ -195,15 +196,20 @@ public class ApplicationDbContextFactory
     {
         // Charge explicitement le fichier .env
         // au mement où la commende CLI appelle la fabrique
-        DotNetEnv.Env.Load();
+        DotNetEnv.Env.TraversePath().Load();
+
+        // Lit Environment et convertit __ en :
+        var config = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .Build();
 
         var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         var conStringBuilder = new NpgsqlConnectionStringBuilder
         {
-            Host = Environment.GetEnvironmentVariable("Postgres:Host"),
-            Username = Environment.GetEnvironmentVariable("Postgres:Username"),
-            Database = Environment.GetEnvironmentVariable("Postgres:Database"),
-            Password = Environment.GetEnvironmentVariable("Postgres:Password"),
+            Host = config["Postgres:Host"],
+            Username = config["Postgres:Username"],
+            Database = config["Postgres:Database"],
+            Password = config["Postgres:Password"],
             Pooling = true, // Recommandé pour PostgreSQL
         };
         optionBuilder.UseNpgsql(conStringBuilder.ConnectionString);
@@ -368,7 +374,7 @@ public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         SavingChanges += (sender, args) =>
         {
             Console.WriteLine(
-                $"Savnig changes for {((DbContext)sender).Database.GetConnectionString()}"
+                $"Saving changes for {((DbContext)sender).Database.GetConnectionString()}"
             );
         };
 
@@ -1334,11 +1340,873 @@ public class Driver : BaseEntity
 
 ### L'API Fluent
 
+>[!tip]
+>"Fluent API" est un abus de langage marketing autant que technique. C'est surtout un **pattern de design** (Builder pattern + method chaining) qu'on a baptisé "API" pour le distinguer des autres approches de configuration.
+
+**L'API Fluent configure les entités de l'application via du code C#.** ***==Les méthodes sont exposées par l'instance `ModelBuilder` disponible dans la méthode `OnModelCreating()` de `DbContext`.==*** ***L'API Fluent est la plus puissante des méthodes de configuration et remplace toute convention ou annotation de données en conflit.*** **Certaines options de configuration sont uniquement disponibles via l'API Fluent, comme la définition de valeurs par défaut et le comportement en cascade des propriétés de navigation.**
 
 
+#### Méthodes de classe et de propriété
+
+**L'API Fluent est un sur-ensemble des annotations de données pour la structuration de vos entités.** **==Elle prend en charge toutes les fonctionnalités des annotations de données, et offre des capacités supplémentaires, telles que la spécification de clés et d'index composites, ainsi que la définition de colonnes calculées.==**
+
+##### Correspondance entre classes et propriétés
+
+**Le code suivant illustre l'exemple précédent de la classe `Car` avec l'API Fluent équivalent aux annotations de données utilisées** (*==en omettant les propriétés de navigation, qui seront abordées ensuite==*).
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	// Les appels à l'API Fluent vont ici
+	modelBuilder.Entity<Car>(entity =>
+	{
+		entity.ToTable("Inventory", "public");
+	});
+}
+```
+
+La table suivante associe la propriété `CarId` de la classe `Radio` à la colonne `InventoryId` de la table `Makes` :
+
+```cs
+modelBuilder.Entity<Radio>(entity =>
+{
+	entity.Property(e => e.CarId).HasColumnName("InventoryId");
+});
+```
+
+##### Clés et index
+
+**Pour définir la clé primaire d'une entité, utilisez la méthode `HasKey()`, comme indiqué ici :**
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	entity.ToTable("Inventory", "public");
+	entity.HasKey(e => e.Id);
+});
+```
+
+**Pour définir une clé composite, sélectionnez les propriétés qui composent la clé dans l'expression de la méthode `HasKey()`.** Par exemple, si la clé primaire de l'entité `Car` doit être constituée des colonnes `Id` et d'une propriété `OrganizationId`, vous la définirez comme suit :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	entity.ToTable("Inventory", "public");
+	entity.HasKey(e => e.Id = new {e.Id, e.OrganizationId});
+});
+```
+
+**La procédure est identique pour la création d'index, à ceci près qu'elle utilise la méthode `HasIndex()` de l'API Fluent.** Par exemple, pour créer un index nommé `IX_Inventory_MakeId`, utilisez le code suivant :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	entity.ToTable("Inventory", "public");
+	entity.HasKey(e => e.Id);
+	entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId");
+});
+```
+
+**Pour rendre l'index unique, utilisez la méthode `IsUnique()`. La méthode `IsUnique()` accepte un `bool` optionnel qui vaut `true` par défaut :**
+
+```cs
+entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
+```
+
+##### Taille des champs et tolérance aux valeurs nulles
+
+**Les propriétés sont configurées en les sélectionnant à l'aide de la méthode `Property()`, puis en utilisant des méthodes supplémentaires pour les configurer. Vous avez déjà vu un exemple avec le mappage de la propriété `CarId` à la colonne `InventoryId`.**
+
+==La méthode `IsRequired()` accepte un `bool` optionnel, défini par défaut à `true`, et détermine si la colonne de la base de données peut contenir des valeurs nulles. La méthode `HasMaxLength()` définit la taille de la colonne.== Voici le code de l'API Fluent qui définit les propriétés `Color` et `PetName` comme obligatoires avec une longueur maximale de $50$ caractères :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	
+	entity.Property(e => e.Color).IsRequired().HasMaxLength(50);
+	entity.Property(e => e.PetName).IsRequired().HasMaxLength(50);
+}
+```
+
+##### Valeurs par défaut
+
+**L'API Fluent fournit des méthodes pour définir des valeurs par défaut pour les colonnes. La valeur par défaut peut être un type valeur ou une chaîne SQL.** Par exemple, pour définir la valeur de `Color` par défaut d'une nouvelle entité `Car` sur `Black`, utilisez ce qui suit :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	entity
+		.Property(e => e.Color)
+		.IsRequired()
+		.HasMaxLength(50)
+		.HasDefaultValue("Black");
+	...
+});
+```
+
+Pour définir la valeur d'une fonction de base de données (comme `getdate()`), utilisez la méthode `HasDefaultValueSql()`. Supposons qu'une nouvelle propriété `DateTime` nommée `DateBuilt` ait été ajoutée à la classe `Car` :
+
+```cs
+public class Car : BaseEntity
+{
+	...
+	
+    public DateTime? DateBuilt { get; set; }
+}
+```
+
+La valeur par défaut doit être la date actuelle, calculée à l'aide de la méthode `getdate()` de SQL Server (`NOW()` ou `CURRENT_TIMESTAMP` pour PostgreSQL). Pour configurer cette propriété avec cette valeur par défaut, utilisez le code d'API Fluent suivant :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	
+	entity.Property(e => e.DateBuilt).HasDefaultValueSql("NOW()");
+}
+```
+
+ **Postgres utilisera le résultat de la fonction `NOW()` si la propriété `DateBuilt` de l'entité n'a pas de valeur lors de son enregistrement dans la base de données.**
+
+*==Un problème survient lorsqu'une propriété booléenne ou numérique possède une valeur par défaut dans la base de données qui contredit la valeur par défaut du CLR.==* Par exemple, ***==si une propriété booléenne (telle que `IsDrivable`) a la valeur par défaut `true` dans la base de données, celle-ci lui attribuera la valeur `true` lors de l'insertion d'un enregistrement si aucune valeur n'est spécifiée pour cette colonne.==*** **==Il s'agit, bien entendu, du comportement attendu côté base de données.==** *==Cependant, la valeur par défaut du CLR pour les propriétés booléennes est `false`, ce qui pose problème en raison de la manière dont EF Core gère les valeurs par défaut.==* 
+
+Par exemple, ajoutez une propriété `bool` nommée `IsDrivable` à la classe `Car`. Si vous suivez ce tutoriel, assurez-vous de créer et d'appliquer une nouvelle migration pour mettre à jour la base de données.
+
+```cs
+public class Car : BaseEntity
+{
+	...
+	
+    public bool IsDrivable { get; set; }
+}
+```
+
+Avant d'aborder les valeurs par défaut, examinons le comportement d'EF Core pour le type de données `bool`. Prenons l'exemple de code suivant qui crée un enregistrement `Car` avec la propriété `IsDrivable` définie sur `false` :
+
+```sql
+INSERT INTO "Inventory" ("Color", "IsDrivable", "MakeId", "PetName", "Price")
+VALUES ('Rust', false, 1, 'Lemon', NULL)
+RETURNING "Id", "DateBuilt", "Display", "IsDeleted", "TimeStamp", "ValidFrom", "ValidTo";
+```
+
+>[!tip]
+>Au lieu de faire un `INSERT` puis un `SELECT` séparé comme SQL Server, PostgreSQL retourne directement les valeurs générées en une seule opération `RETURNING`. C'est plus performant et atomique.
+
+Définissez maintenant la valeur par défaut du mappage de colonne de la propriété sur `true` dans la méthode `OnModelCreating()` de `ApplicationDbContext` (encore une fois : ce qui crée et applique une migration de base de données) :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	// Les appels à l'API Fluent vont ici
+	modelBuilder.Entity<Car>(entity =>
+	{
+		...
+
+		entity.Property(e => e.IsDrivable).HasDefaultValue(true);
+	}
+}
+```
+
+L'exécution du même code pour insérer l'enregistrement de voiture précédent génère une requête SQL différente :
+
+```sql
+INSERT INTO "Inventory" ("Color", "MakeId", "PetName", "Price")
+VALUES ('Rust', 1, 'Lemon', NULL)
+RETURNING "Id", "DateBuilt", "Display", "IsDeleted", "IsDrivable", "TimeStamp", "ValidFrom", "ValidTo";
+```
+
+**Notez que la colonne `IsDrivable` n'est pas incluse dans l'instruction `INSERT`. EF Core sait que la valeur de la propriété `IsDrivable` est la valeur par défaut du CLR et que cette colonne possède une valeur par défaut Postgres**. ==Par conséquent, la colonne n'est pas incluse dans l'instruction.== **==Ainsi, lorsque vous enregistrez un nouvel enregistrement avec `IsDrivable = false`, la valeur est ignorée et la valeur par défaut de la base de données est utilisée.==** **Cela signifie que la valeur de `IsDrivable` sera toujours `true` !**
+
+***==EF Core vous signale ce problème lors de la création d'une migration. Dans cet exemple précis, l'avertissement suivant s'affiche :==***
+
+```
+The 'bool' property 'IsDrivable' on entity type 'Car' is configured with a database-generated default. This default will always be used for inserts when the property has the value 'false', since this is the CLR default for the 'bool' type. Consider using the nullable 'bool?' type instead, so that the default will only be used for inserts when the property value is 'null'.
+```
+
+>[!success] Note moderne (Avec Claude)
+>Le warning n'apparaît plus avec EF Core 8+. Ce breaking change corrige le comportement sous-jacent : EF Core 8+ détecte correctement si `false` est une valeur explicite ou la valeur par défaut CLR, rendant le `bool?` inutile dans ce contexte. Utiliser `bool` avec `HasDefaultValue(true)` est maintenant sûr sans nullable.
+
+>La solution de l'auteur sera gardée à des fins pédagogique
+
+Une solution consiste à rendre votre propriété publique (et donc la colonne) nullable, car la valeur par défaut d'un type nullable est `null`. Ainsi, définir une propriété `bool` sur `false` fonctionne comme prévu. Cependant, modifier la nullabilité de la propriété peut ne pas répondre aux besoins métier.
+
+**==Une autre solution est fournie par EF Core et sa prise en charge des champs de stockage. Rappelons que si un champ de stockage existe==** (et est identifié comme tel pour la propriété par convention, annotation de données ou API Fluent), **==EF Core utilisera ce champ pour les opérations de lecture/écriture et non la propriété publique.==**
+
+Si vous configurez `IsDrivable` pour utiliser un champ de stockage nullable (tout en conservant la propriété non nullable), EF Core effectuera les opérations de lecture/écriture à partir du champ de stockage et non de la propriété. La valeur par défaut d'un `bool` nullable est `null` et non `false`. Cette modification permet désormais à la propriété de fonctionner comme prévu.
+
+```cs
+public class Car : BaseEntity
+{
+	...
+	
+    private bool? _isDrivable;
+    public bool IsDrivable
+    {
+        get => _isDrivable ?? true;
+        set => _isDrivable = value;
+    }
+}
+```
+
+L'API Fluent est utilisée pour informer EF Core du champ de stockage.
+
+```cs
+entity
+	.Property(e => e.IsDrivable)
+	.HasField("_isDriveable")
+	.HasDefaultValue(true);
+```
+
+>[!note]
+>La méthode `HasField()` n'est pas nécessaire dans cet exemple, car le nom du champ sous-jacent respecte les conventions d'appellation. Je l'ai incluse pour montrer comment utiliser l'API Fluent pour le définir et pour faciliter la lecture du code.
+
+**Bien que non illustrées dans les exemples précédents, les propriétés numériques fonctionnent de la même manière. Si vous définissez une valeur par défaut non nulle, le champ sous-jacent (ou la propriété elle-même si aucun champ sous-jacent n'est utilisé) doit autoriser les valeurs nulles.**
+
+*==Enfin, l'avertissement s'affichera même si les champs sont correctement configurés avec des champs sous-jacents autorisant les valeurs nulles.==* ***==Vous pouvez désactiver cet avertissement ; toutefois, il est recommandé de le laisser affiché afin de vous rappeler de vérifier que le champ/la propriété est correctement configuré(e).==*** Pour le désactiver, définissez l'option suivante dans `DbContextOptions`:
+
+```cs
+options.ConfigureWarnings(wc => wc.Ignore(RelationalEventId.BoolWithDefaultWarning));
+```
+
+##### version de ligne/jeton de concurrence
+
+**Pour définir une propriété comme type de données de version de ligne, utilisez la méthode `IsRowVersion()`. Pour également définir la propriété comme jeton de concurrence, utilisez la méthode `IsConcurrencyToken()`. La combinaison de ces deux méthodes a le même effet que l'annotation de données `[Timestamp]` :**
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	entity.Property(e => e.xmin).IsRowVersion().IsConcurrencyToken();
+});
+```
+
+
+>[!tip]
+>Avec Npgsql moderne, `IsRowVersion().IsConcurrencyToken()` s'applique sur la propriété `xmin` de type `uint`, pas sur `TimeStamp` de type `DateTime`. `IsRowVersion()` implique déjà `IsConcurrencyToken()`, donc les deux appels combinés sont redondants mais valides.
+
+La vérification de la concurrence sera abordée dans le chapitre suivant.
+
+##### Colonnes creuses SQL Server
+
+Les colonnes creuses SQL Server sont optimisées pour stocker les valeurs nulles. EF Core 6 a ajouté la prise en charge des colonnes creuses avec la méthode `IsSparse()` de l'API Fluent. Le code suivant illustre la configuration de la propriété fictive `IsRaceCar` pour utiliser les colonnes creuses SQL Server :
+
+>[!Attention] 
+>`IsSparse()` est une méthode **SQL Server uniquement** dans EF Core. Elle n'est pas supportée par Npgsql/PostgreSQL. PostgreSQL gère les valeurs nulles efficacement nativement sans nécessiter de configuration spéciale. Pour les scénarios TPH avec beaucoup de nulls, préférer TPT ou des colonnes JSONB sur PostgreSQL
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	entity.Property(p => p.IsRaceCare).IsSparse();
+});
+```
+
+##### Colonnes calculées
+
+**Les colonnes peuvent également être définies comme calculées en fonction des capacités de la base de données.** Pour SQL Server, deux options sont possibles : calculer la valeur à partir de la valeur d'autres champs du même enregistrement ou utiliser une fonction scalaire. Par exemple, pour créer une colonne calculée dans la table Inventory qui combine les valeurs PetName et Color afin de créer une propriété nommée Display, utilisez la fonction HasComputedColumnSql().
+
+>[!info] Pour Postgres
+>PostgreSQL supporte `HasComputedColumnSql()` mais **uniquement en mode persisté** (`stored: true`). Les colonnes calculées à la volée (`stored: false`) ne sont pas supportées par PostgreSQL. 
+>>[!warning] La syntaxe de concaténation utilise `||` au lieu de `+`.
+>
+
+Commencez par ajouter la nouvelle colonne à la classe `Car` :
+
+```cs
+public class Car : BaseEntity
+{
+	...
+    public string Display { get; set; }
+}
+```
+
+Ajoutez ensuite l'appel d'API Fluent à `HasComputedColumnSql()` :
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	
+	entity
+		.Property(e => e.Display)
+		.HasComputedColumnSql(
+			@"""PetName"" || ' (' || ""Color"" || ')'",
+		);
+});
+```
+
+***==Introduite dans EF Core 5, la fonctionnalité de persistance des valeurs calculées permet d'effectuer le calcul uniquement lors de la création ou de la mise à jour d'une ligne. Bien que SQL Server prenne en charge cette fonctionnalité, ce n'est pas le cas de tous les systèmes de stockage de données. Consultez donc la documentation de votre fournisseur de base de données.==***
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	...
+	
+	entity
+		.Property(e => e.Display)
+		.HasComputedColumnSql(
+			@"""PetName"" || ' (' || ""Color"" || ')'",
+			stored: true
+		);
+});
+```
+
+**L'annotation de données `DatabaseGenerated` est souvent utilisée avec l'API Fluent pour améliorer la lisibilité du code.** Voici la version mise à jour de la propriété `Display` avec l'annotation :
+
+```cs
+public class Car : BaseEntity
+{
+	...
+	
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public string Display { get; set; }
+}
+```
+
+##### Contraintes de vérification
+
+>[!tip]
+>Les contraintes de vérification `HasCheckConstraint()` sont une fonctionnalité **SQL standard** disponible sur tous les moteurs de base de données, pas uniquement SQL Server. La syntaxe Fluent API est identique pour PostgreSQL, seuls les guillemets des noms de colonnes changent (`"Name"` au lieu de `[Name]`).
+
+>[!warning] Depuis EF Core 7, `HasCheckConstraint()` directement sur l'entity builder est obsolète. Il faut désormais l'appeler via `ToTable()` avec un builder action. La syntaxe PostgreSQL utilise `"NomColonne"` (guillemets doubles) pour les colonnes et `'valeur'` (guillemets simples) pour les littéraux string.
+
+Les contraintes de vérification sont une fonctionnalité de ~~SQL Server~~ qui définit une condition sur une ligne qui doit être vraie. Par exemple, **dans un système de commerce électronique, une contrainte de vérification peut être ajoutée pour s'assurer que la quantité est supérieure à zéro ou que le prix est supérieur au prix remisé.** ==Comme notre système ne contient aucune valeur numérique, nous allons créer une contrainte artificielle qui empêche l'utilisation du nom `"Lemon"` dans la table `Makes`.==
+
+Ajoutez ce qui suit à la méthode `OnModelCreating()` de la classe `ApplicationDbContext`, qui crée la contrainte de vérification empêchant la présence du nom `"Lemon"` dans la table `Makes` :
+
+```cs
+modelBuilder
+	.Entity<Make>()
+	.ToTable(
+		"Makes",
+		"public",
+		t =>
+			t.HasCheckConstraint("CK_Check_Name", "\"Name\" <> 'Lemon'")
+	);
+```
+
+```sql
+ALTER TABLE "Makes"
+ADD CONSTRAINT "CK_Check_Name" CHECK ("Name" <> 'Lemon');
+```
+
+Désormais, lorsqu'un enregistrement nommé « Lemon » est ajouté à la table, une exception SQL est levée. Exécutez le code suivant pour observer cette exception (dans *Program.cs*) :
+
+```cs
+var context = new ApplicationDbContextFactory().CreateDbContext(null);
+context.Makes.Add(new Make { Name = "Lemon" });
+context.SaveChanges();
+```
+
+Cela génère l'exception suivante :
+
+```
+...
+
+ Severity: ERROR
+    SqlState: 23514
+    MessageText: new row for relation "Makes" violates check constraint "CK_Check_Name"
+    Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+    SchemaName: public
+    TableName: Makes
+    ConstraintName: CK_Check_Name
+    
+...
+```
+
+>**Le texte montré ici est caché en base de toute la stacktrace de Npgsql (car on n'a pas géré l'exception)**
+
+**Vous pouvez annuler la migration relative à la contrainte de vérification et la supprimer, car le reste du livre n'utilise pas cette contrainte. Elle a été ajoutée dans cette section à titre d'exemple.**
+
+
+>[!attention]
+Si la migration a déjà été appliquée à la base de donnée (`dotnet ef database update`), il faut d'abord revenir en arrière :
+>```bash
+># Revenir à la migration précédente
+>dotnet ef database update NomMigrationPrécédente -c AutoLot.Samples.ApplicationDbContext
+>
+># Puis supprimer
+>dotnet ef migrations remove -c AutoLot.Samples.ApplicationDbContext
+>```
+
+#### Relations un-à-plusieurs
+
+**Pour définir des relations un-à-plusieurs avec l'API Fluent, sélectionnez l'*une* des entités à mettre à jour. Les deux côtés de la chaîne de navigation sont définis dans un seul bloc de code.**
+
+```cs
+modelBuilder.Entity<Car>(entity =>
+{
+	...
+	entity.HasOne(d => d.MakeNavigation)
+		.WithMany(p => p.Cars)
+		.HasForeignKey(d => d.MakeId)
+		.OnDelete(DeleteBehavior.ClientSetNull)
+		.HasConstraintName("FK_Inventory_Makes_MakeId");
+});
+```
+
+**==Si vous sélectionnez l'entité principale comme base pour la configuration des propriétés de navigation,==** le code ressemble à ceci :
+
+```cs
+ modelBuilder.Entity<Make>(entity =>
+ {
+     entity.HasMany(e => e.Cars)
+         .WithOne(c => c.MakeNavigation)
+         .HasForeignKey(c => c.MakeId)
+         .OnDelete(DeleteBehavior.ClientSetNull)
+         .HasConstraintName("FK_Inventory_Makes_MakeId");
+ });
+```
+
+#### Relations un-à-un
+
+**Les relations un-à-un se configurent de la même manière, à ceci près que la méthode `WithOne()` de l'API Fluent est utilisée au lieu de `WithMany()`.** ***==De plus, un index unique est requis sur l'entité dépendante et sera créé automatiquement s'il n'est pas défini.==*** L'exemple suivant crée explicitement l'index unique pour spécifier le nom. Voici le code de la relation entre les entités Voiture et Radio utilisant l'entité dépendante (`Radio`) :
+
+```cs
+modelBuilder.Entity<Radio>(entity =>
+{
+	...
+
+	entity.HasIndex(e => e.CarId, "IX_Radios_CarId").IsUnique();
+	entity
+		.HasOne(d => d.CarNavigation)
+		.WithOne(p => p.RadioNavigation)
+		.HasForeignKey<Radio>(d => d.CarId);
+});
+```
+
+**Si la relation est définie sur une entité principale, un index unique sera tout de même ajouté à l'entité dépendante.** Voici le code de la relation entre les entités `Car` et `Radio`, utilisant l'entité principale pour la relation et spécifiant le nom de l'index sur l'entité dépendante :
+
+```cs
+modelBuilder.Entity<Radio>(entity =>
+{
+	entity.HasIndex(e => e.CarId, "IX_Radios_CarId")
+		.IsUnique();
+});
+
+modelBuilder.Entity<Car>(entity =>
+{
+	entity.HasOne(d => d.RadioNavigation)
+		.WithOne(p => p.CarNavigation)
+		.HasForeignKey<Radio>(d => d.CarId);
+});
+```
+
+#### Relations plusieurs-à-plusieurs
+
+**Les relations plusieurs-à-plusieurs sont bien plus personnalisables grâce à l'API Fluent.** **==Les noms des champs de clé étrangère, les noms des index et le comportement en cascade peuvent tous être définis dans les instructions qui définissent la relation.==** ***==L'API permet également de spécifier directement la table pivot, ce qui permet d'ajouter des champs supplémentaires et de simplifier les requêtes.==***
+
+Commencez par ajouté l'entité `CarDriver` :
+
+```cs
+namespace AutoLot.Samples.Models;
+
+[Table("InventoryToDrivers", Schema = "public")]
+public class CarDriver : BaseEntity
+{
+    public int DriverId { get; set; }
+
+    [ForeignKey(nameof(DriverId))]
+    public Driver DriverNavigation { get; set; }
+
+    [Column("InventoryId")]
+    public int CarId { get; set; }
+
+    [ForeignKey(nameof(CarId))]
+    public Car CarNavigation { get; set; }
+}
+```
+
+Ajoutez un `DbSet<T>` pour la nouvelle entité dans `ApplicationDbContext` :
+
+```cs
+public DbSet<CarDriver> CarsToDrivers { get; set; }
+```
+
+Ensuite, mettez à jour l'entité `Car` pour ajouter une propriété de navigation pour la nouvelle entité `CarDriver` :
+
+```cs
+public class Car : BaseEntity
+{
+	...
+
+    [InverseProperty(nameof(CarDriver.CarNavigation))]
+    public IEnumerable<CarDriver> CarDrivers { get; set; } =
+        new List<CarDriver>();
+}
+```
+
+Maintenant, mettez à jour l'entité `Driver` pour la propriété navigation vers l'entité `CarDriver` :
+
+```cs
+public class Driver : BaseEntity
+{
+    [InverseProperty(nameof(CarDriver.DriverNavigation))]
+    public IEnumerable<CarDriver> CarDrivers { get; set; } =
+        new List<CarDriver>();
+}
+```
+
+Enfin, ajoutez le code de l'API Fluent pour la relation plusieurs-à-plusieurs :
+
+```cs
+modelBuilder
+	.Entity<Car>()
+	.HasMany(p => p.Drivers)
+	.WithMany(p => p.Cars)
+	.UsingEntity<CarDriver>(
+		j =>
+			j.HasOne(cd => cd.DriverNavigation)
+				.WithMany(d => d.CarDrivers)
+				.HasForeignKey(nameof(CarDriver.DriverId))
+				.HasConstraintName("FK_Inventory_Drivers_DriverId")
+				.OnDelete(DeleteBehavior.Cascade),
+		j =>
+			j.HasOne(cd => cd.CarNavigation)
+				.WithMany(c => c.CarDrivers)
+				.HasForeignKey(nameof(CarDriver.CarId))
+				.HasConstraintName(
+					"FK_InventoryDriver_Inventory_InventoryId"
+				)
+				.OnDelete(DeleteBehavior.Cascade),
+		j =>
+		{
+			j.HasKey(cd => new { cd.CarId, cd.DriverId });
+		}
+	);
+```
+
+#### Exclusion d'entités des migrations
+
+***Si une entité est partagée entre plusieurs `DbContexts`, chaque `DbContext` créera du code dans les fichiers de migration pour la création ou la modification de cette entité.*** *==Cela pose problème car le second script de migration échouera si les modifications sont déjà présentes dans la base de données.==* **Avant EF Core 5, la seule solution consistait à modifier manuellement l'un des fichiers de migration pour supprimer ces modifications.**
+
+**Dans EF Core 5, un `DbContext` peut marquer une entité comme exclue des migrations, permettant ainsi à l'autre `DbContext` de devenir le système d'enregistrement pour cette entité.** Le code suivant montre une entité exclue des migrations :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	modelBuilder.Entity<LogEntry>().ToTable("Logs", t => t.ExcludeFromMigrations());
+}
+```
+
+Utilisation des classes `IEntityTypeConfiguration`
+
+**Comme vous l'avez peut-être constaté à ce stade de l'utilisation de l'API Fluent, la méthode `OnModelCreating()` peut devenir assez longue (et difficile à manipuler) à mesure que votre modèle se complexifie.** ***==Introduites dans EF Core 6, l'interface `IEntityTypeConfiguration` et l'attribut `EntityTypeConfiguration` permettent de déplacer la configuration de l'API Fluent d'une entité dans sa propre classe.==*** **==Cela permet d'obtenir un `ApplicationDbContext` plus clair et soutient le principe de séparation des préoccupations.==**
+
+Commencez par créer un nouveau répertoire nommé `Configuration` dans le répertoire `Models`. Dans ce nouveau répertoire, ajoutez un nouveau fichier nommé *CarConfiguration.cs*, déclarez-le public et implémentez l'interface `IEntityTypeConfiguration<Car>`, comme ceci :
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+public class CarConfiguration : IEntityTypeConfiguration<Car>
+{
+    public void Configure(EntityTypeBuilder<Car> builder) { }
+}
+```
+
+**Ensuite, déplacez le contenu de la configuration de l'entité `Car` depuis la méthode `OnModelCreating()` de `ApplicationDbContext` vers la méthode `Configure()` de la classe `CarConfiguration`. Remplacez la variable `entity` par la variable `builder` afin que la méthode `Configure()` ressemble à ceci :**
+
+```cs
+
+```
+
+**Cette configuration fonctionne également avec la configuration fluide de type plusieurs-à-plusieurs entre `Car` et  `Driver`.** **==Vous pouvez choisir d'ajouter la configuration à la classe `CarConfiguration` ou de créer une classe `DriverConfiguration`.==** Dans cet exemple, déplacez-la dans la classe `CarConfiguration` à la fin de la méthode `Configure()`.
+
+```cs
+public void Configure (EntityTypeBuilder<Car> builder)
+	builder
+		.HasMany(p => p.Drivers)
+		.WithMany(p => p.Cars)
+		.UsingEntity<CarDriver>(
+			j =>
+				j.HasOne(cd => cd.DriverNavigation)
+					.WithMany(d => d.CarDrivers)
+					.HasForeignKey(nameof(CarDriver.DriverId))
+					.HasConstraintName("FK_Inventory_Drivers_DriverId")
+					.OnDelete(DeleteBehavior.Cascade),
+			j =>
+				j.HasOne(cd => cd.CarNavigation)
+					.WithMany(c => c.CarDrivers)
+					.HasForeignKey(nameof(CarDriver.CarId))
+					.HasConstraintName(
+						"FK_InventoryDriver_Inventory_InventoryId"
+					)
+					.OnDelete(DeleteBehavior.Cascade),
+			j =>
+			{
+				j.HasKey(cd => new { cd.CarId, cd.DriverId });
+			}
+		);
+}
+```
+
+Mettez à jour le fichier *GlobalUsings.cs* pour inclure le nouvel espace de noms pour les classes de configuration :
+
+```cs
+global using AutoLot.Samples.Models.Configuration;
+```
+
+Remplacez tout le code de la méthode `OnModelBuilding()` (dans la classe *ApplicationDbContext.cs*) qui configure la classe `Car` et la relation plusieurs-à-plusieurs `Car`-`Driver` par la ligne de code suivante :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+	
+	...
+}
+```
+
+**La dernière étape pour la classe `Car` consiste à ajouter l'attribut `EntityTypeConfiguration` :**
+
+```cs
+[Table("Inventory", Schema = "public")]
+[Index(nameof(MakeId), Name = "IX_Inventory_MakeId")]
+[EntityTypeConfiguration(typeof(CarConfiguration))]
+public class Car : BaseEntity
+{
+	...
+}
+```
+
+***==Ensuite, répétez les mêmes étapes pour le code de l'API Radio Fluent.==*** Créez une nouvelle classe nommée `RadioConfiguration`, implémentez l'interface `IEntityTypeConfiguration<Radio>` et ajoutez le code de la méthode `OnModelBuilding()` de `ApplicationDbContext` :
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+public class RadioConfiguration : IEntityTypeConfiguration<Radio>
+{
+    public void Configure(EntityTypeBuilder<Radio> builder)
+    {
+        builder.Property(e => e.CarId).HasColumnName("InventoryId");
+        builder.HasIndex(e => e.CarId, "IX_Radios_CarId").IsUnique();
+        builder
+            .HasOne(d => d.CarNavigation)
+            .WithOne(p => p.RadioNavigation)
+            .HasForeignKey<Radio>(d => d.CarId);
+    }
+}
+
+```
+
+Mettez à jour la méthode `OnModelCreating()` dans `ApplicationDbContext` :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+	new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+}
+```
+
+Enfin, ajoutez l'attribut `EntityTypeConfiguration` à la classe `Radio` :
+
+```cs
+[Table("Radios", Schema = "public")]
+[EntityTypeConfiguration(typeof(RadioConfiguration))]
+public class Radio : BaseEntity
+{
+	...
+}
+```
+
+### Conventions, annotations et l'API Fluent : un vrai casse-tête !
+
+Résumé du paragraphe de l'auteur:
+
+**On peut garder les trois type de déclaration dans le code sans que cela ne fasse planter/bugger les migrations.** Seulement, elles ont une hiérarchie de priorité fixe définie par EF Core:
+ 
+ 1. **L'API Fluent** _(Priorité maximale)_
+ 2. **Les Data Annotations** _(Priorité moyenne)_
+ 3. **Les Conventions par défaut** _(Priorité minimale)_
+
+**Les conventions par défaut seront écrasés par les annotation de données, qui seront à leurs tours écrasés par l'API Fluent.**
+
+
+>[!tip] Bonne pratique moderne - Conventions, Data Annotations et Fluent API (Avec Claude)
+>
+>Utiliser les **Conventions par défaut** pour tout ce qu'EF Core peut inférer  automatiquement (noms de tables, clés primaires simples, relations simples...).  Ne pas les surcharger inutilement.
+>
+Utiliser les **Data Annotations** uniquement pour les attributs qui ont un **double rôle** : validation côté application ET contrainte en base :
+>- `[Required]` → `NOT NULL` en base + validation
+>- `[StringLength]` → `VARCHAR(n)` en base + validation
+>- `[Range]` → validation uniquement (pas de contrainte SQL générée)
+>
+>>[!Attention] Certaines Data Annotations n'ont **aucun effet en base** :
+>>- `[EmailAddress]`, `[Phone]`, `[Url]`... → validation côté application uniquement
+>
+>Utiliser la **Fluent API** pour tout ce qui concerne l'architecture de la base :
+>- Clés primaires composites
+>- Relations complexes (plusieurs-à-plusieurs, comportement de cascade)
+>- Index et contraintes de vérification
+>- Nommage spécifique des tables, colonnes et schémas
+>- Valeurs par défaut et colonnes calculées
+
+## Types d'entités propriétaires
+
+**Il peut arriver que deux entités ou plus contiennent le même ensemble de propriétés.** **==Utiliser une classe C# comme propriété d'une entité pour regrouper des colonnes liées est une fonctionnalité disponible depuis EF Core 2.0.==** ***==Lorsque des types marqués avec l'attribut `[Owned]` (ou configurés avec l'API Fluent) sont ajoutés comme propriété d'une entité, EF Core ajoute toutes les propriétés de la classe d'entité `[Owned]` à l'entité propriétaire.==*** **Cela augmente les possibilités de réutilisation du code C#.**
+
+**En interne, EF Core considère cette relation comme une relation un-à-un.** ***==La classe détenue est l'entité dépendante et la classe propriétaire est l'entité principale.==*** *==La classe propriétaire, bien qu'elle soit considérée comme une entité, ne peut exister sans l'entité propriétaire.==* **Les noms de colonnes par défaut du type propriétaire sont formatés comme suit : `NomPropriétéNavigation_NomPropriétéEntitéDétenu` (par exemple, `PersonalNavigation_FirstName`). Les noms par défaut peuvent être modifiés à l'aide de l'API Fluent.**
+
+Prenons l'exemple de la classe `Person` (notez l'attribut `[Owned]`) :
+
+```cs
+namespace AutoLot.Samples.Models;
+
+[Owned]
+public class Person
+{
+    [Required, StringLength(50)]
+    public string FirstName { get; set; }
+
+    [Required, StringLength(50)]
+    public string LastName { get; set; }
+}
+```
+
+Une fois cela en place, nous pouvons remplacer les propriétés `FirstName` et `LastName` de la classe `Driver` par la nouvelle classe `Person` :
+
+```cs
+namespace AutoLot.Samples.Models;
+
+[Table("Drivers", Schema = "public")]
+public class Driver : BaseEntity
+{
+    public Person PersonInfo { get; set; } = new Person();
+
+    [InverseProperty(nameof(Car.Drivers))]
+    public IEnumerable<Car> Cars { get; set; } = new List<Car>();
+
+    [InverseProperty(nameof(CarDriver.DriverNavigation))]
+    public IEnumerable<CarDriver> CarDrivers { get; set; } =
+        new List<CarDriver>();
+}
+```
+
+**Par défaut, les deux propriétés `Person` sont associées à des colonnes nommées `PersonInfo_FirstName` et `PersonInfo_LastName`.** Pour modifier ce comportement, ajoutez d'abord un nouveau fichier nommé *DriverConfiguration.cs* dans le dossier `Configuration`, puis mettez à jour le code comme suit :
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+public class DriverConfiguration : IEntityTypeConfiguration<Driver>
+{
+    public void Configure(EntityTypeBuilder<Driver> builder)
+    {
+        builder.OwnsOne(
+            o => o.PersonInfo,
+            pd =>
+            {
+                pd.Property<string>(nameof(Person.FirstName))
+                    .HasColumnName(nameof(Person.FirstName))
+                    .HasColumnType("VARCHAR(50)");
+                pd.Property<string>(nameof(Person.LastName))
+                    .HasColumnName(nameof(Person.LastName))
+                    .HasColumnType("VARCHAR(50)");
+            }
+        );
+    }
+}
+```
+
+Mettez à jour la méthode `OnConfiguring()` de `ApplicationDbContext` :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	// Les appels à l'API Fluent vont ici
+	new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+	new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+	new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
+}
+```
+
+Enfin, mettez à jour la classe `Driver` :
+
+```cs
+[Table("Drivers", Schema = "public")]
+[EntityTypeConfiguration(typeof(DriverConfiguration))]
+public class Driver : BaseEntity
+{
+	...
+}
+```
+
+La table `Drivers` est mise à jour comme suit (notez que la possibilité de valeurs nulles pour les colonnes `FirstName` et `LastName` ne correspond pas aux annotations de données obligatoires de l'entité `Person`) :
+
+```sql
+CREATE TABLE "Drivers" (
+    "Id" SERIAL NOT NULL,
+    "TimeStamp" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "FirstName" VARCHAR(50) NULL,
+    "LastName" VARCHAR(50) NULL,
+    CONSTRAINT "PK_Drivers" PRIMARY KEY ("Id")
+);
+```
+
+**Bien que la classe `Person` possède l'annotation de données obligatoires sur ses deux propriétés, les colonnes SQL Server sont toutes deux définies sur `NULL`**. ==Ceci est dû au fait que dans le fichier *.csproj*, nous ayons désactivé les type de donnée anullables.==
+
+Pour corriger ce problème, plusieurs solutions sont possibles. La première consiste à activer les types de référence nuls en C# (au niveau du projet ou dans les classes). Cela rend la propriété de navigation `PersonInfo` non nullable, ce qu'EF Core prend en compte, et EF Core configure alors correctement les colonnes de l'entité possédée. L'autre solution consiste à ajouter une instruction Fluent API pour rendre la propriété de navigation obligatoire.
+
+```cs
+public class DriverConfiguration : IEntityTypeConfiguration<Driver>
+{
+	public void Configure(EntityTypeBuilder<Driver> builder)
+	{
+		...
+		builder.Navigation(d=>d.PersonInfo).IsRequired(true);
+	}
+}
+```
+
+Cela met à jour les propriétés du type `Person` détenue afin qu'elles soient définies comme une colonne non nulle dans la base de données :
+
+```sql
+CREATE TABLE "Drivers" (
+    "Id" SERIAL NOT NULL,
+    "TimeStamp" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "FirstName" VARCHAR(50) NOT NULL,
+    "LastName" VARCHAR(50) NOT NULL,
+    CONSTRAINT "PK_Drivers" PRIMARY KEY ("Id")
+);
+```
+
+**L'utilisation des types détenues présente quatre limitations :**
+
+- Il est impossible de créer un `DbSet<T>` pour un type propriétaire.
+- Il est impossible d'appeler `Entity<T>()` avec un type propriétaire dans `ModelBuilder`.
+- Les instances d'un type d'entité propriétaire ne peuvent pas être partagées entre plusieurs propriétaires.
+- Les types d'entités propriétaires ne peuvent pas avoir de hiérarchie d'héritage.
+
+>[!important] Note moderne (Avec Claude)
+>Les 4 limitations des Owned Entity Types restent valides en EF Core 10. Cependant, depuis EF Core 8, les **Complex Types** (`ComplexProperty()`) sont introduits comme alternative recommandée. Contrairement aux Owned Types, les Complex Types ont des sémantiques de valeur (pas d'identité), peuvent être partagés entre plusieurs propriétés, et sont mappés de la même façon (colonnes aplaties dans la table parente). En EF Core 10, `ComplexProperty()` est l'approche privilégiée pour les types sans identité comme `Address`, `Money` ou `Person`.
+
+Il existe d'autres options à explorer avec les entités possédées, notamment les collections, le fractionnement des tables et l'imbrication. Ces fonctionnalités dépassent le cadre de cet ouvrage. Pour en savoir plus, consultez la [documentation EF Core](https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities).
+
+## Types de requêtes
+
+Les types de requêtes sont des collections `DbSet<T>` utilisées pour représenter des vues, une instruction SQL ou des tables sans clé primaire.
+
+Les versions précédentes d'EF Core utilisaient `DbQuery<T>` à cet effet, mais à partir d'EF Core 3.x, le type DbQuery a été abandonné. Les types de requêtes sont ajoutés au DbContext dérivé à l'aide de propriétés `DbSet<T>` et sont configurés comme sans clé.
+
+Les types de requêtes sont généralement utilisés pour représenter des combinaisons de tables, comme par exemple combiner les détails des tables Make et Inventory. Prenons cet exemple de requête :
 
 # Exécution des requêtes
 
+>[!success] Note moderne
+>**Dans EF Core 11** (==pas encore sorti au moment de la rédaction==), la commande suivante permet de créer **ET** appliquer une migration **en une seule étape** via *Rolsyn*
+>
+>```bash
+dotnet ef database update AddCheckConstraint --add -c AutoLot.Samples.ApplicationDbContext
+>```
 
+>[!success] Meilleure analogie pour les migrations (Avec Claude)
+>
+`dotnet ef migrations` est l'équivalent de Git mais pour le schéma de base de données.
+>
+>**Comme Git**, les migrations sont linéaires et chronologiques, on ne peut pas supprimer une migration du milieu sans défaire celles qui suivent. 
+>
+**Contrairement à Git**, il n'y a pas de branches ni de merge, et l'historique est stocké à la fois dans les fichiers C# du projet ET dans la table `__EFMigrationsHistory` de la base de données.
 
 

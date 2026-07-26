@@ -639,6 +639,13 @@ psql -h XXX -p 5432 -U postgres -d postgres
 **Si tout fonctionne parfaitement, nous voilà connecté dans la base de donnée `postgres` via l'utilisateur `postgres` sur la deuxième machine.**
 
 # Création de la base de donnée AutoLot
+
+>[!danger] Tout les noms utilisé seront entre `"` pour Postgres pour l'empêcher de modifier la casse. 
+>
+>Si on ne les met pas, alors la base de donnée `AutoLot` sera répertorié dans PostresSQL comme `autolot`.
+>
+>Pour ce chapitre, cela n'est pas un très gros problème, mais pour les chapitre suivant (EF Core), cela empêchera au programme de lier les modèles aux tables déja existantes.
+
 Cette section entière est consacrée à la création de la base de données `AutoLot` à l'aide de PostgresSQL. Cette étape est nécessaire car les scripts du livre sont dans une syntaxe que Postgres va échouer de comprendre.
 
 Plutôt que d'exécuter chaque commande SQL les unes à la suite des autres dans `psql` ou `pgcli`, j'ai décidé de créer un fichier *main.sql* qui permettra d'exécuter la création des tables ainsi que leurs peuplements de manière "automatique" et plus rapide. Voici le code du fichier.
@@ -647,18 +654,17 @@ Plutôt que d'exécuter chaque commande SQL les unes à la suite des autres dans
 -- Fichier main.sql 
 
 
--- Nettoyage complet de la base à chaque exécution du script maître (très utilse si on a fait des bétises)
-DROP FUNCTION IF EXISTS GetPetName;
-DROP TABLE IF EXISTS CreditRisks CASCADE;
-DROP TABLE IF EXISTS Orders CASCADE;
-DROP TABLE IF EXISTS Inventory CASCADE;
-DROP TABLE IF EXISTS Customers CASCADE;
-DROP TABLE IF EXISTS Makes CASCADE;
+-- Nettoyage complet de la base à chaque exécution du script maître (Si on a fait des bétises)
+DROP FUNCTION IF EXISTS "GetPetName";
+DROP TABLE IF EXISTS "CreditRisks" CASCADE;
+DROP TABLE IF EXISTS "Orders" CASCADE;
+DROP TABLE IF EXISTS "Inventory" CASCADE;
+DROP TABLE IF EXISTS "Customers" CASCADE;
+DROP TABLE IF EXISTS "Makes" CASCADE;
 
 -- Étape 1 : Création des tables 
 \i CreateScripts/CreateCreditRisksTable.sql
 \i CreateScripts/CreateCustomersTable.sql
-\i CreateScripts/CreateGetPetnameSproc.sql
 \i CreateScripts/CreateInventoryTable.sql
 \i CreateScripts/CreateMakesTable.sql
 \i CreateScripts/CreateOrdersTable.sql
@@ -666,6 +672,8 @@ DROP TABLE IF EXISTS Makes CASCADE;
 -- Étape 2 : Création des relations entres les tables (foreign keys)
 \i CreateScripts/CreateForeignKeys.sql
 
+-- Étape 3 : Création d'une procédure stockée GetPetName()
+\i CreateScripts/CreateGetPetnameSproc.sql
 
 -- Étape 3 : Insertion des données (ordre crutial)
 
@@ -679,6 +687,7 @@ DROP TABLE IF EXISTS Makes CASCADE;
 -- 3. Les enfants terminaux (Ont besoin de "customers" et "inventory")
 \i DataScripts/AddCreditRisks.sql
 \i DataScripts/AddOrderRecords.sql
+
 ```
 
 >[!attention] Il faut déjà avoir crée la la base de donnée avant d'exécuter ce script !
@@ -688,8 +697,7 @@ DROP TABLE IF EXISTS Makes CASCADE;
 ```sql
 -- CreateDatabase.sql
 
--- Création de la base de données AutoLot en syntaxe PostgreSQL
-CREATE DATABASE autolot;
+CREATE DATABASE "AutoLot";
 ```
 
 ## Création des tables 
@@ -700,12 +708,13 @@ Une fois la base de données créée, il est temps de créer les tables. La prem
 
 ```sql
 -- CreateInventoryTable.sql
-CREATE TABLE Inventory (
-    Id SERIAL NOT NULL,
-    MakeId INT NOT NULL,
-    Color VARCHAR(50) NOT NULL,
-    PetName VARCHAR(50) NOT NULL,
-    CONSTRAINT PK_Inventory PRIMARY KEY (Id)
+CREATE TABLE "Inventory" (
+    "Id" SERIAL NOT NULL,
+    "MakeId" INT NOT NULL,
+    "Color" VARCHAR(50) NOT NULL,
+    "PetName" VARCHAR(50) NOT NULL,
+    "TimeStamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PK_Inventory" PRIMARY KEY ("Id")
 );
 ```
 
@@ -777,12 +786,14 @@ La table `Inventory` stocke une clé étrangère dans la table `Makes` (pas enco
 
 ```sql
 -- CreateMakesTable.sql
-CREATE TABLE Makes (
-    Id SERIAL NOT NULL,
-    Name VARCHAR(50) NOT NULL,
-    TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT PK_Makes PRIMARY KEY (Id)
+CREATE TABLE "Makes" (
+    "Id" SERIAL NOT NULL,
+    "Name" VARCHAR(50) NOT NULL,
+    "TimeStamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PK_Makes" PRIMARY KEY ("Id")
 );
+
+
 ```
 
 ### Création de la table `Customers`
@@ -791,12 +802,12 @@ La table `Customers` (comme son nom l'indique) contiendra une liste de clients. 
 
 ```sql
 -- CreateCustomersTable.sql
-CREATE TABLE Customers (
-    Id SERIAL NOT NULL,
-    FirstName VARCHAR(50) NOT NULL,
-    LastName VARCHAR(50) NOT NULL,
-    TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT PK_Customers PRIMARY KEY (Id)
+CREATE TABLE "Customers" (
+    "Id" SERIAL NOT NULL,
+    "FirstName" VARCHAR(50) NOT NULL,
+    "LastName" VARCHAR(50) NOT NULL,
+    "TimeStamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PK_Customers" PRIMARY KEY ("Id")
 );
 ```
 
@@ -806,12 +817,12 @@ Vous utiliserez le tableau suivant, `Orders`, pour représenter l'automobile qu'
 
 ```sql
 -- CreateOrdersTable.sql
-CREATE TABLE Orders (
-    Id SERIAL NOT NULL,
-    CustomerId INT NOT NULL,
-    CarId INT NOT NULL,
-    TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT PK_Orders PRIMARY KEY (Id)
+CREATE TABLE "Orders" (
+    "Id" SERIAL NOT NULL,
+    "CustomerId" INT NOT NULL,
+    "CarId" INT NOT NULL,
+    "TimeStamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PK_Orders" PRIMARY KEY ("Id")
 );
 ```
 
@@ -821,13 +832,13 @@ Vous utiliserez votre tableau final, `CreditRisks`, pour représenter les client
 
 ```sql
 -- CreateCreditRisks.sql
-CREATE TABLE CreditRisks (
-    Id SERIAL NOT NULL,
-    FirstName VARCHAR(50) NOT NULL,
-    LastName VARCHAR(50) NOT NULL,
-    CustomerId INT NOT NULL,
-    TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT PK_CreditRisks PRIMARY KEY (Id)
+CREATE TABLE "CreditRisks" (
+    "Id" SERIAL NOT NULL,
+    "FirstName" VARCHAR(50) NOT NULL,
+    "LastName" VARCHAR(50) NOT NULL,
+    "CustomerId" INT NOT NULL,
+    "TimeStamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PK_CreditRisks" PRIMARY KEY ("Id")
 );
 ```
 
@@ -839,40 +850,40 @@ Cette section ajoutera les relations de clé étrangère entre les tables interd
 
 ```sql
 -- BLOCK 1 : Index et Clé Étrangère pour la table Inventory (liée à Makes)
-CREATE INDEX IX_Inventory_MakeId ON Inventory (MakeId ASC);
+CREATE INDEX "IX_Inventory_MakeId" ON "Inventory" ("MakeId" ASC);
 
-ALTER TABLE Inventory 
-ADD CONSTRAINT FK_Make_Inventory FOREIGN KEY (MakeId) REFERENCES Makes (Id);
+ALTER TABLE "Inventory" 
+ADD CONSTRAINT "FK_Make_Inventory" FOREIGN KEY ("MakeId") REFERENCES "Makes" ("Id");
 ```
 
 ### Création de la relation `Orders` vers `Inventory`
 
 ```sql
 -- BLOCK 2 : Index et Clé Étrangère pour la table Orders (liée à Inventory)
-CREATE INDEX IX_Orders_CarId ON Orders (CarId ASC);
+CREATE INDEX "IX_Orders_CarId" ON "Orders" ("CarId" ASC);
 
-ALTER TABLE Orders 
-ADD CONSTRAINT FK_Orders_Inventory FOREIGN KEY (CarId) REFERENCES Inventory (Id);
+ALTER TABLE "Orders" 
+ADD CONSTRAINT "FK_Orders_Inventory" FOREIGN KEY ("CarId") REFERENCES "Inventory" ("Id");
 ```
 
 ### Création de la relation `Orders` vers `Customers`
 
 ```sql
 -- BLOCK 3 : Index Unique et Clé Étrangère pour la table Orders (liée à Customers)
-CREATE UNIQUE INDEX IX_Orders_CustomerId_CarId ON Orders (CustomerId ASC, CarId ASC);
+CREATE UNIQUE INDEX "IX_Orders_CustomerId_CarId" ON "Orders" ("CustomerId" ASC, "CarId" ASC);
 
-ALTER TABLE Orders 
-ADD CONSTRAINT FK_Orders_Customers FOREIGN KEY (CustomerId) REFERENCES Customers (Id) ON DELETE CASCADE;
+ALTER TABLE "Orders" 
+ADD CONSTRAINT "FK_Orders_Customers" FOREIGN KEY ("CustomerId") REFERENCES "Customers" ("Id") ON DELETE CASCADE;
 ```
 
 ### Création de la relation `CreditRisks` vers `Customers`
 
 ```sql
 -- BLOCK 4 : Index et Clé Étrangère pour la table CreditRisks (liée à Customers)
-CREATE INDEX IX_CreditRisks_CustomerId ON CreditRisks (CustomerId ASC);
+CREATE INDEX "IX_CreditRisks_CustomerId" ON "CreditRisks" ("CustomerId" ASC);
 
-ALTER TABLE CreditRisks 
-ADD CONSTRAINT FK_CreditRisks_Customers FOREIGN KEY (CustomerId) REFERENCES Customers (Id) ON DELETE CASCADE;
+ALTER TABLE "CreditRisks" 
+ADD CONSTRAINT "FK_CreditRisks_Customers" FOREIGN KEY ("CustomerId") REFERENCES  "Customers" ("Id") ON DELETE CASCADE;
 ```
 
 >[!note]
@@ -883,26 +894,23 @@ ADD CONSTRAINT FK_CreditRisks_Customers FOREIGN KEY (CustomerId) REFERENCES Cust
 Plus loin dans ce chapitre, vous apprendrez à utiliser ADO.NET pour appeler des procédures stockées. Comme vous savez peut-être déjà, **les procédures stockées sont des routines de code stockées dans une base de données qui font quelque chose. Comme les méthodes C#, les procédures stockées peuvent renvoyer des données ou simplement opérer sur des données sans rien renvoyer**. ***==Vous ajouterez une seule procédure stockée qui renverra le nom familier d’une automobile, en fonction du `carId` fourni==***. Pour ce faire, créez un nouvelle requête / script et entrez la commande SQL suivante :
 
 ```sql
-CREATE OR REPLACE FUNCTION GetPetName(
-    carID INT
+CREATE OR REPLACE FUNCTION "GetPetName"(
+    p_carID INT
 )
-RETURNS VARCHAR(50) -- On déclare explicitement le type de données retourné
+RETURNS VARCHAR(50)
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    -- On crée une variable interne pour stocker le résultat avant le RETURN
     result_petName VARCHAR(50);
 BEGIN
-    SELECT Inventory.PetName 
-    INTO result_petName 
-    FROM Inventory 
-    WHERE Inventory.Id = carID;
+    SELECT "PetName"
+    INTO result_petName
+    FROM "Inventory"
+    WHERE "Id" = p_carID;
 
-    -- On renvoie explicitement la valeur
     RETURN result_petName;
 END;
 $$;
-
 ```
 
 > [!warning] Ultra important pour éviter des problèmes plus tard avec la base de donnée Postgres (avec Gemini) 
@@ -946,15 +954,16 @@ Créez une nouvelle requête / script et exécutez les instructions SQL suivante
 
 ```sql
 -- Insertion des données des constructeurs (Makes)
-INSERT INTO Makes (Id, Name) VALUES (1, 'VW');
-INSERT INTO Makes (Id, Name) VALUES (2, 'Ford');
-INSERT INTO Makes (Id, Name) VALUES (3, 'Saab');
-INSERT INTO Makes (Id, Name) VALUES (4, 'Yugo');
-INSERT INTO Makes (Id, Name) VALUES (5, 'BMW');
-INSERT INTO Makes (Id, Name) VALUES (6, 'Pinto');
+INSERT INTO "Makes" ("Id", "Name") VALUES (1, 'VW');
+INSERT INTO "Makes" ("Id", "Name") VALUES (2, 'Ford');
+INSERT INTO "Makes" ("Id", "Name") VALUES (3, 'Saab');
+INSERT INTO "Makes" ("Id", "Name") VALUES (4, 'Yugo');
+INSERT INTO "Makes" ("Id", "Name") VALUES (5, 'BMW');
+INSERT INTO "Makes" ("Id", "Name") VALUES (6, 'Pinto');
 
--- Recalage obligatoire de la séquence d'auto-incrémentation (SERIAL) pour la table makes
-SELECT setval(pg_get_serial_sequence('makes', 'id'), COALESCE(max(id), 1)) FROM makes;
+-- Recalage obligatoire de la séquence d'auto-incrémentation 
+-- (SERIAL) pour la table makes
+SELECT setval(pg_get_serial_sequence('"Makes"', 'Id'), COALESCE(max("Id"), 1)) FROM "Makes";
 ```
 
 ### Entrées pour la table `Inventory`
@@ -963,18 +972,19 @@ Pour ajouter des enregistrements à votre première table, créez une nouvelle r
 
 ```sql
 -- Insertion des données de l'inventaire des véhicules
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (1, 1, 'Black', 'Zippy');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (2, 2, 'Rust', 'Rusty');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (3, 3, 'Black', 'Mel');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (4, 4, 'Yellow', 'Clunker');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (5, 5, 'Black', 'Bimmer');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (6, 5, 'Green', 'Hank');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (7, 5, 'Pink', 'Pinky');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (8, 6, 'Black', 'Pete');
-INSERT INTO Inventory (Id, MakeId, Color, PetName) VALUES (9, 4, 'Brown', 'Brownie');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (1, 1, 'Black', 'Zippy');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (2, 2, 'Rust', 'Rusty');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (3, 3, 'Black', 'Mel');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (4, 4, 'Yellow', 'Clunker');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (5, 5, 'Black', 'Bimmer');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (6, 5, 'Green', 'Hank');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (7, 5, 'Pink', 'Pinky');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (8, 6, 'Black', 'Pete');
+INSERT INTO "Inventory" ("Id", "MakeId", "Color", "PetName") VALUES (9, 4, 'Brown', 'Brownie');
 
--- Recalage obligatoire de la séquence d'auto-incrémentation (SERIAL) pour la table inventory
-SELECT setval(pg_get_serial_sequence('inventory', 'id'), COALESCE(max(id), 1)) FROM inventory;
+-- Recalage obligatoire de la séquence d'auto-incrémentation 
+-- (SERIAL) pour la table makes
+SELECT setval(pg_get_serial_sequence('"Inventory"', 'Id'), COALESCE(max("Id"), 1)) FROM "Inventory";
 ```
 
 ### Entrées pour la table `Customers`
@@ -983,14 +993,15 @@ Pour ajouter des entrées à la table `Customers`, créez une nouvelle requête 
 
 ```sql
 -- Insertions des données clients
-INSERT INTO Customers (Id, FirstName, LastName) VALUES (1, 'Dave', 'Brenner');
-INSERT INTO Customers (Id, FirstName, LastName) VALUES (2, 'Matt', 'Walton');
-INSERT INTO Customers (Id, FirstName, LastName) VALUES (3, 'Steve', 'Hagen');
-INSERT INTO Customers (Id, FirstName, LastName) VALUES (4, 'Pat', 'Walton');
-INSERT INTO Customers (Id, FirstName, LastName) VALUES (5, 'Bad', 'Customer');
+INSERT INTO "Customers" ("Id", "FirstName", "LastName") VALUES (1, 'Dave', 'Brenner');
+INSERT INTO "Customers" ("Id", "FirstName", "LastName") VALUES (2, 'Matt', 'Walton');
+INSERT INTO "Customers" ("Id", "FirstName", "LastName") VALUES (3, 'Steve', 'Hagen');
+INSERT INTO "Customers" ("Id", "FirstName", "LastName") VALUES (4, 'Pat', 'Walton');
+INSERT INTO "Customers" ("Id", "FirstName", "LastName") VALUES (5, 'Bad', 'Customer');
 
--- Recalage obligatoire de la séquence d'auto-incrémentation (SERIAL) à la fin des inserts
-SELECT setval(pg_get_serial_sequence('customers', 'id'), COALESCE(max(id), 1)) FROM customers;
+-- Recalage obligatoire de la séquence d'auto-incrémentation 
+-- (SERIAL) pour la table makes
+SELECT setval(pg_get_serial_sequence('"Customers"', 'Id'), COALESCE(max("Id"), 1)) FROM "Customers";
 ```
 
 ### Entrées pour la table `Orders`
@@ -999,13 +1010,14 @@ Ajoutez maintenant des données à votre table `Orders`. Créez une nouvelle req
 
 ```sql
 -- Insertion des données des commandes (Orders)
-INSERT INTO Orders (Id, CustomerId, CarId) VALUES (1, 1, 5);
-INSERT INTO Orders (Id, CustomerId, CarId) VALUES (2, 2, 1);
-INSERT INTO Orders (Id, CustomerId, CarId) VALUES (3, 3, 4);
-INSERT INTO Orders (Id, CustomerId, CarId) VALUES (4, 4, 7);
+INSERT INTO "Orders" ("Id", "CustomerId", "CarId") VALUES (1, 1, 5);
+INSERT INTO "Orders" ("Id", "CustomerId", "CarId") VALUES (2, 2, 1);
+INSERT INTO "Orders" ("Id", "CustomerId", "CarId") VALUES (3, 3, 4);
+INSERT INTO "Orders" ("Id", "CustomerId", "CarId") VALUES (4, 4, 7);
 
--- Recalage obligatoire de la séquence d'auto-incrémentation (SERIAL) pour la table orders
-SELECT setval(pg_get_serial_sequence('orders', 'id'), COALESCE(max(id), 1)) FROM orders;
+-- Recalage obligatoire de la séquence d'auto-incrémentation 
+-- (SERIAL) pour la table makes
+SELECT setval(pg_get_serial_sequence('"Orders"', 'Id'), COALESCE(max("Id"), 1)) FROM "Orders";
 ```
 
 ### Entrées pour la table `CreditRisks`
@@ -1013,9 +1025,13 @@ SELECT setval(pg_get_serial_sequence('orders', 'id'), COALESCE(max(id), 1)) FROM
 Ajouter des données à la table `CreditRisks`. Créez une nouvelle requête / scripts, entrez le SQL suivant
 
 ```sql
-INSERT INTO CreditRisks (Id, FirstName, LastName, CustomerId) 
+-- Insertion des donnés de risque de crédits (CreditRisks)
+INSERT INTO "CreditRisks" ("Id", "FirstName", "LastName", "CustomerId") 
 VALUES (1, 'Bad', 'Customer', 5);
-SELECT setval(pg_get_serial_sequence('creditrisks', 'id'), COALESCE(max(id), 1)) FROM creditrisks;
+
+-- Recalage obligatoire de la séquence d'auto-incrémentation 
+-- (SERIAL) pour la table makes
+SELECT setval(pg_get_serial_sequence('"CreditRisks"', 'Id'), COALESCE(max("Id"), 1)) FROM "CreditRisks";
 ```
 
 ## Exécution de tous les scripts SQL
