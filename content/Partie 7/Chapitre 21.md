@@ -1720,6 +1720,10 @@ Cela génère l'exception suivante :
 
 **Vous pouvez annuler la migration relative à la contrainte de vérification et la supprimer, car le reste du livre n'utilise pas cette contrainte. Elle a été ajoutée dans cette section à titre d'exemple.**
 
+>[!Danger] 
+>Comme les tables que l'on vient de crée en C# sont assez différentes des originaux, des erreurs vont survenir et les données présentes dans les tables seront supprimés.
+>
+> il est préférable de `DROP` la base de donnée et la recréer, exécuter la migration (`dotnet ef update ...`) et enfin peupler les tables (avec les scripts vu dans le [[Chapitre 20#Ajout d'entrées de test|Chapitre 20]])
 
 >[!attention]
 Si la migration a déjà été appliquée à la base de donnée (`dotnet ef database update`), il faut d'abord revenir en arrière :
@@ -2186,13 +2190,217 @@ Il existe d'autres options à explorer avec les entités possédées, notamment 
 
 ## Types de requêtes
 
-Les types de requêtes sont des collections `DbSet<T>` utilisées pour représenter des vues, une instruction SQL ou des tables sans clé primaire.
+**Les types de requêtes sont des collections `DbSet<T>` utilisées pour représenter des vues, une instruction SQL ou des tables sans clé primaire.** Les versions précédentes d'EF Core utilisaient `DbQuery<T>` à cet effet, mais **à partir d'EF Core 3.x, le type `DbQuery` a été abandonné.** **==Les types de requêtes sont ajoutés aux `DbContext` dérivés à l'aide de propriétés `DbSet<T>` et sont configurés comme sans clé.==**
 
-Les versions précédentes d'EF Core utilisaient `DbQuery<T>` à cet effet, mais à partir d'EF Core 3.x, le type DbQuery a été abandonné. Les types de requêtes sont ajoutés au DbContext dérivé à l'aide de propriétés `DbSet<T>` et sont configurés comme sans clé.
+***==Les types de requêtes sont généralement utilisés pour représenter des combinaisons de tables, comme par exemple combiner les détails des tables `Make` et `Inventory`. Prenons cet exemple de requête :==***
 
-Les types de requêtes sont généralement utilisés pour représenter des combinaisons de tables, comme par exemple combiner les détails des tables Make et Inventory. Prenons cet exemple de requête :
+```sql
+SELECT 
+    m."Id" AS "MakeId", 
+    m."Name" AS "Make",
+    i."Id" AS "CarId", 
+    i."IsDrivable", 
+    i."Display", 
+    i."DateBuilt", 
+    i."Color", 
+    i."PetName"
+FROM "Makes" m
+INNER JOIN "Inventory" i ON i."MakeId" = m."Id";
+```
+
+Pour stocker les résultats de cette requête, créez un nouveau dossier nommé `ViewModels`, et dans ce dossier, créez une nouvelle classe nommée `CarMakeViewModel`:
+
+```cs
+namespace AutoLot.Samples.ViewModels;
+
+[Keyless]
+public class CarMakeViewModel
+{
+    public int MakeId { get; set; }
+    public string Make { get; set; }
+    public int CarId { get; set; }
+    public bool IsDriveable { get; set; }
+    public string Display { get; set; }
+    public DateTime DateBuilt { get; set; }
+    public string Color { get; set; }
+    public string PetName { get; set; }
+
+    [NotMapped]
+    public string FullDetail => $"The {Color} {Make} is named {PetName}";
+
+    public override string ToString() => FullDetail;
+}
+```
+
+**L'attribut `Keyless` indique à EF Core que cette entité est un type de requête et ne sera jamais utilisée pour les mises à jour.** ==Elle doit être exclue du suivi des modifications lors des requêtes.== ***==Notez l'utilisation de l'attribut `NotMapped` pour créer une chaîne d'affichage combinant plusieurs propriétés en une seule chaîne lisible.==*** Mettez à jour le contexte de base de données de l'application (`ApplicationDbContext`) pour inclure un `DbSet<T>` pour le modèle de vue :
+
+```cs
+public class ApplicationDbContext : DbContext
+{
+    public DbSet<Car> Cars { get; set; }
+    public DbSet<Make> Makes { get; set; }
+    public DbSet<Radio> Radios { get; set; }
+    public DbSet<Driver> Drivers { get; set; }
+    public DbSet<CarDriver> CarsToDrivers { get; set; }
+    public DbSet<CarMakeViewModel> CarMakeViewModels { get; set; }
+
+	...
+}
+```
+
+Mettez à jour le fichier *GlobalUsings.cs* pour inclure le nouvel espace de noms du modèle de vue et la configuration (qui sera créée ensuite) :
+
+```cs
+global using AutoLot.Samples.ViewModels;
+global using AutoLot.Samples.ViewModels.Configuration;
+```
+
+**Le reste de la configuration s'effectue dans l'API Fluent.** Créez un nouveau dossier nommé `Configuration` sous le dossier `ViewModels`, puis créez dans ce dossier une nouvelle classe nommée `CarMakeViewModelConfiguration` et mettez à jour le code comme suit :
+
+```cs
+namespace AutoLot.Samples.ViewModels.Configuration;
+
+public class CarMakeViewModelConfiguration
+    : IEntityTypeConfiguration<CarMakeViewModel>
+{
+    public void Configure(EntityTypeBuilder<CarMakeViewModel> builder) { }
+}
+```
+
+Mettez à jour la classe `CarMakeViewModel` pour ajouter l'attribut `EntityTypeConfiguration` :
+
+```cs
+[Keyless]
+[EntityTypeConfiguration(typeof(CarMakeViewModelConfiguration))]
+public class CarMakeViewModel
+{
+	...
+}
+```
+
+Mettez à jour la méthode `OnModelCreating()` comme suit :
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	// Les appels à l'API Fluent vont ici
+	new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+	new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+	new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
+	new CarMakeViewModelConfiguration().Configure(
+		modelBuilder.Entity<CarMakeViewModel>()
+	);
+}
+```
+
+**L'exemple suivant configure l'entité comme étant sans clé et associe le type de requête à une requête SQL brute.** **==La méthode de l'API Fluent `HasNoKey()` n'est pas nécessaire si l'annotation de données `Keyless` est présente sur le modèle, et inversement.==** Elle est toutefois présentée dans cet exemple par souci d'exhaustivité.
+
+```cs
+public void Configure(EntityTypeBuilder<CarMakeViewModel> builder)
+{
+	builder
+		.HasNoKey()
+		.ToSqlQuery(
+			"""
+			SELECT m."Id" AS "MakeId", 
+				   m."Name" AS "Make",
+				   i."Id" AS "CarId", 
+				   i."IsDrivable", 
+				   i."Display", 
+				   i."DateBuilt", 
+				   i."Color", 
+				   i."PetName"
+			FROM "Makes" m
+			INNER JOIN "Inventory" i ON i."MakeId" = m."Id"
+			"""
+		);
+}
+```
+
+**==Les types de requêtes peuvent également être associés à une vue de base de données. Supposons qu'il existe une vue nommée `public.CarMakeView`, la configuration serait la suivante :==**
+
+```cs
+builder.HasNoKey().ToView("CarMakeView", "public");
+```
+
+>[!note]
+>Lors de l'utilisation des migrations EF Core pour mettre à jour votre base de données, les types de requêtes mappés à une vue ne sont pas créés en tant que tables. Les types de requêtes non mappés à des vues sont créés en tant que tables sans clé.
+
+**Si vous ne souhaitez pas que le modèle de vue soit associé à une table de votre base de données et que vous n'avez pas de vue à associer, utilisez la surcharge suivante de la méthode `ToTable()` pour exclure l'élément des migrations :**
+
+```cs
+builder.ToTable( x => x.ExcludeFromMigrations());
+```
+
+**Les derniers mécanismes permettant d'utiliser les types de requêtes sont les méthodes `FromSqlRaw()` et `FromSqlInterpolated()`.** Ces méthodes seront abordées en détail dans le chapitre suivant, mais voici un aperçu :
+
+```cs
+var records = context.CarMakeViewModel.FromSqlRaw("""
+    SELECT m."Id" AS "MakeId", 
+           m."Name" AS "Make", 
+           i."Id" AS "CarId", 
+           i."IsDrivable",
+           i."Display", 
+           i."DateBuilt", 
+           i."Color", 
+           i."PetName"
+    FROM "Makes" m
+    INNER JOIN "Inventory" i ON i."MakeId" = m."Id"
+    """);
+```
+
+### Mappage flexible des requêtes et des tables
+
+**==EF Core 5 a introduit la possibilité d'associer une même classe à plusieurs objets de base de données.==** Ces objets peuvent être des tables, des vues ou des fonctions. Par exemple, `CarViewModel` (voir [[Chapitre 20#Créez les classes `Car` et `CarViewModel`|Chapitre 20]]) peut être associé à une vue qui renvoie la marque du véhicule ainsi que les données de la table Inventory. EF Core interrogera ensuite cette vue et enverra les mises à jour à la table.
+
+```cs
+modelBuilder.Entity<CarViewModel>()
+	.ToTable("Inventory")
+	.ToView("InventoryWithMakesView");
+```
 
 # Exécution des requêtes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 >[!success] Note moderne
 >**Dans EF Core 11** (==pas encore sorti au moment de la rédaction==), la commande suivante permet de créer **ET** appliquer une migration **en une seule étape** via *Rolsyn*
