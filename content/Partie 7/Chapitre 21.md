@@ -1,5 +1,5 @@
 ---
-publish: false
+publish: true
 ---
 # <big><big><big><b><font color =green>Présentation d'Entity Framework Core</font></b></big></big></big>
 
@@ -43,7 +43,7 @@ Recréer un framework entier à partir de zéro exige une analyse approfondie de
 
 **À chaque nouvelle version, EF Core a ajouté des fonctionnalités présentes dans EF 6, ainsi que de nouvelles fonctionnalités inédites**. La version 3.1 a considérablement réduit la liste des fonctionnalités essentielles manquantes dans EF Core (par rapport à EF 6), et la version 5.0 a encore davantage réduit cet écart. La sortie d'EF Core 6.0 a consolidé le framework, et désormais, ***==pour la plupart des projets, EF Core offre tout le nécessaire.==***
 
-**Ce chapitre et les trois suivants vous présenteront l'accès aux données avec EF Core.** Vous découvrirez : ==la création d'un modèle de domaine, le mappage des classes d'entités et de leurs propriétés aux tables et colonnes de la base de données, la mise en œuvre du suivi des modifications,== ***==l'utilisation de l'interface de ligne de commande (CLI) d'EF Core pour la génération de code et les migrations, ainsi que le rôle de la classe `DbContext`==***. ==Vous apprendrez également à lier les entités avec des propriétés de navigation, des transactions et la gestion de la concurrence, pour ne citer que quelques-unes des fonctionnalités explorées.== **Le quatrième et dernier chapitre consacré à EF Core met en pratique la couche d'accès aux données à l'aide d'une série de tests d'intégration. Ces tests illustrent l'utilisation d'EF Core pour les opérations CRUD (création, lecture, mise à jour et suppression).***
+**Ce chapitre et les trois suivants vous présenteront l'accès aux données avec EF Core.** Vous découvrirez : ==la création d'un modèle de domaine, le mappage des classes d'entités et de leurs propriétés aux tables et colonnes de la base de données, la mise en œuvre du suivi des modifications,== ***==l'utilisation de l'interface de ligne de commande (CLI) d'EF Core pour la génération de code et les migrations, ainsi que le rôle de la classe `DbContext`==***. ==Vous apprendrez également à lier les entités avec des propriétés de navigation, des transactions et la gestion de la concurrence, pour ne citer que quelques-unes des fonctionnalités explorées.== **Le quatrième et dernier chapitre consacré à EF Core met en pratique la couche d'accès aux données à l'aide d'une série de tests d'intégration. Ces tests illustrent l'utilisation d'EF Core pour les opérations CRUD (création, lecture, mise à jour et suppression).**
 
 **==À la fin de ces chapitres, vous disposerez de la version finale de la couche d'accès aux données pour notre base de données `AutoLot`==**. **Avant d'aborder EF Core, parlons des mappeurs objet-relationnel en général.**
 
@@ -97,7 +97,7 @@ Recréer un framework entier à partir de zéro exige une analyse approfondie de
 
 # Les éléments constitutifs d'Entity Framework
 
-**Les principaux composants d'EF Core sont `DbContext`, `ChangeTracker`, le type de collection spécialisé `DbSet`, les fournisseurs de base de données et les entités de l'application.** Pour suivre ce chapitre, créez une nouvelle application console nommée *AutoLot.Samples* et ajoutez les packages `Microsoft.EntityFrameworkCore`, `Microsoft.EntityFrameworkCore.Design` et le package EF lié à votre fournisseur de données (pour moi : `Npgsql.EntityFrameworkCore.PostgreSQL`. Voir la table des fournisseurs de données disponible [ici](https://learn.microsoft.com/en-us/ef/core/providers/?tabs=dotnet-core-cli)) **N'oubliez pas de désactiver les types référence pouvant être nuls dans le fichier projet :**
+**Les principaux composants d'EF Core sont `DbContext`, `ChangeTracker`, le type de collection spécialisé `DbSet`, les fournisseurs de base de données et les entités de l'application.** Pour suivre ce chapitre, créez une nouvelle application console nommée *AutoLot.Samples* et ajoutez les packages `Microsoft.EntityFrameworkCore`, `Microsoft.EntityFrameworkCore.Design` et le package EF lié à votre fournisseur de données (pour moi : `Npgsql.EntityFrameworkCore.PostgreSQL`. Voir la [table des fournisseurs de données](https://learn.microsoft.com/en-us/ef/core/providers/?tabs=dotnet-core-cli) disponible ici) **N'oubliez pas de désactiver les types référence pouvant être nuls dans le fichier projet :**
 
 ```xml
 <PropertyGroup>
@@ -220,9 +220,9 @@ public class ApplicationDbContextFactory
 
 
 >[!note]
->Le nom de la base de données utilisé dans ces exemples est `AutoLotSamples`, et non `AutoLot`, qui était le nom utilisé au [[Chapitre 20#Création de la base de donnée AutoLot|Chapitre 20]]. La base de données `AutoLot` sera mise à jour vers sa version finale à partir du [[Chapitre 22|Chapitre 22 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]].
+>Le nom de la base de données utilisé dans ces exemples est `AutoLotSamples`, et non `AutoLot`, qui était le nom utilisé au [[Chapitre 20#Création de la base de donnée AutoLot|Chapitre 20]]. La base de données `AutoLot` sera mise à jour vers sa version finale à partir du [[Chapitre 22]].
 
-*==Là encore, la fabrique de contexte est conçue pour l'interface de ligne de commande d'EF Core afin de créer une instance de la classe dérivée `DbContext`, et non pour une utilisation en production.==* **L'interface de ligne de commande utilise la fabrique lors de l'exécution d'actions telles que la création ou l'application de migrations de base de données.** ***==L'une des principales raisons pour lesquelles il est déconseillé de l'utiliser en production est la chaîne de connexion codée en dur. Comme elle est destinée à la conception, l'utilisation d'une chaîne de connexion définie pointant vers la base de données de développement fonctionne parfaitement.
+*==Là encore, la fabrique de contexte est conçue pour l'interface de ligne de commande d'EF Core afin de créer une instance de la classe dérivée `DbContext`, et non pour une utilisation en production.==* **L'interface de ligne de commande utilise la fabrique lors de l'exécution d'actions telles que la création ou l'application de migrations de base de données.** ***==L'une des principales raisons pour lesquelles il est déconseillé de l'utiliser en production est la chaîne de connexion codée en dur. Comme elle est destinée à la conception, l'utilisation d'une chaîne de connexion définie pointant vers la base de données de développement fonctionne parfaitement.==***
 
 >[!success] Précisions sur le paragraphe précédent (Avec Gemini)
 >
@@ -329,7 +329,7 @@ static void UsingSavePoints()
 
 #### Transactions explicites et stratégies d'exécution
 
-**Lorsqu'une stratégie d'exécution est active** (voir le [[Chapitre 22#Résilience de la connection]]), **avant de créer une transaction explicite, vous devez obtenir une référence à la stratégie d'exécution en cours d'utilisation.** ==Appelez ensuite la méthode `Execute()` sur cette stratégie pour créer une transaction explicite.==
+**Lorsqu'une stratégie d'exécution est active** (voir [[Chapitre 22#Résilience de la connection]]), **avant de créer une transaction explicite, vous devez obtenir une référence à la stratégie d'exécution en cours d'utilisation.** ==Appelez ensuite la méthode `Execute()` sur cette stratégie pour créer une transaction explicite.==
 
 ```cs
 static void TransactionWithExecutionStrategies()
@@ -409,7 +409,7 @@ public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 | `Attach()`/`AttachRange()`                | Démarre le suivi de/des entités. Les entités dont la clé primaire numérique est définie comme identité et dont la valeur est égale à zéro sont suivies comme `Added`. Toutes les autres sont suivies comme `Unchanged`. Des versions asynchrones sont également disponibles. |
 | `FromSqlRaw()`<br>`FromSqlInterpolated()` | Crée une requête LINQ à partir d'une chaîne brute ou interpolée représentant une requête SQL. Peut être combinée avec d'autres instructions LINQ pour une exécution côté serveur.                                                                                            |
 
-**Le type `DbSet<T>` implémente `IQueryable<T>`, ce qui permet d'utiliser des requêtes LINQ pour récupérer des enregistrements de la base de données.** ==Outre les méthodes d'extension ajoutées par EF Core, `DbSet<T>` prend en charge les mêmes méthodes d'extension que celles présentées au [[Chapitre 13#Méthodes d'extension|Chapitre 13]], telles que `ForEach()`, `Select()` et `All()`.
+**Le type `DbSet<T>` implémente `IQueryable<T>`, ce qui permet d'utiliser des requêtes LINQ pour récupérer des enregistrements de la base de données.** ==Outre les méthodes d'extension ajoutées par EF Core, `DbSet<T>` prend en charge les mêmes méthodes d'extension que celles présentées au [[Chapitre 13#Méthodes d'extension|Chapitre 13]], telles que `ForEach()`, `Select()` et `All()`.==
 
 **Vous ajouterez les propriétés de `DbSet<T>` à `ApplicationDbContext` dans la section [[#Entités]].**
 
@@ -531,11 +531,11 @@ private void ChangeTracker_Tracked(object sender, EntityTrackedEventArgs e)
 
 **Lorsqu'une base de données relationnelle est utilisée, EF Core exploite les données des colonnes d'une table pour renseigner les propriétés d'une entité lors de la lecture des données et écrit les propriétés de l'entité dans les colonnes d'une table lors de la persistance des données.** **==Si la propriété est automatique, EF Core la lit et l'écrit via ses accesseurs (getter et setter)==**. ***==Si la propriété possède un champ de stockage, EF Core lira et écrira dans ce champ plutôt que dans la propriété publique, même si le champ de stockage est privé.==*** **Bien qu'EF Core puisse lire et écrire dans des champs privés, une propriété publique en lecture-écriture encapsulant le champ de stockage est toujours nécessaire.**
 
-**La prise en charge des champs de stockage est avantageuse dans deux cas :** ***==l'utilisation du modèle `INotifyPropertyChanged` dans les applications WPF/Avalonia et les conflits entre les valeurs par défaut de la base de données et celles de .NET.==*** L'utilisation d'EF Core avec WPF est abordée au [[Chapitre 28|Chapitre 28 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]], et les valeurs par défaut de la base de données sont traitées plus loin dans ce chapitre. 
+**La prise en charge des champs de stockage est avantageuse dans deux cas :** ***==l'utilisation du modèle `INotifyPropertyChanged` dans les applications WPF/Avalonia et les conflits entre les valeurs par défaut de la base de données et celles de .NET.==*** **L'utilisation d'EF Core avec WPF/Avalonia est abordée au [[Chapitre 28]], et les valeurs par défaut de la base de données sont traitées plus loin dans ce chapitre.**
 
 ### Schémas de mappage de tables
 
-**EF Core propose deux schémas de mappage classe-table : *table par hiérarchie* **(TPH)** et *table par type* **(TPT)**. ***==Le mappage TPH, par défaut, associe une hiérarchie d’héritage à une seule table. Introduit dans EF Core 5, le mappage TPT associe chaque classe de la hiérarchie à sa propre table.==***
+**EF Core propose deux schémas de mappage classe-table :** *table par hiérarchie* **(TPH) et** *table par type* **(TPT)**. ***==Le mappage TPH, par défaut, associe une hiérarchie d’héritage à une seule table. Introduit dans EF Core 5, le mappage TPT associe chaque classe de la hiérarchie à sa propre table.==***
 
 >[!note]
 >Les classes peuvent également être associées à des vues et à des requêtes SQL brutes. On les appelle des *types de requêtes* et elles seront abordées plus loin dans ce chapitre.
@@ -661,7 +661,7 @@ Avant d'aborder en détail les propriétés de navigation et les modèles de rel
 
 #### Relations un-à-plusieurs
 
-Pour créer une relation un-à-plusieurs, la classe d'entité du côté principal ajoute une propriété de type collection à la classe d'entité du côté dépendant. L'entité dépendante doit également posséder des propriétés pour la clé étrangère pointant vers le principal. Dans le cas contraire, EF Core créera des propriétés de clé étrangère fantômes, comme expliqué précédemment. Par exemple, dans la base de données créée au chapitre 20, la table Makes (représentée par la classe d'entité Make) et la table Inventory (représentée par la classe d'entité Car) ont une relation un-à-plusieurs.
+**Pour créer une relation un-à-plusieurs, la classe d'entité du côté principal ajoute une propriété de type collection à la classe d'entité du côté dépendant.** ==L'entité dépendante doit également posséder des propriétés pour la clé étrangère pointant vers le principal.== **==Dans le cas contraire, EF Core créera des propriétés de clé étrangère fantômes, comme expliqué précédemment.==** Par exemple, dans la base de données créée au [[Chapitre 20#Création de la table `Makes`|Chapitre 20]], la table `Makes` (représentée par la classe d'entité `Make`) et la table `Inventory` (représentée par la classe d'entité `Car`) ont une relation un-à-plusieurs.
 
 >[!note]
 >Dans ces premiers exemples, la classe `Car` sera associée à une table nommée `Cars`. **Plus loin dans ce chapitre, la classe `Car` sera associée à la table `Inventory`.**
@@ -1000,9 +1000,9 @@ Dans EF Core, le comportement spécifié est déclenché uniquement après la su
 
 ##### Relations facultatives
 
-==Rappelons qu'au [[#Tableau 21-4 Termes utilisés pour décrire les propriétés et les relations de navigation|Tableau 21-4]] les relations facultatives sont celles où l'entité dépendante peut définir la ou les valeurs de la clé étrangère sur `null`.== **Pour les relations facultatives, le comportement par défaut est `ClientSetNull`.** Le [[#Tableau 21-5 Comportement en cascade avec relations optionnelles|Tableau 21-5]] illustre le comportement en cascade avec les entités dépendantes et son impact sur les enregistrements de la base de données lors de l'utilisation de SQL Server.
+==Rappelons qu'au [[#Tableau 21-4 Termes utilisés pour décrire les propriétés et les relations de navigation|Tableau 21-4]] les relations facultatives sont celles où l'entité dépendante peut définir la ou les valeurs de la clé étrangère sur `null`.== **Pour les relations facultatives, le comportement par défaut est `ClientSetNull`.** Le [[#Tableau 21-5 Comportement de la cascade avec des relations optionnelles|Tableau 21-5]] illustre le comportement en cascade avec les entités dépendantes et son impact sur les enregistrements de la base de données lors de l'utilisation de SQL Server.
 
-###### Tableau 21-5: Comportement de la  cascade avec des relations optionnelles
+###### Tableau 21-5: Comportement de la cascade avec des relations optionnelles
 
 | Comportement de la Suppression  | Effet sur les Dépendances (Dans la Mémoire)          | Effet sur les Dépendances (Dans la Base de Données)                                                              |
 | ------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -1028,8 +1028,8 @@ Dans EF Core, le comportement spécifié est déclenché uniquement après la su
 
 >[!tip] Les tableaux [[#Tableau 21-5 Comportement de la cascade avec des relations optionnelles|21-5]] et [[#Tableau 21-6 Comportement de la cascade avec des relations requises|21-6]] sont valides pour PostgreSQL. Les seules nuances sont :
 > 
-> - `ClientCascade` est pratiquement inutile avec Npgsql car PostgreSQL supporte le cascade delete nativement
-> - Pour `SetNull` sur une relation required, l'exception peut provenir de PostgreSQL directement (violation NOT NULL) plutôt que d'EF Core, selon la configuration du change tracker
+> - `ClientCascade` est pratiquement inutile avec `Npgsql` car PostgreSQL supporte le cascade delete nativement
+> - Pour `SetNull` sur une relation required, l'exception peut provenir de PostgreSQL directement (violation `NOT NULL`) plutôt que d'EF Core, selon la configuration du change tracker
 
 ### Conventions d'entités
 
@@ -1895,7 +1895,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 }
 ```
 
-Utilisation des classes `IEntityTypeConfiguration`
+#### Utilisation des classes `IEntityTypeConfiguration`
 
 **Comme vous l'avez peut-être constaté à ce stade de l'utilisation de l'API Fluent, la méthode `OnModelCreating()` peut devenir assez longue (et difficile à manipuler) à mesure que votre modèle se complexifie.** ***==Introduites dans EF Core 6, l'interface `IEntityTypeConfiguration` et l'attribut `EntityTypeConfiguration` permettent de déplacer la configuration de l'API Fluent d'une entité dans sa propre classe.==*** **==Cela permet d'obtenir un `ApplicationDbContext` plus clair et soutient le principe de séparation des préoccupations.==**
 
@@ -1913,13 +1913,45 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
 **Ensuite, déplacez le contenu de la configuration de l'entité `Car` depuis la méthode `OnModelCreating()` de `ApplicationDbContext` vers la méthode `Configure()` de la classe `CarConfiguration`. Remplacez la variable `entity` par la variable `builder` afin que la méthode `Configure()` ressemble à ceci :**
 
 ```cs
-
+public void Configure(EntityTypeBuilder<Car> builder)
+{
+	builder.ToTable("Inventory", "public");
+	builder.HasKey(e => e.Id);
+	builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
+	builder
+		.Property(e => e.Color)
+		.IsRequired()
+		.HasMaxLength(50)
+		.HasDefaultValue("Black");
+	builder.Property(e => e.PetName).IsRequired().HasMaxLength(50);
+	builder.Property(e => e.DateBuilt).HasDefaultValueSql("NOW()");
+	builder
+		.Property(e => e.IsDrivable)
+		.HasField("_isDrivable")
+		.HasDefaultValue(true);
+	builder.Property(e => e.xmin).IsRowVersion().IsConcurrencyToken();
+	builder
+		.Property(e => e.Display)
+		.HasComputedColumnSql(
+			@"""PetName"" || ' (' || ""Color"" || ')'",
+			stored: true
+		);
+	builder
+		.HasOne(d => d.MakeNavigation)
+		.WithMany(p => p.Cars)
+		.HasForeignKey(d => d.MakeId)
+		.OnDelete(DeleteBehavior.ClientSetNull)
+		.HasConstraintName("FK_Inventory_Makes_MakeId");
+}
 ```
 
 **Cette configuration fonctionne également avec la configuration fluide de type plusieurs-à-plusieurs entre `Car` et  `Driver`.** **==Vous pouvez choisir d'ajouter la configuration à la classe `CarConfiguration` ou de créer une classe `DriverConfiguration`.==** Dans cet exemple, déplacez-la dans la classe `CarConfiguration` à la fin de la méthode `Configure()`.
 
 ```cs
 public void Configure (EntityTypeBuilder<Car> builder)
+{
+	...
+	
 	builder
 		.HasMany(p => p.Drivers)
 		.WithMany(p => p.Cars)
@@ -2361,46 +2393,381 @@ modelBuilder.Entity<CarViewModel>()
 
 # Exécution des requêtes
 
+**Les requêtes d'extraction de données sont créées à l'aide de requêtes LINQ écrites sur les propriétés `DbSet<T>`.** ***==La requête LINQ est convertie dans le langage spécifique à la base de données==*** (par exemple, T-SQL) ***==par le moteur de traduction LINQ du fournisseur de base de données et exécutée côté serveur.==*** ==Les requêtes LINQ multi-enregistrements== (ou potentiellement multi-enregistrements) ==ne sont exécutées que lorsqu'elles sont parcourues== (par exemple, à l'aide d'une boucle `foreach`) ==ou liées à un contrôle pour affichage== (comme une grille de données). **Cette exécution différée permet de construire des requêtes dans le code sans subir de problèmes de performance liés à des échanges excessifs avec la base de données ou à la récupération d'un nombre d'enregistrements supérieur à celui prévu.**
+
+**Par exemple, pour obtenir tous les enregistrements de `Car` jaunes dans la base de données, exécutez la requête suivante** (Dans le fichier *Program.cs*) :
+
+```cs
+static void QueryExecution()
+{
+    //Cette fabrique n'est pas censée être utilisée ainsi,
+    //mais il s'agit d'un exemple de code :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var cars = context.Cars.Where(x => x.Color == "Yellow");
+}
+```
+
+**En mode d'exécution différée, la base de données n'est interrogée qu'après le parcours des résultats.** **==Pour que la requête s'exécute immédiatement, utilisez la méthode `ToList()`.==**
+
+```cs
+var listOfCars = context.Cars.Where(x => x.Color == "Yellow").ToList();
+```
+
+**Comme les requêtes ne sont exécutées que lorsqu'elles sont déclenchées, elles peuvent être construites sur plusieurs lignes de code.** L'exemple de code suivant s'exécute de la même manière que l'exemple précédent :
+
+```cs
+var query = context.Cars.AsQueryable();
+query = query.Where(x => x.Color == "Yellow");
+var moreCars = query.ToList();
+```
+
+***==Les requêtes portant sur un seul enregistrement==*** (comme lors de l'utilisation de `First()`/`FirstOrDefault()`) ***==s'exécutent immédiatement lors de l'appel de l'action==*** (telle que `FirstOrDefault()`), ***==et les instructions de création, de mise à jour et de suppression sont exécutées immédiatement lorsque la méthode `DbContext.SaveChanges()` est exécutée.==***
+
+>[!note]
+>Les chapitres suivants traitent en détail de l'exécution des opérations CRUD.
+
+## Évaluation mixte client-serveur
+
+Les versions précédentes d'EF Core permettaient de combiner l'exécution côté serveur et côté client. Cela signifiait qu'une fonction C# pouvait être utilisée au milieu d'une requête LINQ, ce qui annulait en réalité le comportement décrit précédemment. La partie de la requête précédant la fonction C# s'exécutait côté serveur, mais les résultats (à ce stade de la requête) étaient ensuite renvoyés côté client, et le reste de la requête s'exécutait en tant que requête LINQ to Objects. Cette approche a finalement engendré plus de problèmes qu'elle n'en a résolu, et cette fonctionnalité a été modifiée avec la sortie d'EF Core 3.1. Désormais, seul le dernier nœud d'une requête LINQ peut s'exécuter côté client.
+
+# Requêtes avec et sans suivi des modifications
+
+**Lorsque des données sont lues depuis la base de données dans une instance de `DbSet<T>` avec une clé primaire, les entités (par défaut) sont suivies par le gestionnaire de modifications.** **==C'est généralement le comportement souhaité dans votre application.==** ==Toute modification apportée à l'élément peut alors être enregistrée dans la base de données simplement en appelant `SaveChanges()` sur votre instance de `DbContext` dérivée, sans aucune intervention supplémentaire de votre part.== De plus, **une fois qu'une instance est suivie par le gestionnaire de modifications, tout appel ultérieur à la base de données pour ce même élément (basé sur la clé primaire) entraînera une mise à jour de l'élément, et non une duplication.**
+
+***==Cependant, il peut arriver que vous ayez besoin d'extraire des données de la base de données sans souhaiter qu'elles soient suivies par le gestionnaire de modifications.==*** ==Cela peut être dû à des problèmes de performance (le suivi des valeurs d'origine et actuelles pour un grand nombre d'enregistrements peut engendrer une forte consommation de mémoire), ou bien vous savez que ces enregistrements ne seront jamais modifiés par la partie de l'application qui a besoin de ces données.==
+
+**Pour charger des données dans une instance de `DbSet<T>` sans les ajouter au ChangeTracker, ajoutez `AsNoTracking()` à l'instruction LINQ**. **==Cela indique à EF Core de récupérer les données sans les ajouter au `ChangeTracker`.==** Par exemple, pour charger un enregistrement de type `Car` sans l'ajouter au `ChangeTracker`, exécutez le code suivant :
+
+```cs
+static void TrackingNoTracking()
+{
+    //Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var untrackedCar = context.Cars.Where(x => x.Id == 1).AsNoTracking();
+}
+```
+
+*==Cela présente l'avantage d'éviter une potentielle surcharge mémoire, mais aussi un inconvénient : des appels supplémentaires pour récupérer la même voiture créeront des copies supplémentaires de l'enregistrement.==* ***==Au prix d'une consommation de mémoire accrue et d'un temps d'exécution légèrement plus long, la requête peut être modifiée afin de garantir qu'il n'existe qu'une seule instance de la voiture non mappée.==***
+
+```cs
+static void TrackingNoTracking()
+{
+	...
+    var untrackedWithIdResolution = context
+        .Cars.Where(x => x.Id == 1)
+        .AsNoTrackingWithIdentityResolution();
+}
+```
+
+**Les types de requêtes ne sont jamais suivis car ils ne peuvent pas être mis à jour.** *==L'exception concerne le mappage flexible requête/table.==* ==Dans ce cas, les instances sont suivies par défaut afin d'être enregistrées dans la table cible.==
+
+# Code First vs. Database First
+
+***==Que vous développiez une nouvelle application ou que vous ajoutiez EF Core à une application existante, vous vous retrouverez dans l'une des deux situations suivantes :==*** ***soit vous disposez d'une base de données existante avec laquelle vous devez travailler, soit vous n'en avez pas encore et vous devez en créer une.***
+
+**==L'approche *Code First* consiste à créer et configurer vos classes d'entités et le `DbContext` dérivé directement dans le code, puis à utiliser des migrations pour mettre à jour la base de données.==** **C'est ainsi que la plupart des nouveaux projets sont développés.** ==L'avantage est que, à mesure que vous développez votre application, vos entités évoluent en fonction de ses besoins. Les migrations maintiennent la base de données synchronisée, de sorte que sa conception évolue avec votre application.== **Ce processus de conception émergent est populaire auprès des équipes de développement agiles, car il permet de construire les bonnes parties au bon moment.**
+
+**==Si vous disposez déjà d'une base de données ou si vous préférez que la conception de votre base de données guide votre application, on parle alors d'approche *Database First*.==** **Au lieu de créer manuellement le `DbContext` dérivé et toutes les entités, vous générez les classes à partir de la base de données.** ***==Lorsque la base de données est modifiée, vous devez recréer la structure de vos classes pour maintenir votre code synchronisé avec la base de données.==*** **Tout code personnalisé dans les entités ou le `DbContext` dérivé doit être placé dans des classes partielles afin qu'il ne soit pas écrasé lors de la recréation de la structure.** **==Heureusement, le processus de génération de code crée des classes partielles précisément pour cette raison.==**
+
+***==Quelle que soit la méthode choisie, "code first" ou "database first", sachez qu'il s'agit d'un engagement.==*** 
+
+- **Si vous utilisez « code first », toutes les modifications sont apportées aux classes d'entités et de contexte, et la base de données est mise à jour à l'aide de migrations.**
+
+- **Si vous travaillez avec « database first », toutes les modifications doivent être apportées à la base de données, puis les classes sont recréées.** 
+
+***==Avec un peu d'effort et de planification, vous pouvez passer de « database first » à « code first » (et inversement), mais vous ne devez pas effectuer de modifications manuelles simultanément dans le code et la base de données.==***
+
+# Commandes CLI de l'outil global EF Core
+
+**L'outil global `dotnet-ef` (outil EF Core) contient les commandes nécessaires pour générer du code à partir de bases de données existantes, pour créer/supprimer des migrations de bases de données et pour effectuer des opérations sur une base de données (mise à jour, suppression, etc.).** Avant de pouvoir utiliser l'outil global `dotnet-ef`, vous devez l'installer à l'aide de la commande suivante :
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+>[!note]
+>Si vous avez installé une version antérieure des outils en ligne de commande EF Core, vous devrez la désinstaller avant d'installer la dernière version. Pour désinstaller l'outil global, utilisez :
+>```bash
+>dotnet tool uninstall --global dotnet-ef.
+>```
+
+Pour tester l'installation, ouvrez une invite de commandes et saisissez la commande suivante :
+
+```bash
+dotnet ef
+```
+
+***==Si l'outil est installé avec succès, vous obtiendrez la licorne d'EF Core (la mascotte de l'équipe) et la liste des commandes disponibles, comme ceci :==***
+
+```
+                     _/\__
+               ---==/    \\
+         ___  ___   |.    \|\
+        | __|| __|  |  )   \\\
+        | _| | _|   \_/ |  //|\\
+        |___||_|       /   \\\/\\
+
+Entity Framework Core .NET Command-line Tools 10.0.10
+
+Usage: dotnet ef [options] [command]
+
+Options:
+  --version        Show version information
+  -h|--help        Show help information
+  -v|--verbose     Show verbose output.
+  --no-color       Don't colorize output.
+  --prefix-output  Prefix output with level.
+
+Commands:
+  database    Commands to manage the database.
+  dbcontext   Commands to manage DbContext types.
+  migrations  Commands to manage migrations.
+
+Use "dotnet ef [command] --help" for more information about a command.
+```
+
+Le [[#Tableau 21-10 Commandes d'outillage EF Core|Tableau 21-10]] décrit les trois commandes principales de l'outil global EF Core. **Chaque commande principale possède des sous-commandes.** **==Comme pour toutes les commandes .NET, chaque commande dispose d'un système d'aide complet accessible en saisissant l'option `-h` avec la commande.==**
+
+###### Tableau 21-10: Commandes d'outillage EF Core
+
+| Commande     | Description                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| `Database`   | Commandes permettant de gérer la base de données. Les sous-commandes incluent `drop` et `update`               |
+| `DbContext`  | Commandes permettant de gérer les types `DbContext`. Les sous-commandes incluent `scaffold`, `list` et `info`. |
+| `Migrations` | Commandes de gestion des migrations. Les sous-commandes incluent `add`, `list`, `remove` et `script`.          |
+
+***Les commandes EF Core s'exécutent sur les fichiers de projet .NET.*** **Le projet cible doit référencer le package NuGet d'outils EF Core :** `Microsoft.EntityFrameworkCore.Design`. ***==Les commandes agissent sur le fichier projet situé dans le même répertoire que celui où elles sont exécutées, ou sur un fichier projet situé dans un autre répertoire s'il est référencé via les options de ligne de commande.==***
+
+**Pour les commandes CLI EF Core nécessitant une instance d'une classe `DbContext` dérivée** (`Database` et `migrations`), **si une seule instance est présente dans le projet, elle sera utilisée.** **==S'il y en a plusieurs, le `DbContext` doit être spécifié dans les options de ligne de commande.==** ==La classe `DbContext` dérivée sera instanciée à l'aide d'une instance d'une classe implémentant l'interface `IDesignTimeDbContextFactory<TContext>`, si elle est disponible.== **Si l'outil ne trouve pas d'instance, le `DbContext` dérivé sera instancié à l'aide du constructeur sans paramètre. Si aucune de ces instances n'existe, la commande échouera.** ***==Notez que l'utilisation du constructeur sans paramètre (et non du constructeur prenant en paramètre `DbContextOptions<T>`) requiert l'existence d'une surcharge de la méthode `OnConfiguring`, ce qui est déconseillé.==*** **==La meilleure (et en réalité la seule) solution consiste à toujours créer une instance de `IDesignTimeDbContextFactory<TContext>` pour chaque `DbContext` dérivé de votre application.==**
+
+**Des options communes sont disponibles pour les commandes EF Core, comme indiqué dans le [[#Tableau 21-11 Options de commande EF Core|Tableau 21-11]].** De nombreuses commandes possèdent des options ou arguments supplémentaires.
+
+###### Tableau 21-11: Options de commande EF Core
+
+| Option (Version courte) | Option (Version longue) | Type de valeur attendu | Description                                                                                                                                                       |
+| ----------------------- | ----------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-c`                    | `--context`             | `<DBCONTEXT>`          | Classe `DbContext` dérivée entièrement qualifiée à utiliser. **Si plusieurs classes `DbContext` dérivées existent dans le projet, cette option est obligatoire.** |
+| `-p`                    | `--project`             | `<PROJECT>`            | Le projet à utiliser (emplacement des fichiers). Par défaut, le répertoire de travail courant.                                                                    |
+| `-s`                    | `--startup-project`     | `<PROJECT>`            | Le projet de démarrage à utiliser (contient le `DbContext` dérivé). Par défaut, il s'agit du répertoire de travail courant.                                       |
+| `-h`                    | `--help`                |                        | Affiche l'aide et toutes les options.                                                                                                                             |
+| `-v`                    | `--verbose`             |                        | Affiche tout les détails.                                                                                                                                         |
+
+Pour afficher tous les arguments et options d'une commande, saisissez `dotnet ef <commande> -h` dans une fenêtre de commande, comme ceci :
+
+```bash
+dotnet ef migrations add -h
+```
+
+>[!note]
+>Il est important de noter que les commandes CLI ne sont pas des commandes C#, donc les règles d'échappement des barres obliques et des guillemets ne s'appliquent pas.
+
+## Les commandes de `migrations`
+
+**Les commandes de migration permettent d'ajouter, de supprimer, de lister et de générer des scripts de migration.** ***==Lorsqu'une migration est appliquée à une base, un enregistrement est créé dans la table `__EFMigrationsHistory`.==*** Le [[#Tableau 21-12 Commandes de `migrations` EF Core|Tableau 21-12]] décrit ces commandes. Les sections suivantes expliquent les commandes en détail.
+
+>[!success] Meilleure analogie pour les migrations (Avec Claude)
+>
+`dotnet ef migrations` est l'équivalent de *Git* mais pour le schéma de base de données.
+>
+>**Comme Git**, les migrations sont linéaires et chronologiques, on ne peut pas supprimer une migration du milieu sans défaire celles qui suivent. 
+>
+**Contrairement à Git**, il n'y a pas de branches ni de merge, et l'historique est stocké à la fois dans les fichiers C# du projet ET dans la table `__EFMigrationsHistory` de la base de données.
+
+###### Tableau 21-12: Commandes de `migrations` EF Core
+
+| Commande | Description                                                                                                                                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Add`    | Crée une nouvelle migration basée sur les modifications apportées par la migration précédente.                                                                                                                                   |
+| `Remove` | Vérifie si la dernière migration du projet a été appliquée à la base de données et, si ce n'est pas le cas, supprime le fichier de migration (et son concepteur) puis rétablit la classe d'instantané à la migration précédente. |
+| `list`   | Liste toutes les migrations pour un `DbContext` dérivé et leur statut (appliquées ou en attente).                                                                                                                                |
+| `bundle` | Crée un fichier exécutable pour mettre à jour la base de données.                                                                                                                                                                |
+| `script` | Crée un script SQL pour toutes les migrations, une seule ou une plage de migrations.                                                                                                                                             |
+
+### La commande `add` de `migrations`
+
+**La commande `add` crée une nouvelle migration de base de données basée sur le modèle objet actuel.** **==Le processus examine chaque entité possédant une propriété `DbSet<T>` sur le `DbContext` dérivé (et chaque entité accessible depuis ces entités via les propriétés de navigation) et détermine si des modifications doivent être appliquées à la base de données.==** **Le cas échéant, le code approprié est généré pour mettre à jour la base de données. Vous en apprendrez davantage à ce sujet prochainement.**
+
+**La commande `add` requiert un argument `name`, utilisé pour nommer la classe et les fichiers de la migration.** ==Outre les options communes, l'option `-o <CHEMIN>` ou `--output-dir <CHEMIN>` indique l'emplacement où les fichiers de migration doivent être enregistrés. Le répertoire par défaut est nommé `Migrations`, relatif au chemin actuel.==
+
+**Chaque migration ajoutée crée deux fichiers partiels de la même classe.** ==Le nom de ces deux fichiers commence par un horodatage et le nom de la migration utilisé comme argument de la commande `add`== **Le premier fichier se nomme** *`<YYYYMMDDHHMMSS>_<NomMIgration>`.cs*, **et le second** *`<YYYYMMDDHHMMSS>_<NomMigration>`.Designer.cs*. ***==L'horodatage correspond à la date de création du fichier et est identique pour les deux.==*** **Le premier fichier contient le code généré pour les modifications de la base de données lors de *cette* migration, tandis que le fichier "designer" contient le code permettant de créer et de mettre à jour la base de données en fonction de toutes les migrations effectuées jusqu'à celle-ci incluse.**
+
+**Le fichier principal contient deux méthodes, `Up()` et `Down()`.** ***==La méthode `Up()` contient le code permettant de mettre à jour la base de données avec les modifications de cette migration, et la méthode `Down()` contient le code permettant d'annuler ces modifications.==*** Un extrait de la migration initiale présentée précédemment dans ce chapitre est fourni ci-dessous (toutes les migrations utilisées dans les exemples précédents se trouvent dans le projet *AutoLot.Samples*, dans le code associé) :
+
+> Les exemple de code sont ceux de l'auteur car, comme cette explication vient seulement à la fin du chapitre, je n'ai pas su exécuter les migrations.
+
+```cs
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace AutoLot.Samples.Migrations
+{
+    public partial class Initial : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Makes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TimeStamp = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Makes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Cars",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PetName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MakeId = table.Column<int>(type: "int", nullable: false),
+                    TimeStamp = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cars", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Cars_Makes_MakeId",
+                        column: x => x.MakeId,
+                        principalTable: "Makes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cars_MakeId",
+                table: "Cars",
+                column: "MakeId");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Cars");
+
+            migrationBuilder.DropTable(
+                name: "Makes");
+        }
+    }
+}
+```
+
+==Comme vous pouvez le constater, la méthode `Up()` crée des tables, des colonnes, des index, etc. La méthode `Down()` supprime les éléments créés. Le moteur de migrations exécutera les instructions `ALTER`, `ADD` et `DROP` nécessaires pour que la base de données corresponde à votre modèle.==
+
+**Le fichier de conception contient deux attributs qui lient ces modèles partiels au nom de fichier et au `DbContext` dérivé. Ces attributs sont présentés ici, accompagnés d'une liste partielle de la classe de conception :**
+
+```cs
+[DbContext(typeof(ApplicationDbContext))]
+[Migration("20210801173031_Initial")]
+partial class Initial
+{
+	protected override void BuildTargetModel(ModelBuilder modelBuilder)
+	{
+		// Omis pour brièvete'
+	}
+}
+```
+
+***==La première migration crée un fichier supplémentaire dans le répertoire cible==***, nommé d'après le `DbContext` dérivé, au format *`<NomDuDbContextDérivé>`ModelSnapshot.cs*. **Le format de ce fichier est identique à celui de l'aperçu du concepteur et contient le code résultant de toutes les migrations. Lorsque des migrations sont ajoutées ou supprimées, ce fichier est automatiquement mis à jour pour refléter les modifications.**
+
+>[!note]
+Il est extrêmement important de ne pas supprimer manuellement les fichiers de migration. Cela entraînerait une désynchronisation du fichier *`<NomDbContextDérivé>`ModelSnapshot.cs* avec vos migrations, les rendant ainsi inutilisables. Si vous décidez malgré tout de les supprimer manuellement, supprimez-les tous et recommencez. Pour supprimer une migration, utilisez la commande `remove`, que nous aborderons prochainement.
+
+### La commande `remove` de `migrations`
+
+**La commande `remove` permet de supprimer des migrations du projet et agit toujours sur la dernière migration appliquée (en fonction de leur horodatage).** ***==Lors de la suppression d'une migration, EF Core vérifie qu'elle n'a pas été appliquée en consultant la table `__EFMigrationsHistory` de la base de données.==*** *==Si la migration a été appliquée, le processus échoue.==* **==Si la migration n'a pas encore été appliquée ou a été annulée, elle est supprimée et le fichier d'instantané du modèle est mis à jour.==**
+
+**La commande `remove` ne prend aucun argument (puisqu'elle agit toujours sur la dernière migration) et utilise les mêmes options que la commande `add`.** ***==Une option supplémentaire est disponible : `force` (`-f` ou `--force`). Cette option annule la dernière migration puis la supprime en une seule étape.==***
+
+### La commande `list` de `migrations`
+
+**La commande `list` permet d'afficher toutes les migrations d'un `DbContext` dérivé.** ***==Par défaut, elle liste toutes les migrations et interroge la base de données pour déterminer si elles ont été appliquées.==*** ==Si elles n'ont pas été appliquées, elles sont indiquées comme étant en attente.== **Une option pour spécifier une chaîne de connexion et une autre pour ne pas se connecter à la base de données, mais simplement de lister les migrations.** Le [[#Tableau 21-13 Options supplémentaires pour la commande `list` de `migrations` EF Core|Tableau 21-13]] présente ces options.
+
+###### Tableau 21-13: Options supplémentaires pour la commande `list` de `migrations` EF Core
+
+| Option (Seulement version longue) | Argument       | Description                                                                                                                                                               |
+| --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--connection`                    | `<CONNECTION>` | Chaîne de connexion à la base de données. Par défaut, celle spécifiée dans l’instance de `IDesignTimeDbContextFactory` ou dans la méthode `OnConfiguring` du `DbContext`. |
+| `--no-connect`                    |                | Indique à la commande d'ignorer la vérification de la base de données.                                                                                                    |
+
+### La commande `bundle` de `migrations`
+
+**La commande `bundle` crée un exécutable pour mettre à jour la base de données.** ***==Cet exécutable, conçu pour un environnement d'exécution cible (par exemple, Windows ou Linux), appliquera toutes les migrations qu'il contient à la base de données.==*** Le [[#Tableau 21-14 Arguments courants de la commande `bundle` de `migrations` EF Core|Tableau 21-14]] décrit les arguments les plus fréquemment utilisés avec la commande bundle.
+
+###### Tableau 21-14: Arguments courants de la commande `bundle` de `migrations` EF Core
+
+| Option (Courte) | Option (Longue)    | Argument       | Description                                                                                                                                                                                           |
+| --------------- | ------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-o`            | `--output`         | `<FILE>`       | Le chemin d'accès pour l'exécutable à créer                                                                                                                                                           |
+| `-f`            | `--force`          |                | Écrase les fichiers existants.                                                                                                                                                                        |
+|                 | `--self-contained` |                | Inclue également le runtime .NET avec l'exécutable.                                                                                                                                                   |
+| `-r`            | `--target-runtime` | `<RUNTIME ID>` | Environnement d'exécution cible pour lequel l'exécutable sera généré. Si aucun environnement d'exécution n'est spécifié, le fichier utilisera celui du système d'exploitation de la machine actuelle. |
+
+**L'exécutable utilisera la chaîne de connexion fournie par `IDesignTimeDbContextFactory` ; toutefois, une autre chaîne de connexion peut être transmise à l'exécutable à l'aide de l'option `--connection`. Si les migrations ont déjà été appliquées à la base de données cible, elles ne seront pas réappliquées.**
+
+==Lorsque l'option `--self-contained` est utilisée, la taille de l'exécutable augmente considérablement.== Sur ma machine, avec l'exemple de projet de ce chapitre, le fichier d'installation standard pèse 11 Mo, tandis que le fichier autonome pèse 74 Mo.
+
+### La commande `script` de `migrations`
+
+**La commande `script` crée un script SQL basé sur une ou plusieurs migrations.** ***==Elle accepte deux arguments optionnels : la migration de départ et la migration d'arrivée.==*** **Si aucun argument n'est spécifié, toutes les migrations sont générées.** Le [[#Tableau 21-15 Arguments de la commande `script` de `migrations` EF Core|Tableau 21-15]] décrit les arguments.
+
+###### Tableau 21-15: Arguments  de la commande `script` de `migrations` EF Core
+
+| Argument | Description                                         |
+| -------- | --------------------------------------------------- |
+| `<FROM>` | Migration initiale. Par défaut : 0 (zéro).          |
+| `<TO>`   | Migration cible. Par défaut, la dernière migration. |
+
+**Si aucune migration n'est spécifiée, le script créé correspondra au total cumulatif de toutes les migrations. Si des migrations sont spécifiées, le script contiendra les modifications entre les deux migrations (incluses).** ***==Chaque migration est encapsulée dans une transaction.==*** **==Si la table `__EFMigrationsHistory` n'existe pas dans la base de données où le script est exécuté, elle sera créée. La table sera également mise à jour pour refléter les migrations exécutées.==** Quelques exemples sont présentés ici :
+
+```bash
+# Script de toutes les migrations
+dotnet ef migrations script
+# Script du début jusqu'aux migrations Many2Many
+dotnet ef migrations script 0 Many2Many
+```
+
+Des options supplémentaires sont disponibles, comme indiqué dans le [[#Tableau 21-16 Options supplémentaires pour la commande `script` de `migrations` EF Core|Tableau 21-16]]. L'option `-o` permet de spécifier un fichier pour le script (le répertoire est relatif à l'emplacement d'exécution de la commande), et l'option `-i` crée un script idempotent. Cela signifie qu'il contient des vérifications pour déterminer si une migration a déjà été appliquée et l'ignore le cas échéant. L'option `--no-transaction` désactive les transactions normales ajoutées au script.
+
+###### Tableau 21-16: Options supplémentaires pour la commande `script` de `migrations` EF Core
+
+| Option (Court) | Option (Longue)    | Argument | Description                                                                              |
+| -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
+| `-o`           | `--output`         | `<FILE>` | Le fichier dans lequel écrire le script résultant                                        |
+| `-i`           | `--idempotent`     |          | Génère un script qui vérifie si une migration a déjà été appliquée avant de l'appliquer. |
+|                | `--no-transaction` |          | N'encapsule pas chaque migration dans une transaction                                    |
 
 
 
+## Les commandes de `database`
 
+**Il existe deux commandes de base de données : `drop` et `update`**. **==La commande `drop` supprime la base de données si elle existe. La commande `update` met à jour la base de données à l'aide des migrations.==**
 
+### La commande `drop` de `database`
 
+**La commande `drop` supprime la base de données spécifiée par la chaîne de connexion dans la fabrique de contexte de la méthode `OnConfiguring` de `DbContext`.** ==L'option `force` force la fermeture de toutes les connexions sans confirmation.== Voir le [[#Tableau 21-17 Options de la commande `drop` de `database` EF Core|Tableau 21-17]].
 
+###### Tableau 21-17: Options de la commande `drop` de `database` EF Core
+| Option (Courte) | Option (Longue) | Description                                                                  |
+| --------------- | --------------- | ---------------------------------------------------------------------------- |
+| `-f`            | `--force`       | Ne confirme pas la déconnexion. Force la fermeture de toutes les connexions. |
+|                 | `--dry-run`     | Indique quelle base de données sera supprimée, mais ne la supprime pas.      |
 
+### La commande `udpate` de `database`
 
+**La commande `update` prend un argument (le nom de la migration) et les options habituelles.** ***==Elle possède une option supplémentaire : `--connection <CONNEXION>`.==*** **==Celle-ci permet d’utiliser une chaîne de connexion non configurée dans la fabrique de conception ou le `DbContext`==**.
 
+***==Si la commande est exécutée sans nom de migration, elle met à jour la base de données avec la migration la plus récente, en créant la base de données si nécessaire.==*** ==Si une migration est spécifiée, la base de données sera mise à jour avec cette migration.== **Toutes les migrations précédentes non encore appliquées seront également appliquées.** ==Au fur et à mesure de leur application, les noms des migrations sont stockés dans la table `__EFMigrationsHistory`.==
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**Si l’horodatage de la migration spécifiée est antérieur à celui des autres migrations appliquées, toutes les migrations ultérieures sont annulées.** ***==Si la valeur $0$ (zéro) est fournie comme nom de migration, toutes les migrations sont annulées, laissant une base de données vide (à l’exception de la table `__EFMigrationsHistory`).==***
 
 >[!success] Note moderne
 >**Dans EF Core 11** (==pas encore sorti au moment de la rédaction==), la commande suivante permet de créer **ET** appliquer une migration **en une seule étape** via *Rolsyn*
@@ -2409,12 +2776,122 @@ modelBuilder.Entity<CarViewModel>()
 dotnet ef database update AddCheckConstraint --add -c AutoLot.Samples.ApplicationDbContext
 >```
 
->[!success] Meilleure analogie pour les migrations (Avec Claude)
->
-`dotnet ef migrations` est l'équivalent de Git mais pour le schéma de base de données.
->
->**Comme Git**, les migrations sont linéaires et chronologiques, on ne peut pas supprimer une migration du milieu sans défaire celles qui suivent. 
->
-**Contrairement à Git**, il n'y a pas de branches ni de merge, et l'historique est stocké à la fois dans les fichiers C# du projet ET dans la table `__EFMigrationsHistory` de la base de données.
+## Les commandes de `dbcontext`
 
+**Il existe quatre commandes `dbcontext`. Trois d'entre elles (`list`, `info`, `script`) agissent sur les classes `DbContext` dérivées de votre projet.** **==La commande `scaffold` crée un `DbContext` dérivé et des entités à partir d'une base de données existante.==** Le [[#Tableau 21-18 les commandes de `dbcontext`|Tableau 21-18]] présente les commandes disponibles.
 
+###### Tableau 21-18: les commandes de `dbcontext`
+
+| Commande   | Description                                                                                               |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| `info`     | Obtient des informations sur un type `DbContext`                                                          |
+| `list`     | Liste les types `DbContext` disponibles                                                                   |
+| `optimize` | Génère une version compilée du modèle utilisé par le `DbContext`                                          |
+| `scaffold` | Génère un `DbContext` et des types d'entités pour une base de données.                                    |
+| `script`   | Génère un script SQL à partir du `DbContext` en fonction du modèle objet, en contournant toute migration. |
+
+**Les commandes `list` et `info` offrent les options habituelles.** ==La commande `list` liste les classes `DbContext` dérivées du projet cible.== **==La commande `info` fournit des détails sur la classe `DbContext` dérivée spécifiée, notamment la chaîne de connexion, le nom du fournisseur, le nom de la base de données et la source de données.==** **La commande `script` crée un script SQL qui crée votre base de données à partir du modèle objet, en ignorant les migrations éventuelles.** ==La commande `scaffold` permet de reconstituer une base de données existante et est abordée dans la section suivante.==
+
+### La commande `scaffold` de `dbcontext`
+
+**La commande `scaffold` crée les classes C# (`DbContext` dérivé et entités) avec les annotations de données (si demandées) et les commandes de l'API Fluent à partir d'une base de données existante.** ***==Deux arguments sont requis : la chaîne de connexion à la base de données et le fournisseur complet (par exemple, `Microsoft.EntityFrameworkCore.SqlServer`)==***. Le [[#Tableau 21-19 Les arguments de la commande `scaffhold` de `dbcontext`|Tableau 21-19]] décrit ces arguments.
+
+###### Tableau 21-19: Les arguments de la commande `scaffhold` de `dbcontext`
+
+| Argument     | Description                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `Connection` | La chaîne de connexion à la base de données                                                                   |
+| `Provider`   | Le fournisseur de base de données EF Core à utiliser (par exemple, `Microsoft.EntityFrameworkCore.SqlServer`) |
+
+==Les options disponibles comprennent la sélection de schémas et de tables spécifiques, le nom et l'espace de noms de la classe de contexte créée, le répertoire et l'espace de noms de sortie des classes d'entités générées, et bien d'autres.== **Les options standard sont également disponibles.** Les options étendues sont répertoriées dans le [[#Tableau 21-20 et seront détaillées ultérieurement.
+
+###### Tableau 21-20: Les options de la commande `scaffhold` de `dbcontext`
+
+| Option (Courte)<br><br> | Option (Longue)        | Argument           | Description                                                                                                                         |
+| ----------------------- | ---------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `-d`                    | `--data-annotations`   |                    | Utilisez les attributs pour configurer le modèle (lorsque cela est possible). À défaut, seule l'API Fluent sera utilisée.           |
+| `-c`                    | `--context`            | `<NAME>`           | Le nom du `DbContext` dérivé à créer.                                                                                               |
+|                         | `--context-dir`        | `<PATH>`           | Répertoire dans lequel placer le `DbContext` dérivé, par rapport au répertoire du projet. Par défaut, le nom de la base de données. |
+| `-f`                    | `--force`              |                    | Remplace tous les fichiers existants dans le répertoire cible.                                                                      |
+| `-o`                    | `--output-dir`         | `<PATH>`           | Répertoire dans lequel placer les classes d'entités générées. Relatif au répertoire du projet.                                      |
+|                         | `--schema`             | `<SCHEMA_NAME>`... | Les schémas des tables pour lesquelles générer des types d'entités.                                                                 |
+| `-t`                    | `--table`              | `<TABLE_NAME>`...  | Les tables pour lesquelles générer des types d'entités.                                                                             |
+|                         | `--use-database-names` |                    | Utilisez directement les noms de tables et de colonnes issus de la base de données.                                                 |
+| `-n`                    | `--namespaces`         | `<NAMESPACE>`      | Espace de noms des classes d'entités générées. Correspond par défaut au répertoire.                                                 |
+| <br><br>                | `--context-namespace`  | `<NAMESPACE>`      | Espace de noms de la classe dérivée `DbContext` générée. Correspond par défaut au répertoire.                                       |
+|                         | `--no-onconfiguring`   |                    | Ne génère pas la méthode `OnConfiguring`.                                                                                           |
+|                         | `--no-pluralize`       |                    | désactive la pluralisation automatique des nom                                                                                      |
+
+**La commande `scaffold` est devenue beaucoup plus robuste avec EF Core 6.0.** Comme vous pouvez le constater, ==de nombreuses options sont disponibles.== **==Si l'option annotations de données (`-d`) est sélectionnée, EF Core utilisera les annotations de données lorsque possible et comblera les différences avec l'API Fluent==**. ***==Si cette option n'est pas sélectionnée, toute la configuration (lorsqu'elle diffère des conventions) est codée dans l'API Fluent.==*** ==Vous pouvez spécifier l'espace de noms, le schéma et l'emplacement des entités générées et des fichiers `DbContext` dérivés.== **Si vous ne souhaitez pas générer l'intégralité de la base de données, vous pouvez sélectionner certains schémas et tables.** ***==L'option `--no-onconfiguring` supprime la méthode `OnConfiguring()` de la classe générée, et l'option `--no-pluralize` désactivele pluraliseur, qui transforme les entités singulières (`Car`) en tables plurielles (`Cars`) lors de la création de migrations et transforme les tables plurielles en entités uniques lors de la génération de code.==***
+
+**Nouveauté d'EF Core 6 : les commentaires de base de données sur les tables et colonnes SQL sont également intégrés aux classes d'entités et à leurs propriétés.**
+
+### La commande `optimize` de `dbcontext`
+
+**La commande `optimize` optimise le `DbContext` dérivé en exécutant la plupart des étapes qui se produisent normalement lors de sa première utilisation.** ==Les options disponibles incluent la spécification du répertoire de destination des résultats compilés ainsi que de l'espace de noms à utiliser.== **Les options standard sont également disponibles.** Les options étendues sont listées dans le [[#Tableau 21-21 Les options de la commande `optimize` de `dbcontext`|Tableau 21-21]] et seront commentées ci-après.
+
+###### Tableau 21-21: Les options de la commande `optimize` de `dbcontext`
+
+| Option (Courte) | Option (Longue) | Argument      | Description                                                                                       |
+| --------------- | --------------- | ------------- | ------------------------------------------------------------------------------------------------- |
+| `-o`            | `--output-dir`  |               | Le répertoire dans lequel placer les fichiers. Les chemins sont relatifs au répertoire du projet. |
+| `-n`            | `--namespace`   | `<NAMESPACE>` | L'espace de noms à utiliser. Correspond par défaut au répertoire.                                 |
+
+**Lors de la compilation du `DbContext` dérivé, les résultats incluent une classe pour chaque entité de votre modèle, le `DbContext` dérivé compilé et le `ModelBuilder` du `DbContext` dérivé compilé.** ***==Par exemple, vous pouvez compiler `AutoLot.Samples.ApplicationDbContext` à l'aide de la commande suivante :==***
+
+```bash
+dotnet ef dbcontextptimize --output-dir CompiledModels
+```
+
+Les fichiers compilés sont placés dans un répertoire nommé `CompiledModels`. La liste des fichiers est disponible ici :
+
+- *AppllicationDbContextAssemblyAttributes.cs*
+- *ApplicationDbContextModel.cs*
+- *ApplicationDbContextModelBuilder.cs*
+- *CarDriverEntityType.cs*
+- *CarEntityType.cs*
+- *CarMakeViewModelEntityType.cs*
+- *DriverEntityType.cs*
+- *MakeEntityType.cs*
+- *PersonEntityType.cs*
+- *RadioEntityType.cs*
+
+Pour utiliser le modèle compilé, appelez la méthode `UseModel()` dans `DbContextOptions`, comme ceci :
+
+```cs
+static void UseCompiledDbContext()
+{
+	
+    DotNetEnv.Env.TraversePath().Load();
+
+    var config = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+
+    var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+    var conStringBuilder = new NpgsqlConnectionStringBuilder
+    {
+        Host = config["Postgres:Host"],
+        Username = config["Postgres:Username"],
+        Database = config["Postgres:Database"],
+        Password = config["Postgres:Password"],
+        Pooling = true, // Recommandé pour PostgreSQL
+    };
+
+    optionBuilder
+        .UseNpgsql(conStringBuilder.ConnectionString)
+        .UseModel(ApplicationDbContextModel.Instance);
+    var context = new ApplicationDbContext(optionBuilder.Options);
+}
+```
+
+**La compilation du `DbContext` dérivé peut améliorer considérablement les performances dans certains cas, mais il existe certaines restrictions :**
+
+- Les filtres de requêtes globaux ne sont pas pris en charge.
+- Les proxys de chargement différé ne sont pas pris en charge.
+- Les proxys de suivi des modifications ne sont pas pris en charge.
+- Le modèle doit être recompilé à chaque modification.
+
+**==Si ces restrictions ne vous posent pas de problème, l’optimisation du `DbContext` peut améliorer considérablement les performances de vos applications.==**
+
+# Résumé du chapitre
+
+Ce chapitre a marqué le début de votre découverte d’Entity Framework Core. **Il a examiné les fondamentaux d’EF Core, le fonctionnement des requêtes et le suivi des modifications.** ***==Vous avez appris à structurer votre modèle à l’aide de conventions, d’annotations de données et de l’API Fluent. La dernière section a présenté la puissance de l’interface de ligne de commande et des outils globaux d’EF Core.==***
