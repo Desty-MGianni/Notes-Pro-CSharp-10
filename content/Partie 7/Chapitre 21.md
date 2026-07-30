@@ -1917,7 +1917,7 @@ public void Configure(EntityTypeBuilder<Car> builder)
 {
 	builder.ToTable("Inventory", "public");
 	builder.HasKey(e => e.Id);
-	builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
+	builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId");
 
 	builder
 		.Property(e => e.Color)
