@@ -555,7 +555,7 @@ namespace AutoLot.TPH.Models;
 public abstract class BaseEntity
 {
 	public int Id { get; set; }
-	public DateTime TimeStamp { get; set; }
+	public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 }
 ```
 
@@ -1918,7 +1918,6 @@ public void Configure(EntityTypeBuilder<Car> builder)
 	builder.ToTable("Inventory", "public");
 	builder.HasKey(e => e.Id);
 	builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
-	builder.Property(e => e.TimeStamp).HasDefaultValueSql("NOW()");
 
 	builder
 		.Property(e => e.Color)
@@ -2024,7 +2023,6 @@ public class RadioConfiguration : IEntityTypeConfiguration<Radio>
             .HasOne(d => d.CarNavigation)
             .WithOne(p => p.RadioNavigation)
             .HasForeignKey<Radio>(d => d.CarId);
-		builder.Property(e => e.TimeStamp).HasDefaultValueSql("NOW()");
     }
 }
 ```
@@ -2144,7 +2142,6 @@ public class DriverConfiguration : IEntityTypeConfiguration<Driver>
                     .HasColumnType("VARCHAR(50)");
             }
         );
-        builder.Property(e => e.TimeStamp).HasDefaultValueSql("NOW()");
     }
 }
 ```
