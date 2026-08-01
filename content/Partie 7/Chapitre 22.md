@@ -351,8 +351,399 @@ SELECT setval(pg_get_serial_sequence('"public"."Inventory"', 'Id'),
 
 ## Ajout d'un graphe d'objets
 
-**Lors de l'ajout d'une entité à la base de données, les enregistrements enfants peuvent être ajoutés en une seule opération, sans avoir à les ajouter explicitement à leur propre `DbSet<T>`.** Pour ce faire, il suffit de les ajouter à la propriété de navigation de collection de l'enregistrement parent. Par exemple, une nouvelle entité `Make` est créée, et un enregistrement enfant `Car` est ajouté à la propriété `Cars` de l'entité `Make`. Lorsque l'entité `Make` est ajoutée à la propriété `DbSet<Make>`, EF Core commence automatiquement à suivre l'enregistrement enfant `Car`, sans qu'il soit nécessaire de l'ajouter explicitement à la propriété `DbSet<Car>`. L'exécution de `SaveChanges()` enregistre les entités `Make` et `Car` ensemble. Le test suivant illustre ce comportement :
+**Lors de l'ajout d'une entité à la base de données, les enregistrements enfants peuvent être ajoutés en une seule opération, sans avoir à les ajouter explicitement à leur propre `DbSet<T>`.** **==Pour ce faire, il suffit de les ajouter à la propriété de navigation de collection de l'enregistrement parent.==** ==Par exemple, une nouvelle entité `Make` est créée, et un enregistrement enfant `Car` est ajouté à la propriété `Cars` de l'entité `Make`.== ***==Lorsque l'entité `Make` est ajoutée à la propriété `DbSet<Make>`, EF Core commence automatiquement à suivre l'enregistrement enfant `Car`, sans qu'il soit nécessaire de l'ajouter explicitement à la propriété `DbSet<Car>`.==*** **L'exécution de `SaveChanges()` enregistre les entités `Make` et `Car` ensemble.** Le test suivant illustre ce comportement :
 
-# Résilience de la connection
+```cs
+static async Task AddRecordsAsync()
+{
+    var anotherMake = new Make { Name = "Honda" };
+    var car = new Car { Color = "Yellow", PetName = "Herbie" };
+    //Casting de la propriété Cars de IEnumerable<Car> vers List<Car>
+    ((List<Car>)anotherMake.Cars).Add(car);
+    await context.Makes.AddAsync(anotherMake);
+    await context.SaveChangesAsync();
+}
+```
+
+Les instructions SQL exécutées sont affichées ici :
+
+```sql
+INSERT INTO public."Makes" ("Name", "TimeStamp")
+	VALUES (@p0, @p1)
+	RETURNING "Id", xmin;
+	
+INSERT INTO public."Inventory" ("Color", "MakeId", "PetName", "TimeStamp")
+	VALUES (@p2, @p3, @p4, @p5)
+	RETURNING "Id", "DateBuilt", "Display", "IsDrivable", xmin;
+```
+
+**Remarquez comment EF Core a récupéré l'identifiant du nouvel enregistrement `Make` et l'a automatiquement inclus dans l'instruction d'insertion pour l'enregistrement `Car`.**
+
+> [!IMPORTANT] SQL Server vs PostgreSQL : Insertion d'IDs manuels (Avec Gemini)
+> Bien que le code C# final produise le même résultat (ID 28), le comportement interne des deux moteurs de base de données est radicalement différent après une insertion manuelle :
+> 
+> - **SQL Server (`SET IDENTITY_INSERT`)** : Le compteur d'identité est *intelligent*. Lors de l'insertion manuelle de l'ID `27`, le moteur détecte que cette valeur dépasse le compteur actuel (`5`) et **recale automatiquement** sa séquence interne à 27. La voiture suivante reçoit l'ID `28`.
+> - **PostgreSQL (`IDENTITY` / `SEQUENCE`)** : Le compteur est *aveugle*. Il est stocké dans un objet autonome (`SEQUENCE`) qui ignore totalement vos insertions manuelles. Si vous insérez l'ID `27`, le compteur reste bloqué à `5`.
+> 
+> ⚠️ **Le piège Postgres** : La voiture suivante aurait reçu l'ID `6` (risquant un crash futur par clé dupliquée arrivant à 27). Elle n'a reçu l'ID `28` que parce que **votre code a forcé** le saut du compteur en exécutant manuellement la fonction `setval(..., max("Id"))`.
+
+## Ajout d'enregistrements de type plusieurs-à-plusieurs
+
+**Grâce à la nouvelle prise en charge des tables plusieurs-à-plusieurs par EF Core, il est possible d'ajouter directement des enregistrements d'une entité à l'autre, *sans passer par la table pivot.**** **==Vous pouvez désormais utiliser le code suivant pour ajouter directement des enregistrements de conducteur aux enregistrements de `Car` :==**
+
+```cs
+static async Task AddRecordsAsync()
+{
+	...
+	
+    var carsForM2M = await context.Cars.Take(2).ToListAsync();
+    /*
+     * Cast l'IEnumerable en List pour accéder à la méthode Add.
+     *
+     * La prise en charge des plages fonctionne avec LINQ to Objects
+     * mais n'est pas traduisible en requêtes SQL.
+     *
+     * AddRangeAsync n'existe que pour le type DbSet<T>,
+     * pas pour une List<T>.
+     */
+    ((List<Driver>)carsForM2M[0].Drivers).AddRange(drivers.Take(..3));
+    ((List<Driver>)carsForM2M[1].Drivers).AddRange(drivers.Take(3..));
+    await context.SaveChangesAsync();
+}
+```
+
+**Lors de l'exécution de la méthode `SaveChanges()`, deux instructions `INSERT` (SQL Server) ou deux blocs d'instruction `INSERT` (PostgreSQL) sont exécutées. La première insère les six enregistrements `Driver` dans la table `Drivers`, et la seconde insère les six enregistrements dans la table `InventoryDriver` (table pivot).** Voici l'instruction `INSERT` pour la table pivot :
+
+```sql
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p18, @p19, @p20)
+	RETURNING "Id", xmin;
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p21, @p22, @p23)
+	RETURNING "Id", xmin;
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p24, @p25, @p26)
+	RETURNING "Id", xmin;
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p27, @p28, @p29)
+	RETURNING "Id", xmin;
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p30, @p31, @p32)
+	RETURNING "Id", xmin;
+INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
+	VALUES (@p33, @p34, @p35)
+	RETURNING "Id", xmin;
+```
+
+**==L'expérience est bien meilleure qu'avec les versions précédentes d'EF Core lors de l'utilisation de relations plusieurs-à-plusieurs, où il fallait gérer soi-même la table pivot.==**
+
+## Ajouter des enregistrements d'exemple
+
+La dernière étape consiste à ajouter une série d'enregistrements `Make` et `Make` pour les exemples de requêtes présentés dans la section suivante. Cette méthode crée plusieurs entités `Make` et `Car` et les ajoute à la base de données.
+
+Commencez par créer les entités `Make` et ajoutez-les à la propriété `Makes` `DbSet<Make>` de l'objet dérivé `ApplicationDbContext`, puis appelez la méthode `SaveChanges()`. Répétez ce processus pour les enregistrements `Car`, en utilisant la propriété Cars `DbSet<Car>` :
+
+```cs
+static async Task LoadMakesAndCarData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    List<Make> makes =
+    [
+        new() { Name = "VW" },
+        new() { Name = "Ford" },
+        new() { Name = "Saab" },
+        new() { Name = "Yugo" },
+        new() { Name = "BMW" },
+        new() { Name = "Pinto" },
+    ];
+    await context.Makes.AddRangeAsync(makes);
+    await context.SaveChangesAsync();
+
+    List<Car> inventory =
+    [
+        new()
+        {
+            MakeId = 1,
+            Color = "Black",
+            PetName = "Zippy",
+        },
+        new()
+        {
+            MakeId = 2,
+            Color = "Rust",
+            PetName = "Rusty",
+        },
+        new()
+        {
+            MakeId = 3,
+            Color = "Black",
+            PetName = "Mel",
+        },
+        new()
+        {
+            MakeId = 4,
+            Color = "Yellow",
+            PetName = "Clunker",
+        },
+        new()
+        {
+            MakeId = 5,
+            Color = "Black",
+            PetName = "Bimmer",
+        },
+        new()
+        {
+            MakeId = 5,
+            Color = "Green",
+            PetName = "Hank",
+        },
+        new()
+        {
+            MakeId = 5,
+            Color = "Pink",
+            PetName = "Pinky",
+        },
+        new()
+        {
+            MakeId = 6,
+            Color = "Black",
+            PetName = "Pete",
+        },
+        new()
+        {
+            MakeId = 4,
+            Color = "Brown",
+            PetName = "Brownie",
+        },
+        new()
+        {
+            MakeId = 1,
+            Color = "Rust",
+            PetName = "Lemon",
+            IsDrivable = false,
+        },
+    ];
+    await context.Cars.AddRangeAsync(inventory);
+    await context.SaveChangesAsync();
+}
+```
+
+# Effacer les données d'exemple
+
+**La suppression des enregistrements sera abordée plus en détail ultérieurement dans ce chapitre.** ==Pour l'instant, nous allons créer une méthode qui efface les données d'exemple afin que, lors de l'exécution répétée des exemples, les exécutions précédentes n'interfèrent pas avec les exemples.==
+
+**Créez une nouvelle méthode appelée `ClearSampleData()`.** **==Cette méthode utilise la méthode `FindEntityType()` sur la propriété `Model` de l'`ApplicationDbContext` pour obtenir le nom de la table et du schéma, puis supprime les enregistrements.==** Une fois les enregistrements supprimés, le code utilise la commande `TRUNCATE ... RESTART IDENTITY CASCADE` pour réinitialiser l'identité de chaque table.
+
+```cs
+static async Task ClearSampleData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var entities = new[]
+    {
+        typeof(Driver).FullName,
+        typeof(Car).FullName,
+        typeof(Make).FullName,
+    };
+
+    foreach (var entityName in entities)
+    {
+        var entity = context.Model.FindEntityType(entityName);
+        var tableName = entity.GetTableName();
+        var schemaName = entity.GetSchema() ?? "public";
+        await context.Database.ExecuteSqlRawAsync(
+            $"TRUNCATE TABLE \"{schemaName}\".\"{tableName}\" RESTART IDENTITY CASCADE;"
+        );
+    }
+}
+```
+
+**Ajoutez un appel à cette méthode au début des instructions principales pour réinitialiser la base de données à chaque exécution du programme.** **==Ajoutez également un appel après la méthode `AddRecords()` pour nettoyer les exemples qui ajoutent des enregistrements individuels.**==
+
+```cs
+Console.Title = "More Fun with Entity Framework Core";
+Console.WriteLine("*****  More Fun with Entity Framework Core *****\n");
+
+await ClearSampleData();
+await AddRecordsAsync();
+await ClearSampleData();
+await LoadMakesAndCarData();
+Console.ReadLine();
+```
+
+>[!tip] Si on utilise les versions asynchrone des méthodes, il faut absolument un moyen pour attendre que les opérations soient exécutée. Ici, le plus simples est d'utilisé un appel à `Console.ReadLine()`.
+
+## Requête de données
+
+**La requête de données avec EF Core s'effectue généralement à l'aide de requêtes LINQ.** ***==Pour rappel, lorsqu'on utilise LINQ pour interroger la base de données afin d'obtenir une liste d'entités, la requête n'est exécutée qu'après itération, conversion en `List<T>` (ou en tableau), ou liaison à un contrôle de liste==*** (comme une grille de données). **==Pour les requêtes portant sur un seul enregistrement, l'instruction est exécutée immédiatement lors de l'utilisation de la méthode `First()`, `Single()`, etc.==**
+
+>[!note]
+>Ce livre ne constitue pas une référence complète sur LINQ, mais présente quelques exemples. Pour plus d'exemples de requêtes LINQ, voir [Les 101 exemples de requêtes LINQ de Microsoft](https://github.com/dotnet/try-samples).
+
+**==Nouveauté d'EF Core 5 : vous pouvez appeler la méthode `ToQueryString()` dans la plupart des requêtes LINQ pour examiner la requête exécutée sur la base de données.==** *==La principale exception concerne les requêtes à exécution immédiate, telles que `First()`/`FirstOrDefault()`==*. **Pour les requêtes fractionnées, la méthode `ToQueryString()` ne renvoie que la première requête exécutée.**
+
+```cs
+static async Task QueryData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Retourne toutes les voitures
+    IQueryable<Car> cars = context.Cars;
+    foreach (Car c in cars)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+
+    // Nettoie le context
+    context.ChangeTracker.Clear();
+    Console.WriteLine();
+
+    var cars2 = await context.Cars.ToListAsync();
+    foreach (Car c in cars2)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+}
+```
+
+**Notez que le type renvoyé est un `IQueryable<Car>` lors de l'utilisation de `DbSet<Car>`, et le type de retour est `List<Car>` lors de l'utilisation de la méthode `ToList()`.** La différence d'exécution de la requêtes, comme expliqué au dessus, est visible ici :
+
+```
+...
+
+An entity of type Car was loaded from the database.
+Zippy is Black
+An entity of type Car was loaded from the database.
+Rusty is Rust
+An entity of type Car was loaded from the database.
+Mel is Black
+An entity of type Car was loaded from the database.
+Clunker is Yellow
+An entity of type Car was loaded from the database.
+Bimmer is Black
+An entity of type Car was loaded from the database.
+Hank is Green
+An entity of type Car was loaded from the database.
+Pinky is Pink
+An entity of type Car was loaded from the database.
+Pete is Black
+An entity of type Car was loaded from the database.
+Brownie is Brown
+An entity of type Car was loaded from the database.
+Lemon is Rust
+
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+Zippy is Black
+Rusty is Rust
+Mel is Black
+Clunker is Yellow
+Bimmer is Black
+Hank is Green
+Pinky is Pink
+Pete is Black
+Brownie is Brown
+Lemon is Rust
+```
+
+## Filtrer les enregistrements
+
+La méthode `Where()` permet de filtrer les enregistrements d'un `DbSet<T>`. **==Plusieurs méthodes `Where()` peuvent être chaînées de manière fluide pour construire dynamiquement la requête.==** ***==Les méthodes `Where()` chaînées sont toujours combinées sous forme de clauses `AND` dans la requête créée.==*** Dans l'exemple suivant, les requêtes générées pour `cars2` et `cars3` sont identiques. Pour créer une instruction `OR`, vous devez utiliser la même clause `Where()`.
+
+```cs
+static void FilterData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Retourne toutes les voitures jaunes
+    IQueryable<Car> cars = context.Cars.Where(c => c.Color == "Yellow");
+    Console.WriteLine("**** Yellow cars ****");
+    foreach (Car c in cars)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+    // Retourne toutes les voitures jaunes avec un PetName = Clunker
+    IQueryable<Car> cars2 = context.Cars.Where(c =>
+        c.Color == "Yellow" && c.PetName == "Clunker"
+    );
+    Console.WriteLine("**** Yellow cars AND Clunkers ****");
+    foreach (Car c in cars2)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+    // Retourne toutes les voitures jaunes avec un PetName = Clunker
+    IQueryable<Car> cars3 = context
+        .Cars.Where(c => c.Color == "Yellow")
+        .Where(c => c.PetName == "Clunker");
+    Console.WriteLine("**** Yellow cars AND Clunkers ****");
+    foreach (Car c in cars3)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+    // Retourne toutes les voitures jaunes ou avec un PetName = Clunker
+    IQueryable<Car> cars4 = context.Cars.Where(c =>
+        c.Color == "Yellow" || c.PetName == "Clunker"
+    );
+    Console.WriteLine("**** Yellow cars OR Clunkers ****");
+    foreach (Car c in cars4)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+**Notez que le type renvoyé est également un `IQueryable<Car>` lors de l'utilisation d'une clause `Where`.**
+
+**==Une des améliorations d'EF Core 6 concerne la conversion de `string.IsNullOrWhiteSpace()` en SQL.==** Examinez le code ajouté à la fin de la méthode `FilterData()` :
+
+```cs
+static void FilterData()
+{
+	...
+	
+    // Retourne toutes les voitures possédant une couleur
+    IQueryable<Car> cars5 = context.Cars.Where(c =>
+        !string.IsNullOrWhiteSpace(c.Color)
+    );
+    Console.WriteLine("**** Cars with colors ****");
+    foreach (Car c in cars5)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      WHERE btrim(i."Color", E' \t\n\r') <> ''
+```
+
+
+> [!WARNING] Performance : Le piège de `IsNullOrWhiteSpace` sur PostgreSQL
+> 
+> - **SQL Server** : Traduit l'expression par un simple `[Color] <> N''` (grâce au comportement natif de trim de SQL Server). Elle reste optimisée.
+> - **PostgreSQL** : Force l'utilisation de la fonction `btrim(i."Color", E' \t\n\r')`. 
+> 
+>**Problème d'index** : Appliquer une fonction (`btrim`) sur une colonne dans un `WHERE` désactive les index standards de PostgreSQL et force un scan complet de la table (*Seq Scan*).
+> 
+>**Correction recommandée** : Remplacer par `Where(c => c.Color != null && c.Color != "" && c.Color != " ")` pour générer du SQL brut indexable.
+
+## Trier les enregistrements
+
+
+
+## Résilience de la connection
 
 
