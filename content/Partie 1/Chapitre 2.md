@@ -504,4 +504,5 @@ L'objectif de ce chapitre était de vous fournir les informations nécessaires p
 >[!info]
 >*MAUI* est une option qui permet de créer des applications à interface graphique multi-plateforme, bien que très peu utilisées.
 >>[!success] Une alternative à été trouvée.
->Pour la partie entière dédié aux applications graphiques, il est possible d'utiliser *AvaloniaUI*, qui est un concurrent cross-platform de WPF.
+>>Pour la partie entière dédié aux applications graphiques, il est possible d'utiliser *AvaloniaUI*, qui est un concurrent cross-platform de WPF.
+
