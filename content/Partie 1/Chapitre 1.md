@@ -7,14 +7,14 @@ publish: true
 
 La plateforme .NET de Microsoft et le langage de programmation C# ont été **officiellement lancés vers 2002** et sont rapidement devenus incontournables dans le développement logiciel moderne. La plateforme .NET permet à un grand nombre de langages de programmation (dont C#, VB.NET et F#) d'interagir entre eux. ==Un programme écrit en C# peut être référencé par un autre programme écrit en VB.NET==. Nous reviendrons sur cette interopérabilité plus loin dans ce chapitre.
 
-En __2016__, Microsoft annonce `.NET Core`. Il remplace `.NET Framework` permettant l'utilisation des programmes écrit en C# d'être utilisé nativement par d'autre systèmes d'exploitation que Windows. (Développement sur MacOS par exemple).  
+En **2016**, Microsoft annonce `.NET Core`. Il remplace `.NET Framework` permettant l'utilisation des programmes écrit en C# d'être utilisé nativement par d'autre systèmes d'exploitation que Windows. (Développement sur MacOS par exemple).  
 
 **Microsoft lance C# 10 et .NET 6 le 8 Novembre 2021.**
 
->[!Info]-
+>[!Info]
 > Un programme écrit en C# peut être référencé (utilisé) par un autre programme utilisant la plateforme .NET.
 
-Le but du livre est double:
+**Le but du livre est double**:
 1. Explication claire et très détaillé de la syntaxe et de la sémantique de C#.
 2. Illustrer l'usage de nombreux framework de développement .NET 
     - `ADO.NET` et `Entity Framework Core` pour l'accès aux bases de données
@@ -27,12 +27,12 @@ Ce premier chapitre pose les bases conceptuelle du reste du livre. Il fait une p
 - Le Common Intermediate Language (`CIL`)
 - La compilation Juste-à-temps (`JIT`)
 
-En plus de découvrir certains mots-clés du langage de programmation C#, vous comprendrez également la relation entre le *runtime .NET*, le Common Type System (`CTS`) et le Common Language Specification (`CLS`).
+En plus de découvrir certains mots-clés du langage de programmation C#, vous comprendrez également la relation entre le *runtime .NET*, le *Common Type System* (`CTS`) et le *Common Language Specification* (`CLS`).
 
 Ce chapitre propose aussi un aperçu des fonctionnalité fournie par les bibliothèques de classes de base .NET, parfois abrégé en `BCL`, mais aussi un aperçu de la nature indépendante de `C#` et de la plateforme `.NET`.
 
->[!tldr]- Dans le livre: 
-> Beaucoup de fonctionnalité surligné dans ce chapitre (et à travers le livre) s'applique aussi pour la plateforme précédente *.NET Framework*.
+>[!info] 
+> Beaucoup de fonctionnalité surligné dans ce chapitre (et à travers le livre) s'applique aussi pour la plateforme précédente:  *.NET Framework*.
 
 # Explorons des bénéfice clés de la plateforme .NET
 
@@ -56,9 +56,9 @@ pour préparer le terrain, voici un aperçu rapide de quelque fonctionnalité fo
 2. `STS` pour *Standard Term Support*:
     - 6 mois après un précédent `STS` ou `LTS`
 
-.NET 6 est sorti en Novembre 2021 en tant que `LTS`. Il à été supporté jusqu'en Novembre 2024.
+==**.NET 6** est sorti en Novembre 2021 en tant que `LTS`. Il à été supporté jusqu'en Novembre 2024.==
 
-pour voir la politique de support des plateforme .NET et .NET Core: https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core
+Pour voir la politique de support des plateforme .NET et .NET Core: https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core
 
 # Aperçu des blocs de construction de la plateforme .NET
 
@@ -67,15 +67,14 @@ Parlons des sujets clés et interdépendant:
 - `CTS`
 - `CLS`
 
-**Du point de vue d'un développeur, `.NET` peut être compris comme un environnement d'exécution avec une librairie de classe de base exhaustive**. La couche runtime contient un ensemble d'implémentation minimal qui sont lié spécifiquement au système d'exploitation (Windows, MacOS/iOS, Linux), à l'architecture (x86, x64, ARM) ainsi qu'aux type de base de .NET.
+==Du point de vue d'un développeur, `.NET` peut être compris comme un environnement d'exécution avec une librairie de classe de base exhaustive==. La couche runtime contient un ensemble d'implémentation minimal qui sont lié spécifiquement au système d'exploitation (Windows, MacOS/iOS, Linux), à l'architecture (x86, x64, ARM) ainsi qu'aux type de base de .NET.
 
-Un autre bloc de la plateforme `.NET` est le *Common Type System (`CTS`)*.
-La Spécification `CTS` décrit complètement tous les type de données et toutes les construction de programmation prise en charge par le runtime, spécifie comment ces entités peuvent interagir entre elle, et détaille comment ils sont représenté dans le format de méta-donnée .NET. (Plus d'information sur les metadata dans ce chapitre, voir chapitre [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] pour l'explication détaillée).
+Un autre bloc de la plateforme `.NET` est le *Common Type System (`CTS`)*. La Spécification `CTS` décrit complètement tous les type de données et toutes les construction de programmation prise en charge par le runtime, spécifie comment ces entités peuvent interagir entre elle, et détaille comment ils sont représenté dans le format de méta-donnée .NET. (==Plus d'information sur les metadata dans ce chapitre, voir [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] pour l'explication détaillée==).
 
-==Comprenez qu'un language .NET donnée peut ne pas supporté toute les fonctionnalité défini par le `CTS`==. Le *Common Language Specification (`CLS`)* est une spécification reliée qui définit les sous-ensemble des types de donnée et des construction de programmation que tout les language de programmation .NET peuvent supporter.
+Comprenez qu'un language .NET donnée peut ne pas supporté toute les fonctionnalité défini par le `CTS`. ==Le *Common Language Specification (`CLS`)* est une spécification reliée qui définit les sous-ensemble des types de donnée et des construction de programmation que tout les language de programmation .NET peuvent supporter.==
 
--> Si on crée un programme qui n'exploite que des fonctionnalités *"CLS compliant"* , alors tous les autre language de programmation de la plateforme .NET pourront l'utiliser.
--> Au contraire, si on utilise des fonctions qui ne sont pas *CLS compliant*, alors on ne peut pas garantir que les language `.NET` pourrons interagir avec notre librairie de code `.NET`.
+- -> Si on crée un programme qui n'exploite que des fonctionnalités *"CLS compliant"* , alors tous les autre language de programmation de la plateforme .NET pourront l'utiliser.
+- -> Au contraire, si on utilise des fonctions qui ne sont pas *CLS compliant*, alors on ne peut pas garantir que les language `.NET` pourrons interagir avec notre librairie de code `.NET`.
 
 Plus loin dans le chapitre, on verra comment demander au compilateur si notre programme est *CLS compliant*.
 
@@ -93,9 +92,9 @@ Les bibliothèques de classes de base définissent des types qui peuvent être u
 
 ### Le rôle du standard .NET
 
-**Le nombre de classes de base est plus élevé dans `.NET Framework` que dans `.NET (Core)` car il y'a 14 ans de différences entre leurs sortie**. La disparité entre les deux à créer des problèmes quand on a voulu passer du code .NET Framework en du code .NET Core. **La solution (et nécessité) pour l'Interopérabilité entre `.NET Framework 4.8.2` / `.NET Core 3.1` est `.NET Standard`.**
+Le nombre de classes de base est plus élevé dans `.NET Framework` que dans `.NET (Core)` car il y'a 14 ans de différences entre leurs sortie. La disparité entre les deux à créer des problèmes quand on a voulu passer du code .NET Framework en du code .NET Core. **La solution (et nécessité) pour l'Interopérabilité entre `.NET Framework 4.8.2` / `.NET Core 3.1` est `.NET Standard`.**
 
-**.NET Standard et une spécification qui définis la disponibilité d'une API .NET et des `BCL` qui doivent être disponible pour chaque implémentation**. Le standard active les scénarios suivants:
+==.NET Standard et une spécification qui définis la disponibilité d'une API .NET et des `BCL` qui doivent être disponible pour chaque implémentation==. Le standard active les scénarios suivants:
 
 - Définis un ensemble uniforme d' API `BCL` pour toutes les implementation .NET. indépendant de la charge de travail.
 - Permet aux développeurs de produire des bibliothèques portables utilisables dans toutes les implémentations .NET à l'aide de ce même ensemble d'API
@@ -163,15 +162,15 @@ Quel que soit le langage .NET que vous choisissez pour programmer, sachez que m�
 
 Quand le compilateur .NET créé un fichier *.dll*, le résultat binaire est nommé *assembly*. Les détails concernant les assembly .NET seront dans le [[Chapitre 16#Le rôle des assemblages .NET|Chapitre 16]] cependant pour faciliter la compréhension de ce point, il faut comprendre les 4 propriétés basique de ce format de fichier.
 
-D'abord, contrairement aux assembly .NET Framework qui peuvent être soit un fichier *.exe*  ou un fichier *.dll*. **Les projets `.NET` sont toujours compilés dans un fichier *.dll*, même si le projet fournit un exécutable**. ***==Les assemblages .NET exécutables sont exécutés à l'aide de la commande `dotnet <nom de l'assemblage>.dll`==***. Nouveauté dans .NET Core 3.0 (et versions ultérieures), **la commande `dotnet.exe` est copiée dans le répertoire de compilation et renommée `<nom de l'assemblage>.exe`**. ==L'exécution de cette commande appelle automatiquement le fichier `dotnet <nom de l'assembly>.dll`, exécutant l'équivalent de `dotnet <nom de l'assembly>.dll`==. **Le fichier *.exe* portant le nom de votre projet n'est pas réellement le code de votre projet; il s'agit d'un raccourci pratique pour exécuter votre application**.
+D'abord, contrairement aux assembly .NET Framework qui peuvent être soit un fichier *.exe*  ou un fichier *.dll*. Les projets `.NET` sont toujours compilés dans un fichier *.dll*, même si le projet fournit un exécutable. ==Les assemblages .NET exécutables sont exécutés à l'aide de la commande `dotnet <nom de l'assemblage>.dll`==. Nouveauté dans .NET Core 3.0 (et versions ultérieures), la commande `dotnet.exe` est copiée dans le répertoire de compilation et renommée `<nom de l'assemblage>.exe`. L'exécution de cette commande appelle automatiquement le fichier `dotnet <nom de l'assembly>.dll`, exécutant l'équivalent de `dotnet <nom de l'assembly>.dll`. ==**Le fichier *.exe* portant le nom de votre projet n'est pas réellement le code de votre projet; il s'agit d'un raccourci vers le fichier *.dll* pratique pour exécuter votre application.**==
 
-Mis à jour dans .NET 6, **==votre application peut être réduit à un fichier unique qui peut être exécuté directement==**. *==Même si ce fichier unique ressemble à un exécutable natif de type C++ et se comporte comme tel, il s'agit en réalité d'un fichier unique créé pour des raisons pratiques==*. **Il contient tous les fichiers nécessaires à l'exécution de votre application, voire même le runtime .NET lui-même ! Mais sachez que votre code s'exécute toujours dans un conteneur géré, comme s'il était publié sous forme de plusieurs fichiers.**
+==Mis à jour dans .NET 6, votre application peut être réduit à un fichier unique qui peut être exécuté directement.== Même si ce fichier unique ressemble à un exécutable natif de type C++ et se comporte comme tel, il s'agit en réalité d'un fichier unique créé pour des raisons pratiques. Il contient tous les fichiers nécessaires à l'exécution de votre application, voire même le runtime .NET lui-même ! Mais sachez que votre code s'exécute toujours dans un conteneur géré, comme s'il était publié sous forme de plusieurs fichiers. ==**Ce sujet sera abordé en détail dans le [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]].**==
 
-Deuxièmement, ***==un assembly contient du code `CIL`, qui est conceptuellement similaire au `bytecode` de `Java`, en ce sens qu'il n'est pas compilé en instructions spécifiques à la plate-forme tant que cela n'est pas absolument nécessaire==***. En général, « absolument nécessaire » correspond au moment où un bloc d'instructions `CIL` (tel qu'une implémentation de méthodes) est référencé pour être utilisé par le runtime .NET.
+Deuxièmement, **un assembly contient du code `CIL`**, ==qui est conceptuellement similaire au `bytecode` de `Java`, en ce sens qu'il n'est pas compilé en instructions spécifiques à la plate-forme tant que cela n'est pas absolument nécessaire==. En général, "absolument nécessaire" correspond au moment où un bloc d'instructions `CIL` (tel qu'une implémentation de méthodes) est référencé pour être utilisé par le runtime .NET.
 
-Troisièmement, **les assemblies contiennent également des métadonnées qui décrivent en détail les caractéristiques de chaque *type de donnée* dans le binaire**. Par exemple, ==si vous avez une classe nommée `SportsCar`, les métadonnées de type décrivent des détails tels que la classe de base de `SportsCar`, spécifient les *interfaces* implémentés par `SportsCar` (le cas échéant) et fournissent une description complète de chaque membre pris en charge par le type `SportsCar`==. Les métadonnées .NET sont toujours présentes dans un *assembly* et sont générées automatiquement par le compilateur de langage.
+Troisièmement, **les assemblies contiennent également des métadonnées qui décrivent en détail les caractéristiques de chaque *type de donnée* dans le binaire**. Par exemple, si vous avez une classe nommée `SportsCar`, les métadonnées de type décrivent des détails tels que la classe de base de `SportsCar`, spécifient les *interfaces* implémentés par `SportsCar` (le cas échéant) et fournissent une description complète de chaque membre pris en charge par le type `SportsCar`. ==Les métadonnées .NET sont toujours présentes dans un *assembly* et sont générées automatiquement par le compilateur de langage.==
 
-Enfin, outre les métadonnées `CIL` et de `type de donnée`, **les *assembly* eux-mêmes sont également décrits à l'aide de métadonnées, officiellement appelées *manifest***. Le manifeste contient des informations sur la version actuelle de l'*assembly*, **des informations culturelles (utilisées pour localiser les ressources de chaînes et d'images)** et une **liste de tous les assemblages externes référencés qui sont nécessaires à une exécution correcte**. Vous examinerez divers outils pouvant être utilisés pour examiner les types, les métadonnées et les informations du manifeste d'un assemblage au cours des prochains chapitres.
+Enfin, outre les métadonnées `CIL` et de `type de donnée`, **les *assembly* eux-mêmes sont également décrits à l'aide de métadonnées, officiellement appelées *manifest***. Le manifeste contient des informations sur la version actuelle de l'*assembly*, des informations culturelles (utilisées pour localiser les ressources de chaînes et d'images) et une liste de tous les assemblages externes référencés qui sont nécessaires à une exécution correcte. Vous examinerez divers outils pouvant être utilisés pour examiner les types, les métadonnées et les informations du manifeste d'un assemblage au cours des prochains chapitres.
 
 ## Le rôle du CIL
 
@@ -221,7 +220,7 @@ Par exemple, si vous deviez générer le code `IL` à partir de cet assemblage �
 } // end of method Calc::Add
 ```
 
-Ne vous inquiétez pas si vous ne comprenez pas grand-chose au `CIL` résultant de cette méthode, car le [[Chapitre 18#Motivations pour l'apprentissage de la grammaire du CIL|Chapitre 18]] décrit les bases du langage de programmation `CIL`. **Ce qu'il faut retenir, c'est que le compilateur C# génère du `CIL`, et non des instructions spécifiques à une plate-forme**.
+Ne vous inquiétez pas si vous ne comprenez pas grand-chose au `CIL` résultant de cette méthode, car ==le [[Chapitre 18#Motivations pour l'apprentissage de la grammaire du CIL|Chapitre 18]] décrit les bases du langage de programmation `CIL`==. **Ce qu'il faut retenir, c'est que le compilateur C# génère du `CIL`, et non des instructions spécifiques à une plate-forme**.
 
 Rappelez-vous que cela vaut pour tous les compilateurs .NET. À titre d'illustration, supposons que vous ayez créé cette même application à l'aide de `Visual Basic` plutôt que `C#`.
 
@@ -273,21 +272,29 @@ Si on examine le Code `CIL` pour la méthode `add()`, on remarquera des instruct
 
 ## Compilation du CIL en instructions spécifiques à chaque plate-formes
 
-On utilise un compilateur juste-à-temps (`JIT` ou `jitter`) pour compiler notre code `CIL` en instructions CPU. Le. runtime .NET utilise un compilateur `JIT` pour chaque processeur ciblant l'environnement d'exécution, chacun étant optimisé pour la plate-forme sous-jacente.
+==On utilise un compilateur juste-à-temps (`JIT` ou `jitter`) pour compiler notre code `CIL` en instructions CPU.== Le. runtime .NET utilise un compilateur `JIT` pour chaque processeur ciblant l'environnement d'exécution, chacun étant optimisé pour la plate-forme sous-jacente.
 
 Par exemple, si vous développez une application .NET destinée à être déployée sur un appareil mobile (tel qu'un téléphone iOS ou Android), le `jitter` correspondant est parfaitement adapté pour fonctionner dans un environnement à faible mémoire. En revanche, si vous déployez votre assembly sur un serveur back-end d'entreprise (où la mémoire est rarement un problème), le jitter sera optimisé pour fonctionner dans un environnement à mémoire élevée. De cette manière, **les développeurs peuvent écrire un seul corps de code qui peut être compilé et exécuté efficacement par JIT sur des machines ayant des architectures différentes**.
 
 De plus, comme un `jitter` donné compile les instructions `CIL` en code machine correspondant, il met en cache les résultats dans la mémoire d'une manière adaptée au système d'exploitation cible. Ainsi, si un appel est effectué vers une méthode nommée `PrintDocument()`, les instructions `CIL` sont compilées en instructions spécifiques à la plate-forme lors de la première invocation et conservées en mémoire pour une utilisation ultérieure. *Par conséquent, la prochaine fois que `PrintDocument()` est appelé, il n'est pas nécessaire de re-compiler le CIL*.
 
+>[!info] Note moderne
+>Depuis .NET 8, Microsoft à implémentée une nouvelle manière de compiler les programmes .NET : *Ahead-of-Time* ou `AoT`.
+>
+>La compilation AoT compile votre code directement en code machine natif au lieu d'un langage intermédiaire (IL). Ce processus élimine le besoin d'un compilateur `JIT` (Just-In-Time) lors de l'exécution.
+
 ### Pré-compilation du CIL en instructions spécifiques à la plateforme
 
-Il existe dans .NET un utilitaire appelé *crossgen.exe*, qui peut être utilisé pour pré-JIT votre code. Heureusement, dans .NET Core 6, la capacité à produire des assemblages « prêts à l'emploi » est intégrée au framework. Nous y reviendrons plus en détail dans la suite de cet ouvrage.
+~~Il existe dans .NET un utilitaire appelé *crossgen.exe*, qui peut être utilisé pour pré-JIT votre code.~~ Heureusement, dans .NET Core 6, la capacité à produire des assemblages « prêts à l'emploi » est intégrée au framework. Nous y reviendrons plus en détail dans la suite de cet ouvrage.
+
+>[!important]
+>l'outil *crosgen.exe* est obsolète et à été remplacé par *crossgen2*, un outil cross-platform et indépendant de l'architecture du processeur de la machine.
 
 ## Le rôle des métadonnée des types de donnée .NET
 
-En plus des instructions `CIL`, un assemblage .NET contient des métadonnées complètes, exhaustives et précises qui décrivent chaque type (par exemple: *classe*, *structure*, *énumération*) défini dans le binaire, ainsi que les membres de chaque type (par exemple, *propriétés*, *méthodes*, *événements*). **Heureusement, c'est toujours au compilateur (et non au programmeur) qu'il incombe d'émettre les métadonnées de type les plus récentes et les plus performantes**. Les métadonnées .NET étant extrêmement méticuleuses, les assemblages sont des entités entièrement auto-descriptives.
+En plus des instructions `CIL`, un assemblage .NET contient des métadonnées complètes, exhaustives et précises qui décrivent chaque type (par exemple: *classe*, *structure*, *énumération*) défini dans le binaire, ainsi que les membres de chaque type (par exemple, *propriétés*, *méthodes*, *événements*). ==Heureusement, c'est toujours au compilateur (et non au programmeur) qu'il incombe d'émettre les métadonnées de type les plus récentes et les plus performantes==. **Les métadonnées .NET étant extrêmement méticuleuses, les assemblages sont des entités entièrement auto-descriptives.**
 
-Pour illustrer le format des métadonnées de type .NET, examinons les métadonnées qui ont été générées pour la méthode `Add()` de la classe `C#` `Calc` que vous avez examinée précédemment <small>(les métadonnées générées pour la version Visual Basic de la méthode Add() sont similaires, nous n'examinerons donc que la version C#)</small>.
+Pour illustrer le format des métadonnées de type .NET, examinons les métadonnées qui ont été générées pour la méthode `Add()` de la classe `C#` `Calc` que vous avez examinée précédemment.
 
 ```CIL
 // TypeDef #2 (02000003)
@@ -312,11 +319,11 @@ Pour illustrer le format des métadonnées de type .NET, examinons les métadonn
 //         (2) ParamToken : (08000003) Name : addend2 flags: [none] (00000000)
 ```
 
-Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement. **Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception**. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*. Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.
+==Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement.== Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. ==Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*==. ==**Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.**==
 
 ## Le rôle du manifeste d'assembly
 
-Enfin, n'oubliez pas q'==un assemblage .NET contient également des métadonnées qui décrivent l'assemblage lui-même (techniquement appelé *manifeste*)==. Entre autres détails, ==le manifeste documente tous les assemblages externes nécessaires au bon fonctionnement de l'assemblage actuel, le numéro de version de l'assemblage, les informations de copyright, etc==. Comme pour les métadonnées de type, *c'est toujours au compilateur qu'il revient de générer le manifeste de l'assemblage*. Voici quelques détails pertinents du manifeste généré lors de la compilation du fichier de code `Calc.cs` présenté plus haut dans ce chapitre (certaines lignes ont été omises par souci de concision) :
+Enfin, n'oubliez pas q'un assemblage .NET contient également des métadonnées qui décrivent l'assemblage lui-même (techniquement appelé *manifeste*). Entre autres détails, ==le manifeste documente tous les assemblages externes nécessaires au bon fonctionnement de l'assemblage actuel, le numéro de version de l'assemblage, les informations de copyright, etc==. Comme pour les métadonnées de type, *c'est toujours au compilateur qu'il revient de générer le manifeste de l'assemblage*. Voici quelques détails pertinents du manifeste généré lors de la compilation du fichier de code `Calc.cs` présenté plus haut dans ce chapitre (certaines lignes ont été omises par souci de concision) :
 
 ```CIL
 .assembly extern /*23000001*/ System.Runtime
@@ -344,7 +351,7 @@ Enfin, n'oubliez pas q'==un assemblage .NET contient également des métadonnée
 .corflags 0x00000001 // ILONLY
 ```
 
-**En résumé, le manifeste documente l'ensemble des assemblages externes requis** par `Calc.dll` (via la directive `.assembly extern`) **ainsi que diverses caractéristiques de l'assemblage lui-même** (par exemple, le numéro de version, le nom du module). Le [[Chapitre 16#Exploration du manifeste|Chapitre 16]] examinera plus en détail l'utilité des données du manifeste.
+**En résumé, le manifeste documente l'ensemble des assemblages externes requis par** `Calc.dll` (via la directive `.assembly extern`) **ainsi que diverses caractéristiques de l'assemblage lui-même** (par exemple, le numéro de version, le nom du module). ==Le [[Chapitre 16#Exploration du manifeste|Chapitre 16]] examinera plus en détail l'utilité des données du manifeste.==
 
 # Comprendre le Common Type System (CTS)
 
@@ -358,7 +365,7 @@ Dans le monde de .NET, un *type* est simplement un terme générale qui réfère
 
 Lorsque vous créez des solutions à l'aide d'un langage .NET, vous êtes susceptible d'interagir avec bon nombre de ces types. Par exemple, votre *assembly* peut définir une classe unique qui implémente plusieurs interfaces. Il se peut qu'une des méthodes d'interface prenne un type d'énumération comme paramètre d'entrée et renvoie une structure à l'appel.
 
-Rappelons que le `CTS` est une **spécification formelle qui documente la manière dont les types doivent être définis afin d'être hébergés par le runtime .NET**. En général, les seules personnes qui s'intéressent de près au fonctionnement interne du `CTS` sont celles qui développent des outils et/ou des compilateurs destinés à la plateforme .NET. *Il est toutefois important que tous les programmeurs .NET apprennent à utiliser les cinq types définis par le CTS dans le langage de leur choix*. Voici un bref aperçu.
+Rappelons que **le `CTS` est une spécification formelle qui documente la manière dont les types doivent être définis afin d'être hébergés par le runtime .NET**. En général, les seules personnes qui s'intéressent de près au fonctionnement interne du `CTS` sont celles qui développent des outils et/ou des compilateurs destinés à la plateforme .NET. ==*Il est toutefois important que tous les programmeurs .NET apprennent à utiliser les cinq types définis par le CTS dans le langage de leur choix*==. Voici un bref aperçu.
 
 ## Types de Classe CTS
 
@@ -378,6 +385,7 @@ class Calc
 Le [[Chapitre 5#Présentation du type classe C|Chapitre 5]] vous permettra d'aborder officiellement l'étude des type *class* en `C#`, cependant, le [[#Tableau 1-1: Les caractéristiques des classes CTS| Tableau 1-1]] présente un certain nombre de caractéristiques relative aux type *class*.
 
 ###### Tableau 1-1: Les caractéristiques des classes CTS
+
 
 | Caractéristique de classes                          | Signification                                                                                                                                                                                                                                         |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

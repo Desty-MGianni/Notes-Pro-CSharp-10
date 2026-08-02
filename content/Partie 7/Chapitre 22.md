@@ -27,7 +27,8 @@ Console.Title = "More Fun with Entity Framework Core";
 Console.WriteLine("*****  More Fun with Entity Framework Core *****\n");
 ```
 
->[!tip] Si vous garder les exemples de code provenant du chapitre précédent, il est préférable de créer une méthode regroupant tous les appels de méthodes par chapitre. Dans mes exemples de livre, j'utilise `TopLevelChapter21()` et `TopLevelChapter22()`
+>[!Important] 
+>Si vous garder les exemples de code provenant du chapitre précédent, il est préférable de créer une méthode regroupant tous les appels de méthodes par chapitre. Dans mes exemples de livre, j'utilise `TopLevelChapter21()` et `TopLevelChapter22()`
 
 ## État de l'entité
 
@@ -40,7 +41,7 @@ Lorsqu'une entité est créée par programmation mais n'est pas encore ajoutée 
 
 Le code suivant illustre un enregistrement `Make` nouvellement créé et son `EntityState` :
 
-```cs
+```CS
 static async Task AddRecordsAsync()
 {
     //Cette fabrique n'est pas censée être utilisée ainsi,
@@ -561,7 +562,7 @@ static async Task ClearSampleData()
 }
 ```
 
-**Ajoutez un appel à cette méthode au début des instructions principales pour réinitialiser la base de données à chaque exécution du programme.** **==Ajoutez également un appel après la méthode `AddRecords()` pour nettoyer les exemples qui ajoutent des enregistrements individuels.**==
+**Ajoutez un appel à cette méthode au début des instructions principales pour réinitialiser la base de données à chaque exécution du programme.** ==**Ajoutez également un appel après la méthode `AddRecords()` pour nettoyer les exemples qui ajoutent des enregistrements individuels.**==
 
 ```cs
 Console.Title = "More Fun with Entity Framework Core";
@@ -704,7 +705,7 @@ static void FilterData()
 
 **Notez que le type renvoyé est également un `IQueryable<Car>` lors de l'utilisation d'une clause `Where`.**
 
-**==Une des améliorations d'EF Core 6 concerne la conversion de `string.IsNullOrWhiteSpace()` en SQL.==** Examinez le code ajouté à la fin de la méthode `FilterData()` :
+***==Une des améliorations d'EF Core 6 concerne la conversion de `string.IsNullOrWhiteSpace()` en SQL.==*** Examinez le code ajouté à la fin de la méthode `FilterData()` :
 
 ```cs
 static void FilterData()
@@ -722,7 +723,7 @@ static void FilterData()
 }
 ```
 
-
+Avant EF Core 6, la requête résultante (==**Sur SQL Server**==) était un mélange de commandes `LTRIM`/`RTRIM`. Grâce aux améliorations apportées par EF Core 6, la requête exécutée est beaucoup plus propre :
 
 ```sql
 SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
@@ -730,8 +731,7 @@ SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId"
       WHERE btrim(i."Color", E' \t\n\r') <> ''
 ```
 
-
-> [!WARNING] Performance : Le piège de `IsNullOrWhiteSpace` sur PostgreSQL
+> [!Warning] Performance : Le piège de `IsNullOrWhiteSpace` sur PostgreSQL
 > 
 > - **SQL Server** : Traduit l'expression par un simple `[Color] <> N''` (grâce au comportement natif de trim de SQL Server). Elle reste optimisée.
 > - **PostgreSQL** : Force l'utilisation de la fonction `btrim(i."Color", E' \t\n\r')`. 
@@ -745,5 +745,4 @@ SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId"
 
 
 ## Résilience de la connection
-
 
