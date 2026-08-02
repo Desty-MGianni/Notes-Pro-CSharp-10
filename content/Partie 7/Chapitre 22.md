@@ -4,16 +4,16 @@ publish: true
 
 # <big><big><big><b><font color =green>Exploration d'Entity Framework Core</font></b></big></big></big>
 
-Le chapitre précédent a présenté les composants d'EF Core. Ce chapitre explore les fonctionnalités d'EF Core, en commençant par les opérations CRUD (création, lecture, mise à jour et suppression). Après avoir abordé les opérations CRUD, nous examinerons les fonctionnalités spécifiques d'EF Core, notamment les filtres de requêtes globales, la combinaison de requêtes SQL et LINQ, les projections, et bien plus encore.
+Le chapitre précédent a présenté les composants d'EF Core. **Ce chapitre explore les fonctionnalités d'EF Core, en commençant par les opérations CRUD** (création, lecture, mise à jour et suppression). Après avoir abordé les opérations CRUD, **nous examinerons les fonctionnalités spécifiques d'EF Core,** notamment les filtres de requêtes globales, la combinaison de requêtes SQL et LINQ, les projections, et bien plus encore.
 
 >[!note]
 >Le code de ce chapitre fait suite à celui du chapitre précédent. Vous pouvez donc continuer à utiliser le code du [[Chapitre 21]] si vous avez suivi le texte. Si vous commencez par ce chapitre et souhaitez suivre le texte, utilisez le code du chapitre précédent disponible dans le dépôt.
 
 # Création d'enregistrements
 
-**Les enregistrements sont ajoutés à la base de données en les créant par programmation, en les ajoutant à leur `DbSet<T>` et en appelant `SaveChanges()`/`SaveChangesAsync()` sur le contexte.** ***==Lors de l'exécution de `SaveChanges()`, le `ChangeTracker` rapporte toutes les entités ajoutées et EF Core==*** (avec le fournisseur de base de données) ***==crée les instructions SQL appropriées pour insérer le ou les enregistrements.==*** ==Vous avez vu des exemples de ce processus plus tôt dans ce chapitre, lors de l'ajout des enregistrements d'exemple à la base de données.==
+**Les enregistrements sont ajoutés à la base de données en les créant par programmation, en les ajoutant à leur `DbSet<T>` et en appelant `SaveChanges()`/`SaveChangesAsync()` sur le contexte.** Lors de l'exécution de `SaveChanges()`, le `ChangeTracker` rapporte toutes les entités ajoutées et EF Core (avec le fournisseur de base de données) rée les instructions SQL appropriées pour insérer le ou les enregistrements. ==Vous avez vu des exemples de ce processus plus tôt dans ce chapitre, lors de l'ajout des enregistrements d'exemple à la base de données.==
 
-Pour rappel ([[Chapitre 21#Événements de sauvegarde/modifications enregistrées|Chapitre 21]]), **`SaveChanges()` s'exécute dans une transaction implicite, sauf si une transaction explicite est utilisée.** **==Si l'enregistrement a réussi, les valeurs générées par le serveur sont ensuite interrogées pour définir les valeurs des entités.==** ==La gestion des valeurs générées par le serveur est abordée en détail plus loin dans ce chapitre.==
+Pour rappel ([[Chapitre 21#Événements de sauvegarde/modifications enregistrées|Chapitre 21]]), **`SaveChanges()` s'exécute dans une transaction implicite, sauf si une transaction explicite est utilisée.** **==Si l'enregistrement a réussi, les valeurs générées par le serveur sont ensuite interrogées pour définir les valeurs des entités.==** La gestion des valeurs générées par le serveur est abordée en détail plus loin dans ce chapitre.
 
 Toutes les instructions SQL présentées dans cette section ont été collectées à l'aide de la méthode `LogTo()` d'EF Core.
 
@@ -37,7 +37,7 @@ Console.WriteLine("*****  More Fun with Entity Framework Core *****\n");
 >
 >La méthode `CreateDbContext()` n'est pas asynchrone car elle à été au chapitre précédent et sera gardée telle quelle.
 
-Lorsqu'une entité est créée par programmation mais n'est pas encore ajoutée à un `DbSet<T>`, son `EntityState` est `Detached`. Une fois l'entité ajoutée au `DbSet<T>`, son `EntityState` passe à `Added`. Après l'exécution réussie de `SaveChanges()`, l'`EntityState` passe à `Unchanged`.
+**Lorsqu'une entité est créée par programmation mais n'est pas encore ajoutée à un `DbSet<T>`, son `EntityState` est `Detached`. Une fois l'entité ajoutée au `DbSet<T>`, son `EntityState` passe à `Added`. Après l'exécution réussie de `SaveChanges()`, l'`EntityState` passe à `Unchanged`.**
 
 Le code suivant illustre un enregistrement `Make` nouvellement créé et son `EntityState` :
 
@@ -64,7 +64,7 @@ State of the BMW is Detached
 
 ## Ajouter un enregistrement en utilisant `Add`
 
-**Pour ajouter un nouvel enregistrement `Make` à la base de données, créez une nouvelle instance d'entité et appelez la méthode `Add()` du `DbSet<T>` approprié.** ***==Pour déclencher la persistance des données, la méthode `SaveChanges()` de la classe `DbContext` dérivée doit également être appelée.==*** Le code suivant ajoute le nouvel enregistrement `Make` à la base de données :
+**Pour ajouter un nouvel enregistrement `Make` à la base de données, créez une nouvelle instance d'entité et appelez la méthode `Add()` du `DbSet<T>` approprié.** **Pour déclencher la persistance des données, la méthode `SaveChanges()` de la classe `DbContext` dérivée doit également être appelée.** Le code suivant ajoute le nouvel enregistrement `Make` à la base de données :
 
 ```cs
 static async Task AddRecordAsync()
@@ -81,7 +81,7 @@ static async Task AddRecordAsync()
 }
 ```
 
-**En exécutant à nouveau le programme, vous verrez la sortie suivante dans la console.** ==Après l'ajout de l'entité au Suivi des modifications== (à l'aide de la méthode `AddAsync()`), ==son état est passé à `Added`==. **Le message concernant l'enregistrement des modifications provient du gestionnaire d'événements `SavingChanges`, et le message « Saved 1 entities» provient du gestionnaire d'événements `SavedChanges`.** **==Après l'appel à `SaveChanges()` sur le contexte, l'état de l'entité est passé à `Unchanged`.
+En exécutant à nouveau le programme, vous verrez la sortie suivante dans la console. ==Après l'ajout de l'entité au Suivi des modifications== (à l'aide de la méthode `AddAsync()`), ==son état est passé à `Added`==. **Le message concernant l'enregistrement des modifications provient du gestionnaire d'événements `SavingChanges`, et le message « Saved 1 entities» provient du gestionnaire d'événements `SavedChanges`.** Après l'appel à `SaveChanges()` sur le contexte, l'état de l'entité est passé à `Unchanged`.
 
 ```
 State of the BMW is Detached
@@ -91,7 +91,7 @@ Saved 1 entities
 State of the BMW is Unchanged
 ```
 
-**==L'instruction SQL exécutée pour l'insertion est affichée ici-bas==**. **Le format de la requête est dû au traitement par lots utilisé par EF Core pour améliorer les performances des opérations de base de données.** ***==Le traitement par lots est abordé plus loin dans ce chapitre.==*** **Toutes les valeurs transmises à l'instruction SQL sont paramétrées afin de réduire le risque d'attaques par script.** **==Notez également que l'entité récemment ajoutée est interrogée==** (avec l'instruction `RETURNING` pour PostgreSQL et un `SELECT` complet sur SQL Server) **==sur les propriétés générées par la base de données.==** **La gestion des valeurs gérées par le serveur par EF Core est également abordée plus loin dans ce chapitre.**
+L'instruction SQL exécutée pour l'insertion est affichée ici-bas. **==Le format de la requête est dû au traitement par lots utilisé par EF Core pour améliorer les performances des opérations de base de données.==** Le traitement par lots est abordé plus loin dans ce chapitre. **Toutes les valeurs transmises à l'instruction SQL sont paramétrées afin de réduire le risque d'attaques par script.** Notez également que l'entité récemment ajoutée est interrogée (avec l'instruction `RETURNING` pour PostgreSQL et un `SELECT` complet sur SQL Server) sur les propriétés générées par la base de données. **La gestion des valeurs gérées par le serveur par EF Core est également abordée plus loin dans ce chapitre.**
 
 ```sql
 INSERT INTO public."Makes" ("Name", "TimeStamp")
@@ -224,9 +224,9 @@ INSERT INTO public."Inventory" ("Color", "MakeId", "PetName", "TimeStamp")
 
 ## Considérations relatives aux colonnes d'identité lors de l'ajout d'enregistrements
 
-**Lorsqu'une entité possède une propriété numérique définie comme clé primaire, cette propriété est (par défaut) associée à une colonne d'identité. EF Core considère toute entité dont la valeur par défaut est zéro comme nouvelle, et toute entité dont la valeur est différente de zéro comme déjà existante dans la base de données.** *==Si vous créez une nouvelle entité, définissez sa clé primaire sur un nombre différent de zéro et tentez de l'ajouter à la base de données, EF Core ne pourra pas ajouter l'enregistrement car l'insertion d'identité n'est pas activée.==*
+Lorsqu'une entité possède une propriété numérique définie comme clé primaire, cette propriété est (par défaut) associée à une colonne d'identité. **EF Core considère toute entité dont la valeur par défaut est zéro comme nouvelle, et toute entité dont la valeur est différente de zéro comme déjà existante dans la base de données.** *==Si vous créez une nouvelle entité, définissez sa clé primaire sur un nombre différent de zéro et tentez de l'ajouter à la base de données, EF Core ne pourra pas ajouter l'enregistrement car l'insertion d'identité n'est pas activée.==*
 
-==Pour SQL Server, l'insertion d'identité est activée en exécutant la commande `SET IDENTITY_INSERT` dans une transaction explicite.== Cette commande requiert le schéma de base de données et le nom de la table, et non l'espace de noms C# ni le nom de l'entité. **Pour obtenir les informations de base de données d'une entité, utilisez la méthode `FindEntityType()` de la propriété `Model` du `DbContext` dérivé.** **==Une fois le type d'entité obtenu, utilisez les méthodes `GetSchema()` et `GetTableName()`.==**
+Pour SQL Server, l'insertion d'identité est activée en exécutant la commande `SET IDENTITY_INSERT` dans une transaction explicite. Cette commande requiert le schéma de base de données et le nom de la table, et non l'espace de noms C# ni le nom de l'entité. **Pour obtenir les informations de base de données d'une entité, utilisez la méthode `FindEntityType()` de la propriété `Model` du `DbContext` dérivé.** **==Une fois le type d'entité obtenu, utilisez les méthodes `GetSchema()` et `GetTableName()`.==**
 
 >[!warning] PostgreSQL n'a pas d'équivalent à la commande globale `SET IDENTITY_INSERT ON/OFF` (Avec Gemini)
 > Il n'y a aucun état de session ou de table à activer ou désactiver dans une transaction. Vous ne pouvez pas exécuter de commande textuelle pour "autoriser" temporairement l'insertion d'un ID.
@@ -250,7 +250,7 @@ static async Task AddRecordsAsync()
 }
 ```
 
-**Rappelons, comme indiqué dans le chapitre précédent, que lors de l'utilisation d'une stratégie d'exécution, les transactions explicites doivent s'exécuter dans le cadre de cette stratégie.** À titre de référence, voici un exemple tiré du chapitre précédent :
+Rappelons, comme indiqué dans le chapitre précédent, que **lors de l'utilisation d'une stratégie d'exécution, les transactions explicites doivent s'exécuter dans le cadre de cette stratégie.** À titre de référence, voici un exemple tiré du chapitre précédent :
 
 ```cs
 var strategy = context.Database.CreateExecutionStrategy();
@@ -271,9 +271,9 @@ strategy.Execute(() =>
 });
 ```
 
-**Lors de l'ajout d'un enregistrement via l'insertion d'identité, l'espace réservé `actionToExecute()` du bloc de code précédent est remplacé par du code activant l'insertion d'identité, ajoutant le ou les enregistrements, puis enregistrant les modifications.** **==Si tout se déroule correctement, la transaction est validée.==** *==En cas d'échec, la transaction est annulée.==* **Dans le bloc `finally`, l'insertion d'identité est désactivée.**
+**Lors de l'ajout d'un enregistrement via l'insertion d'identité, l'espace réservé `actionToExecute()` du bloc de code précédent est remplacé par du code activant l'insertion d'identité, ajoutant le ou les enregistrements, puis enregistrant les modifications.** Si tout se déroule correctement, la transaction est validée.*==En cas d'échec, la transaction est annulée.==* **Dans le bloc `finally`, l'insertion d'identité est désactivée.**
 
-**==EF Core propose deux méthodes pour exécuter des commandes directement sur la base de données. La méthode `ExecuteSqlRaw()` exécute la chaîne telle quelle, tandis que `ExecuteSqlInterpolated()` utilise l'interpolation de chaînes C# pour créer une requête paramétrée.==** Pour cet exemple, utilisez la version `ExecuteSqlInterpolatedRawAsync()`. Voici le code mis à jour, les nouvelles lignes étant en gras :
+**EF Core propose deux méthodes pour exécuter des commandes directement sur la base de données.** La méthode `ExecuteSqlRaw()` exécute la chaîne telle quelle, tandis que `ExecuteSqlInterpolated()` utilise l'interpolation de chaînes C# pour créer une requête paramétrée. ==Pour cet exemple, utilisez la version `ExecuteSqlInterpolatedRawAsync()`.== Voici le code mis à jour :
 
 ```cs
 static async Task AddRecords()
@@ -352,7 +352,7 @@ SELECT setval(pg_get_serial_sequence('"public"."Inventory"', 'Id'),
 
 ## Ajout d'un graphe d'objets
 
-**Lors de l'ajout d'une entité à la base de données, les enregistrements enfants peuvent être ajoutés en une seule opération, sans avoir à les ajouter explicitement à leur propre `DbSet<T>`.** **==Pour ce faire, il suffit de les ajouter à la propriété de navigation de collection de l'enregistrement parent.==** ==Par exemple, une nouvelle entité `Make` est créée, et un enregistrement enfant `Car` est ajouté à la propriété `Cars` de l'entité `Make`.== ***==Lorsque l'entité `Make` est ajoutée à la propriété `DbSet<Make>`, EF Core commence automatiquement à suivre l'enregistrement enfant `Car`, sans qu'il soit nécessaire de l'ajouter explicitement à la propriété `DbSet<Car>`.==*** **L'exécution de `SaveChanges()` enregistre les entités `Make` et `Car` ensemble.** Le test suivant illustre ce comportement :
+**Lors de l'ajout d'une entité à la base de données, les enregistrements enfants peuvent être ajoutés en une seule opération, sans avoir à les ajouter explicitement à leur propre `DbSet<T>`.** Pour ce faire, **==il suffit de les ajouter à la propriété de navigation de collection de l'enregistrement parent.==** Par exemple, une nouvelle entité `Make` est créée, et un enregistrement enfant `Car` est ajouté à la propriété `Cars` de l'entité `Make`. Lorsque l'entité `Make` est ajoutée à la propriété `DbSet<Make>`, EF Core commence automatiquement à suivre l'enregistrement enfant `Car`, sans qu'il soit nécessaire de l'ajouter explicitement à la propriété `DbSet<Car>`. L'exécution de `SaveChanges()` enregistre les entités `Make` et `Car` ensemble.** Le test suivant illustre ce comportement :
 
 ```cs
 static async Task AddRecordsAsync()
@@ -390,7 +390,7 @@ INSERT INTO public."Inventory" ("Color", "MakeId", "PetName", "TimeStamp")
 
 ## Ajout d'enregistrements de type plusieurs-à-plusieurs
 
-**Grâce à la nouvelle prise en charge des tables plusieurs-à-plusieurs par EF Core, il est possible d'ajouter directement des enregistrements d'une entité à l'autre, *sans passer par la table pivot.**** **==Vous pouvez désormais utiliser le code suivant pour ajouter directement des enregistrements de conducteur aux enregistrements de `Car` :==**
+**Grâce à la nouvelle prise en charge des tables plusieurs-à-plusieurs par EF Core, il est possible d'ajouter directement des enregistrements d'une entité à l'autre, *sans passer par la table pivot.*** Vous pouvez désormais utiliser le code suivant pour ajouter directement des enregistrements de conducteur aux enregistrements de `Car` :
 
 ```cs
 static async Task AddRecordsAsync()
@@ -413,7 +413,7 @@ static async Task AddRecordsAsync()
 }
 ```
 
-**Lors de l'exécution de la méthode `SaveChanges()`, deux instructions `INSERT` (SQL Server) ou deux blocs d'instruction `INSERT` (PostgreSQL) sont exécutées. La première insère les six enregistrements `Driver` dans la table `Drivers`, et la seconde insère les six enregistrements dans la table `InventoryDriver` (table pivot).** Voici l'instruction `INSERT` pour la table pivot :
+**Lors de l'exécution de la méthode `SaveChanges()`, deux instructions `INSERT` (SQL Server) ou deux blocs d'instruction `INSERT` (PostgreSQL) sont exécutées.** La première insère les six enregistrements `Driver` dans la table `Drivers`, et la seconde insère les six enregistrements dans la table `InventoryDriver` (table pivot). Voici l'instruction `INSERT` pour la table pivot :
 
 ```sql
 INSERT INTO public."InventoryToDrivers" ("InventoryId", "DriverId", "TimeStamp")
@@ -533,9 +533,9 @@ static async Task LoadMakesAndCarData()
 
 # Effacer les données d'exemple
 
-**La suppression des enregistrements sera abordée plus en détail ultérieurement dans ce chapitre.** ==Pour l'instant, nous allons créer une méthode qui efface les données d'exemple afin que, lors de l'exécution répétée des exemples, les exécutions précédentes n'interfèrent pas avec les exemples.==
+**La suppression des enregistrements sera abordée plus en détail ultérieurement dans ce chapitre.** Pour l'instant, nous allons créer une méthode qui efface les données d'exemple afin que, lors de l'exécution répétée des exemples, les exécutions précédentes n'interfèrent pas avec les exemples.
 
-**Créez une nouvelle méthode appelée `ClearSampleData()`.** **==Cette méthode utilise la méthode `FindEntityType()` sur la propriété `Model` de l'`ApplicationDbContext` pour obtenir le nom de la table et du schéma, puis supprime les enregistrements.==** Une fois les enregistrements supprimés, le code utilise la commande `TRUNCATE ... RESTART IDENTITY CASCADE` pour réinitialiser l'identité de chaque table.
+Créez une nouvelle méthode appelée `ClearSampleData()`. Cette méthode utilise **la méthode `FindEntityType()` sur la propriété `Model` de l'`ApplicationDbContext` pour obtenir le nom de la table et du schéma,** puis supprime les enregistrements. Une fois les enregistrements supprimés, le code utilise la commande `TRUNCATE ... RESTART IDENTITY CASCADE` pour réinitialiser l'identité de chaque table.
 
 ```cs
 static async Task ClearSampleData()
@@ -562,7 +562,7 @@ static async Task ClearSampleData()
 }
 ```
 
-**Ajoutez un appel à cette méthode au début des instructions principales pour réinitialiser la base de données à chaque exécution du programme.** ==**Ajoutez également un appel après la méthode `AddRecords()` pour nettoyer les exemples qui ajoutent des enregistrements individuels.**==
+Ajoutez un appel à cette méthode au début des instructions principales pour réinitialiser la base de données à chaque exécution du programme. Ajoutez également un appel après la méthode `AddRecords()` pour nettoyer les exemples qui ajoutent des enregistrements individuels.
 
 ```cs
 Console.Title = "More Fun with Entity Framework Core";
@@ -579,12 +579,12 @@ Console.ReadLine();
 
 ## Requête de données
 
-**La requête de données avec EF Core s'effectue généralement à l'aide de requêtes LINQ.** ***==Pour rappel, lorsqu'on utilise LINQ pour interroger la base de données afin d'obtenir une liste d'entités, la requête n'est exécutée qu'après itération, conversion en `List<T>` (ou en tableau), ou liaison à un contrôle de liste==*** (comme une grille de données). **==Pour les requêtes portant sur un seul enregistrement, l'instruction est exécutée immédiatement lors de l'utilisation de la méthode `First()`, `Single()`, etc.==**
+**La requête de données avec EF Core s'effectue généralement à l'aide de requêtes LINQ.** Pour rappel, lorsqu'on utilise LINQ pour interroger la base de données afin d'obtenir une liste d'entités, la requête n'est exécutée qu'après itération, conversion en `List<T>` (ou en tableau), ou liaison à un contrôle de liste (comme une grille de données). **Pour les requêtes portant sur un seul enregistrement, l'instruction est exécutée immédiatement lors de l'utilisation de la méthode `First()`, `Single()`, etc.**
 
 >[!note]
 >Ce livre ne constitue pas une référence complète sur LINQ, mais présente quelques exemples. Pour plus d'exemples de requêtes LINQ, voir [Les 101 exemples de requêtes LINQ de Microsoft](https://github.com/dotnet/try-samples).
 
-**==Nouveauté d'EF Core 5 : vous pouvez appeler la méthode `ToQueryString()` dans la plupart des requêtes LINQ pour examiner la requête exécutée sur la base de données.==** *==La principale exception concerne les requêtes à exécution immédiate, telles que `First()`/`FirstOrDefault()`==*. **Pour les requêtes fractionnées, la méthode `ToQueryString()` ne renvoie que la première requête exécutée.**
+Nouveauté d'EF Core 5 : **vous pouvez appeler la méthode `ToQueryString()` dans la plupart des requêtes LINQ pour examiner la requête exécutée sur la base de données.** La principale exception concerne les requêtes à exécution immédiate, telles que `First()`/`FirstOrDefault()`. *==Pour les requêtes fractionnées, la méthode `ToQueryString()` ne renvoie que la première requête exécutée.==*
 
 ```cs
 static async Task QueryData()
@@ -658,7 +658,7 @@ Lemon is Rust
 
 ## Filtrer les enregistrements
 
-La méthode `Where()` permet de filtrer les enregistrements d'un `DbSet<T>`. **==Plusieurs méthodes `Where()` peuvent être chaînées de manière fluide pour construire dynamiquement la requête.==** ***==Les méthodes `Where()` chaînées sont toujours combinées sous forme de clauses `AND` dans la requête créée.==*** Dans l'exemple suivant, les requêtes générées pour `cars2` et `cars3` sont identiques. Pour créer une instruction `OR`, vous devez utiliser la même clause `Where()`.
+**La méthode `Where()` permet de filtrer les enregistrements d'un `DbSet<T>`.** **==Plusieurs méthodes `Where()` peuvent être chaînées de manière fluide pour construire dynamiquement la requête.==** Les méthodes `Where()` chaînées sont toujours combinées sous forme de clauses `AND` dans la requête créée. Dans l'exemple suivant, les requêtes générées pour `cars2` et `cars3` sont identiques. Pour créer une instruction `OR`, vous devez utiliser la même clause `Where()`.
 
 ```cs
 static void FilterData()
