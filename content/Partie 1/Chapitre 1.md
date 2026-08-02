@@ -319,7 +319,7 @@ Pour illustrer le format des métadonnées de type .NET, examinons les métadonn
 //         (2) ParamToken : (08000003) Name : addend2 flags: [none] (00000000)
 ```
 
-==Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement.== Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. ==Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*==. ==**Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.**==
+==Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement.== Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. ==Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*==. **==Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.==**
 
 ## Le rôle du manifeste d'assembly
 
