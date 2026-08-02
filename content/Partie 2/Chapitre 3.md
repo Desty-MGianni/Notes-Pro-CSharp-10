@@ -1,5 +1,5 @@
 ---
-title: "Chapitre 3: Principes Fondamentaux de la Programmatio - Partie 1"
+title: "Chapitre 3: Principes Fondamentaux de la Programmation - Partie 1"
 publish: true
 ---
 
