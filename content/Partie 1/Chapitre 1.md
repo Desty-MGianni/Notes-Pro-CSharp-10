@@ -17,13 +17,13 @@ En **2016**, Microsoft annonce `.NET Core`. Il remplace `.NET Framework` permett
 **Le but du livre est double**:
 1. Explication claire et très détaillé de la syntaxe et de la sémantique de C#.
 2. Illustrer l'usage de nombreux framework de développement .NET 
-    - `ADO.NET` et `Entity Framework Core` pour l'accès aux bases de données
-    - `WPF` pour les interfaces utilisateurs
-    - `ASP.NET Core` pour les applications web et API en REST ([Voir vidéo ici](https://youtu.be/7iHl71nt49o?si=nO_Sg4u9rKUFVj4P))
+    - *ADO.NET* et *Entity Framework Core* pour l'accès aux bases de données
+    - *WPF* ou *AvaloniaUI* pour les interfaces utilisateurs
+    - *ASP.NET Core* pour les applications web et API en REST ([Voir vidéo ici](https://youtu.be/7iHl71nt49o?si=nO_Sg4u9rKUFVj4P))
 
 Ce premier chapitre pose les bases conceptuelle du reste du livre. Il fait une présentation générale de certains éléments lié a .NET comme:
 
-- Les Assemblies (équivalent des module en Python)
+- Les Assemblies.
 - Le Common Intermediate Language (`CIL`)
 - La compilation Juste-à-temps (`JIT`)
 
@@ -58,7 +58,7 @@ pour préparer le terrain, voici un aperçu rapide de quelque fonctionnalité fo
 
 ==**.NET 6** est sorti en Novembre 2021 en tant que `LTS`. Il à été supporté jusqu'en Novembre 2024.==
 
-Pour voir la politique de support des plateforme .NET et .NET Core: https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core
+Pour voir la politique de support de la plateforme .NET: https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core
 
 # Aperçu des blocs de construction de la plateforme .NET
 
@@ -114,7 +114,7 @@ De plus, au fur et à mesure que vous avancerez dans ce texte, vous vous rendrez
 
 `C#` étant un hybride de nombreux langages, le résultat est un produit dont la syntaxe est aussi claire que celle de `Java` et qui offre à peu près autant de puissance et de flexibilité que C++. Voici une liste partielle des fonctionnalités essentielles de C# que l'on retrouve dans toutes les versions du langage :
 
-- Aucun pointeur requis ! Les programmes C# n'ont généralement pas besoin de manipulation directe de pointeurs (Toujours possible, comme indiqué au [[Chapitre 11]]).
+- *Aucun pointeur requis !* Les programmes C# n'ont généralement pas besoin de manipulation directe de pointeurs (Toujours possible, comme indiqué au [[Chapitre 11]]).
 - Une gestion de la mémoire automatique avec un collecteur de déchets (*garbage collection*)
 - Constructions syntaxiques formelles pour les classes, les interfaces, les structures, les énumérations et les délégués. 
 - Possibilité de *surchargé les opérateurs* comme en `C++`.
@@ -162,15 +162,15 @@ Quel que soit le langage .NET que vous choisissez pour programmer, sachez que m�
 
 Quand le compilateur .NET créé un fichier *.dll*, le résultat binaire est nommé *assembly*. Les détails concernant les assembly .NET seront dans le [[Chapitre 16#Le rôle des assemblages .NET|Chapitre 16]] cependant pour faciliter la compréhension de ce point, il faut comprendre les 4 propriétés basique de ce format de fichier.
 
-D'abord, contrairement aux assembly .NET Framework qui peuvent être soit un fichier *.exe*  ou un fichier *.dll*. Les projets `.NET` sont toujours compilés dans un fichier *.dll*, même si le projet fournit un exécutable. ==Les assemblages .NET exécutables sont exécutés à l'aide de la commande `dotnet <nom de l'assemblage>.dll`==. Nouveauté dans .NET Core 3.0 (et versions ultérieures), la commande `dotnet.exe` est copiée dans le répertoire de compilation et renommée `<nom de l'assemblage>.exe`. L'exécution de cette commande appelle automatiquement le fichier `dotnet <nom de l'assembly>.dll`, exécutant l'équivalent de `dotnet <nom de l'assembly>.dll`. ==**Le fichier *.exe* portant le nom de votre projet n'est pas réellement le code de votre projet; il s'agit d'un raccourci vers le fichier *.dll* pratique pour exécuter votre application.**==
+D'abord, contrairement aux assembly .NET Framework qui peuvent être soit un fichier *.exe*  ou un fichier *.dll*. Les projets `.NET` sont toujours compilés dans un fichier *.dll*, même si le projet fournit un exécutable. Les assemblages .NET exécutables sont exécutés à l'aide de la commande `dotnet <nom de l'assemblage>.dll`. Nouveauté dans .NET Core 3.0 (et versions ultérieures), la commande `dotnet.exe` est copiée dans le répertoire de compilation et renommée `<nom de l'assemblage>.exe`. L'exécution de cette commande appelle automatiquement le fichier `dotnet <nom de l'assembly>.dll`, exécutant l'équivalent de `dotnet <nom de l'assembly>.dll`. ==Le fichier *.exe* portant le nom de votre projet n'est pas réellement le code de votre projet; il s'agit d'un raccourci vers le fichier *.dll* pratique pour exécuter votre application.==
 
-==Mis à jour dans .NET 6, votre application peut être réduit à un fichier unique qui peut être exécuté directement.== Même si ce fichier unique ressemble à un exécutable natif de type C++ et se comporte comme tel, il s'agit en réalité d'un fichier unique créé pour des raisons pratiques. Il contient tous les fichiers nécessaires à l'exécution de votre application, voire même le runtime .NET lui-même ! Mais sachez que votre code s'exécute toujours dans un conteneur géré, comme s'il était publié sous forme de plusieurs fichiers. ==**Ce sujet sera abordé en détail dans le [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]].**==
+**Mis à jour dans .NET 6, votre application peut être réduit à un fichier unique qui peut être exécuté directement.** Même si ce fichier unique ressemble à un exécutable natif de type C++ et se comporte comme tel, il s'agit en réalité d'un fichier unique créé pour des raisons pratiques. Il contient tous les fichiers nécessaires à l'exécution de votre application, voire même le runtime .NET lui-même ! Mais sachez que votre code s'exécute toujours dans un conteneur géré, comme s'il était publié sous forme de plusieurs fichiers. ==**Ce sujet sera abordé en détail dans le [[Chapitre 16#Publication d'applications autonomes dans un seul fichier|Chapitre 16]].**==
 
-Deuxièmement, **un assembly contient du code `CIL`**, ==qui est conceptuellement similaire au `bytecode` de `Java`, en ce sens qu'il n'est pas compilé en instructions spécifiques à la plate-forme tant que cela n'est pas absolument nécessaire==. En général, "absolument nécessaire" correspond au moment où un bloc d'instructions `CIL` (tel qu'une implémentation de méthodes) est référencé pour être utilisé par le runtime .NET.
+Deuxièmement, **un assembly contient du code `CIL`**, ==qui est conceptuellement similaire au `bytecode` de `Java`,== en ce sens qu'il n'est pas compilé en instructions spécifiques à la plate-forme tant que cela n'est pas absolument nécessaire. En général, "absolument nécessaire" correspond au moment où un bloc d'instructions `CIL` (tel qu'une implémentation de méthodes) est référencé pour être utilisé par le runtime .NET.
 
-Troisièmement, **les assemblies contiennent également des métadonnées qui décrivent en détail les caractéristiques de chaque *type de donnée* dans le binaire**. Par exemple, si vous avez une classe nommée `SportsCar`, les métadonnées de type décrivent des détails tels que la classe de base de `SportsCar`, spécifient les *interfaces* implémentés par `SportsCar` (le cas échéant) et fournissent une description complète de chaque membre pris en charge par le type `SportsCar`. ==Les métadonnées .NET sont toujours présentes dans un *assembly* et sont générées automatiquement par le compilateur de langage.==
+Troisièmement, **les assemblies contiennent également des *métadonnées* qui décrivent en détail les caractéristiques de chaque  "type de donnée" dans le binaire**. Par exemple, si vous avez une classe nommée `SportsCar`, les métadonnées de type décrivent des détails tels que la classe de base de `SportsCar`, spécifient les *interfaces* implémentés par `SportsCar` (le cas échéant) et fournissent une description complète de chaque membre pris en charge par le type `SportsCar`. ==Les métadonnées .NET sont toujours présentes dans un *assembly* et sont générées automatiquement par le compilateur de langage.==
 
-Enfin, outre les métadonnées `CIL` et de `type de donnée`, **les *assembly* eux-mêmes sont également décrits à l'aide de métadonnées, officiellement appelées *manifest***. Le manifeste contient des informations sur la version actuelle de l'*assembly*, des informations culturelles (utilisées pour localiser les ressources de chaînes et d'images) et une liste de tous les assemblages externes référencés qui sont nécessaires à une exécution correcte. Vous examinerez divers outils pouvant être utilisés pour examiner les types, les métadonnées et les informations du manifeste d'un assemblage au cours des prochains chapitres.
+Enfin, outre le `CIL` et les types de donnée, **les *assembly* eux-mêmes sont également décrits à l'aide de métadonnées, officiellement appelées *manifest***. Le manifeste contient des informations sur la version actuelle de l'*assembly*, des informations culturelles (utilisées pour localiser les ressources de chaînes et d'images) et une liste de tous les assemblages externes référencés qui sont nécessaires à une exécution correcte. Vous examinerez divers outils pouvant être utilisés pour examiner les types, les métadonnées et les informations du manifeste d'un assemblage au cours des prochains chapitres.
 
 ## Le rôle du CIL
 
@@ -220,9 +220,9 @@ Par exemple, si vous deviez générer le code `IL` à partir de cet assemblage �
 } // end of method Calc::Add
 ```
 
-Ne vous inquiétez pas si vous ne comprenez pas grand-chose au `CIL` résultant de cette méthode, car ==le [[Chapitre 18#Motivations pour l'apprentissage de la grammaire du CIL|Chapitre 18]] décrit les bases du langage de programmation `CIL`==. **Ce qu'il faut retenir, c'est que le compilateur C# génère du `CIL`, et non des instructions spécifiques à une plate-forme**.
+Ne vous inquiétez pas si vous ne comprenez pas grand-chose au `CIL` résultant de cette méthode, car le [[Chapitre 18#Motivations pour l'apprentissage de la grammaire du CIL|Chapitre 18]] décrit les bases du langage de programmation `CIL`. **Ce qu'il faut retenir, c'est que le compilateur C# génère du `CIL`, et non des instructions spécifiques à une plate-forme**.
 
-Rappelez-vous que cela vaut pour tous les compilateurs .NET. À titre d'illustration, supposons que vous ayez créé cette même application à l'aide de `Visual Basic` plutôt que `C#`.
+Rappelez-vous que cela vaut pour tous les compilateurs .NET. À titre d'illustration, supposons que vous ayez créé cette même application à l'aide de VB plutôt que C#.
 
 ```vb
 ' Calc.vb
@@ -272,16 +272,16 @@ Si on examine le Code `CIL` pour la méthode `add()`, on remarquera des instruct
 
 ## Compilation du CIL en instructions spécifiques à chaque plate-formes
 
-==On utilise un compilateur juste-à-temps (`JIT` ou `jitter`) pour compiler notre code `CIL` en instructions CPU.== Le. runtime .NET utilise un compilateur `JIT` pour chaque processeur ciblant l'environnement d'exécution, chacun étant optimisé pour la plate-forme sous-jacente.
+**Étant donné que les assemblys contiennent des instructions CIL plutôt que des instructions spécifiques à la plate-forme, le code CIL doit être compilé à la volée avant utilisation.** L'entité qui compile le code CIL en instructions CPU significatives est un compilateur JIT, qui porte parfois le nom convivial de *jitter*. ***==L'environnement d'exécution .NET exploite un Compilateur JIT pour chaque CPU ciblant le runtime, chacun optimisé pour la plateforme sous-jacente.==***
 
 Par exemple, si vous développez une application .NET destinée à être déployée sur un appareil mobile (tel qu'un téléphone iOS ou Android), le `jitter` correspondant est parfaitement adapté pour fonctionner dans un environnement à faible mémoire. En revanche, si vous déployez votre assembly sur un serveur back-end d'entreprise (où la mémoire est rarement un problème), le jitter sera optimisé pour fonctionner dans un environnement à mémoire élevée. De cette manière, **les développeurs peuvent écrire un seul corps de code qui peut être compilé et exécuté efficacement par JIT sur des machines ayant des architectures différentes**.
 
-De plus, comme un `jitter` donné compile les instructions `CIL` en code machine correspondant, il met en cache les résultats dans la mémoire d'une manière adaptée au système d'exploitation cible. Ainsi, si un appel est effectué vers une méthode nommée `PrintDocument()`, les instructions `CIL` sont compilées en instructions spécifiques à la plate-forme lors de la première invocation et conservées en mémoire pour une utilisation ultérieure. *Par conséquent, la prochaine fois que `PrintDocument()` est appelé, il n'est pas nécessaire de re-compiler le CIL*.
+==De plus, comme un `jitter` donné compile les instructions `CIL` en code machine correspondant, il met en cache les résultats dans la mémoire d'une manière adaptée au système d'exploitation cible.== Ainsi, si un appel est effectué vers une méthode nommée `PrintDocument()`, les instructions `CIL` sont compilées en instructions spécifiques à la plate-forme lors de la première invocation et conservées en mémoire pour une utilisation ultérieure. Par conséquent, la prochaine fois que `PrintDocument()` est appelé, il n'est pas nécessaire de re-compiler le CIL.
 
 >[!info] Note moderne
 >Depuis .NET 8, Microsoft à implémentée une nouvelle manière de compiler les programmes .NET : *Ahead-of-Time* ou `AoT`.
 >
->La compilation AoT compile votre code directement en code machine natif au lieu d'un langage intermédiaire (IL). Ce processus élimine le besoin d'un compilateur `JIT` (Just-In-Time) lors de l'exécution.
+>La compilation AoT compile votre code directement en code machine natif au lieu d'un langage intermédiaire (CIL). Ce processus élimine le besoin d'un compilateur `JIT` (Just-In-Time) lors de l'exécution.
 
 ### Pré-compilation du CIL en instructions spécifiques à la plateforme
 
@@ -319,7 +319,7 @@ Pour illustrer le format des métadonnées de type .NET, examinons les métadonn
 //         (2) ParamToken : (08000003) Name : addend2 flags: [none] (00000000)
 ```
 
-==Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement.== Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. ==Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*==. **Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.**
+**Les métadonnées sont utilisées par de nombreux aspects de l'environnement d'exécution .NET, ainsi que par divers outils de développement.** Par exemple, la fonctionnalité *IntelliSense* fournie par des outils tels que *Visual Studio* est rendue possible par la lecture des métadonnées d'un assemblage au moment de la conception. Les métadonnées sont également utilisées par divers utilitaires de navigation d'objets, des outils de déboggage et le compilateur C# lui-même. ==Il est certain que les métadonnées constituent l'épine dorsale de nombreuses technologies .NET, notamment la *réflexion*, la *liaison tardive* et la *sérialisation d'objets*==. **Le [[Chapitre 17#L’importance des métadonnées de type|Chapitre 17]] formalisera le rôle des métadonnées .NET.**
 
 ## Le rôle du manifeste d'assembly
 
@@ -351,7 +351,7 @@ Enfin, n'oubliez pas q'un assemblage .NET contient également des métadonnées 
 .corflags 0x00000001 // ILONLY
 ```
 
-**En résumé, le manifeste documente l'ensemble des assemblages externes requis par** `Calc.dll` (via la directive `.assembly extern`) **ainsi que diverses caractéristiques de l'assemblage lui-même** (par exemple, le numéro de version, le nom du module). ==Le [[Chapitre 16#Exploration du manifeste|Chapitre 16]] examinera plus en détail l'utilité des données du manifeste.==
+**En résumé, le manifeste documente l'ensemble des assemblages externes requis par** `Calc.dll` (via la directive `.assembly extern`) **ainsi que diverses caractéristiques de l'assemblage lui-même** (par exemple, le numéro de version, le nom du module). Le [[Chapitre 16#Exploration du manifeste|Chapitre 16]] examinera plus en détail l'utilité des données du manifeste.
 
 # Comprendre le Common Type System (CTS)
 
@@ -365,11 +365,11 @@ Dans le monde de .NET, un *type* est simplement un terme générale qui réfère
 
 Lorsque vous créez des solutions à l'aide d'un langage .NET, vous êtes susceptible d'interagir avec bon nombre de ces types. Par exemple, votre *assembly* peut définir une classe unique qui implémente plusieurs interfaces. Il se peut qu'une des méthodes d'interface prenne un type d'énumération comme paramètre d'entrée et renvoie une structure à l'appel.
 
-Rappelons que **le `CTS` est une spécification formelle qui documente la manière dont les types doivent être définis afin d'être hébergés par le runtime .NET**. En général, les seules personnes qui s'intéressent de près au fonctionnement interne du `CTS` sont celles qui développent des outils et/ou des compilateurs destinés à la plateforme .NET. ==*Il est toutefois important que tous les programmeurs .NET apprennent à utiliser les cinq types définis par le CTS dans le langage de leur choix*==. Voici un bref aperçu.
+Rappelons que **le `CTS` est une spécification formelle qui documente la manière dont les types doivent être définis afin d'être hébergés par le runtime .NET**. En général, les seules personnes qui s'intéressent de près au fonctionnement interne du `CTS` sont celles qui développent des outils et/ou des compilateurs destinés à la plateforme .NET. ***==Il est toutefois important que tous les programmeurs .NET apprennent à utiliser les cinq types définis par le CTS dans le langage de leur choix==***. Voici un bref aperçu.
 
 ## Types de Classe CTS
 
-Chaque langage .NET prend en charge, au minimum, la notion de type de classe, qui est la pierre angulaire de la *programmation orientée objet (POO)*. Une classe peut être composée d'un nombre quelconque de membres (tels que des constructeurs, des propriétés, des méthodes et des événements) et de points de données (champs). En C#, les classes sont déclarées à l'aide du mot-clé class, comme suit :
+Chaque langage .NET prend en charge, au minimum, la notion de *type de classe*, qui est la pierre angulaire de la *programmation orientée objet (POO)*. **Une classe peut être composée d'un nombre quelconque de membres** (tels que des constructeurs, des propriétés, des méthodes et des événements) **et de points de données** (champs). En C#, les classes sont déclarées à l'aide du mot-clé `class`, comme suit :
 
 ```cs
 // A C# class type with 1 method.
@@ -386,17 +386,16 @@ Le [[Chapitre 5#Présentation du type classe C|Chapitre 5]] vous permettra d'abo
 
 ###### Tableau 1-1: Les caractéristiques des classes CTS
 
-
-| Caractéristique de classes                          | Signification                                                                                                                                                                                                                                         |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Est ce que la classe est `sealed`?                  | Les classes scellé ne peuvent pas être utilisé comme classe de base pour les autres classes.                                                                                                                                                          |
-| Est ce que la classe implémentent une *interface* ? | **Une *interface* est une collection de membres `abstract` qui propose un contrat entre l'objet et l'utilisateur de l'objet**. Le `CTS` permet à une classes d'implémenter un nombre illimité d'*interface*.                                          |
-| Est ce que la classes est `abstract` ou non ?       | Les classes *abstract* ne peuvent pas être instanciée mais elle servent à définir le comportement commun d'un *type dérivé*.                                                                                                                          |
-| Quel est la visibilité de la classe ?               | Chaque classe doit être configurée avec un mot-clé de visibilité comme `public`,`internal`. **En gros, cela permet de contrôler si la classe peut être utilisée par des assemblages externes ou uniquement à partir de l'assemblage qui la définit**. |
+| Caractéristique de classes                          | Signification                                                                                                                                                                                                                            |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Est ce que la classe est `sealed`?                  | Les classes scellé ne peuvent pas être utilisé comme classe de base pour les autres classes.                                                                                                                                             |
+| Est ce que la classe implémentent une *interface* ? | Une *interface* est une collection de membres `abstract` qui propose un contrat entre l'objet et l'utilisateur de l'objet. Le `CTS` permet à une classes d'implémenter un nombre illimité d'*interface*.                                 |
+| Est ce que la classes est `abstract` ou non ?       | Les classes *abstract* ne peuvent pas être instanciée mais elle servent à définir le comportement commun d'un *type dérivé*.                                                                                                             |
+| Quel est la visibilité de la classe ?               | Chaque classe doit être configurée avec un mot-clé de visibilité comme `public`,`internal`. Cela permet de contrôler si la classe peut être utilisée par des assemblages externes ou uniquement à partir de l'assemblage qui la définit. |
 
 ## Types d'Interface CTS
 
-Les interfaces ne sont rien d'autre qu'un ensemble nommé de définitions de membres abstraits et/ou (introduit dans C# 8) d'implémentations par défaut, qui sont implémentés (facultativement dans le cas des implémentations par défaut) par une classe ou une structure donnée. En C#, les types d'interface sont définis à l'aide du mot-clé `interface`. Par convention, toutes les interfaces .NET commencent par une lettre majuscule *I*, comme dans l'exemple suivant :
+**Les interfaces ne sont rien d'autre qu'un ensemble nommé de définitions de membres abstraits et/ou** (introduit dans C# 8) **d'implémentations par défaut, qui sont implémentés** (facultativement dans le cas des implémentations par défaut) **par une classe ou une structure donnée**. En C#, les types d'interface sont définis à l'aide du mot-clé `interface`. Par convention, toutes les interfaces .NET commencent par une lettre majuscule *I*, comme dans l'exemple suivant :
 
 ```cs
 // A C# interface type is usually
@@ -413,7 +412,7 @@ En elles-mêmes, les interfaces sont peu utiles. Cependant, lorsqu'une classe ou
 
 ## Type de Structure CTS
 
-Le concept de structure est également formalisé dans le `CTS`. Si vous avez des connaissances en C, vous serez heureux d'apprendre que ces *types définis par l'utilisateur (UDT)* ont survécu dans le monde .NET (même s'ils se comportent un peu différemment sous le capot). **En termes simples, une structure peut être considérée comme un type de classe léger ayant une sémantique basée sur les valeurs (value types)**. Pour plus de détails sur les subtilités des structures, voir le [[Chapitre 4#Comprendre les structures (`struct`)|Chapitre 4]]. En général, les structures sont particulièrement adaptées à la modélisation de données géométriques et mathématiques et sont créées en `C#` à l'aide du mot-clé `struct`, comme suit :
+Le concept de structure est également formalisé dans le `CTS`. ==Si vous avez des connaissances en C, vous serez heureux d'apprendre que ces *types définis par l'utilisateur (UDT)* ont survécu dans le monde .NET== (même s'ils se comportent un peu différemment sous le capot). **En termes simples, une structure peut être considérée comme un type de classe léger ayant une sémantique basée sur les valeurs (value types)**. Pour plus de détails sur les subtilités des structures, voir le [[Chapitre 4#Comprendre les structures (`struct`)|Chapitre 4]]. En général, les structures sont particulièrement adaptées à la modélisation de données géométriques et mathématiques et sont créées en `C#` à l'aide du mot-clé `struct`, comme suit :
 
 ```cs
 // A C# structure type.
@@ -440,7 +439,7 @@ struct Point
 
 ## Types d'Énumération CTS
 
-Les *énumérations* sont une construction de programmation pratique qui vous permet de regrouper des *paires nom-valeur*. Par exemple, supposons que vous créiez une application de jeu vidéo qui permet au joueur de choisir parmi trois catégories de personnages (sorcier, guerrier ou voleur). Plutôt que de garder une trace de simples valeurs numériques pour représenter chaque possibilité, vous pouvez créer une énumération fortement typée à l'aide du mot-clé `enum`.
+**Les *énumérations* sont une construction de programmation pratique qui vous permet de regrouper des *paires nom-valeur*.** Par exemple, supposons que vous créiez une application de jeu vidéo qui permet au joueur de choisir parmi trois catégories de personnages (sorcier, guerrier ou voleur). **==Plutôt que de garder une trace de simples valeurs numériques pour représenter chaque possibilité, vous pouvez créer une énumération fortement typée à l'aide du mot-clé `enum`.==**
 
 ```cs
 // A C# enumeration type.
@@ -452,11 +451,11 @@ enum CharacterTypeEnum
 }
 ```
 
-Par défaut, l'espace de stockage utilisé pour contenir chaque élément est un entier 32 bits ; cependant, il est possible de modifier cet emplacement de stockage si nécessaire (l'attribut [flags] permet d'utiliser le décalage de bit pour définir la valeur associé au nom). De plus, le CTS exige que les types énumérés dérivent d'une classe de base commune, `System.Enum`. Comme vous le verrez au [[Chapitre 4#Comprendre le type de donnée `enum`|Chapitre 4]], cette classe de base définit un certain nombre de membres intéressants qui vous permettent d'extraire, de manipuler et de transformer les paires nom-valeur sous-jacentes par programmation.
+**Par défaut, l'espace de stockage utilisé pour contenir chaque élément est un entier 32 bits ; cependant, il est possible de modifier cet emplacement de stockage si nécessaire** (==l'attribut `[flags]` permet d'utiliser le décalage de bit pour définir la valeur associé au nom==). De plus, le CTS exige que les types énumérés dérivent d'une classe de base commune, `System.Enum`. Comme vous le verrez au [[Chapitre 4#Comprendre le type de donnée `enum`|Chapitre 4]], cette classe de base définit un certain nombre de membres intéressants qui vous permettent d'extraire, de manipuler et de transformer les paires nom-valeur sous-jacentes par programmation.
 
 ## Types de Délégué CTS
 
-Les délégués sont l'équivalent .NET d'un ==pointeur de fonction sécurisé en language C==. La principale différence réside dans le fait qu'un délégué .NET est une classe dérivée de `System.MulticastDelegate`, plutôt qu'un simple pointeur vers une adresse mémoire brute. En C#, les délégués sont déclarés à l'aide du mot-clé `delegate`.
+**Les délégués sont l'équivalent .NET d'un pointeur de fonction sécurisé en language C**. La principale différence réside dans le fait qu'un délégué .NET est une classe dérivée de `System.MulticastDelegate`, plutôt qu'un simple pointeur vers une adresse mémoire brute. En C#, les délégués sont déclarés à l'aide du mot-clé `delegate`.
 
 ```cs
 // This C# delegate type can "point to" any method
@@ -464,7 +463,7 @@ Les délégués sont l'équivalent .NET d'un ==pointeur de fonction sécurisé e
 delegate int BinaryOp(int x, int y);
 ```
 
-Les délégués sont essentiels lorsque vous souhaitez permettre à un objet de transférer un appel vers un autre objet et constituent la base de l'architecture événementielle .NET. Comme vous le verrez dans les [[Chapitre 12#Les classes de base `System.MulticastDelegate` et `System.Delegate`|Chapitre 12]] et [[Chapitre 14#Le rôle des threads|Chapitre 14]], les délégués prennent en charge de manière intrinsèque le *multicast* (c'est-à-dire le transfert d'une requête vers plusieurs destinataires) et les appels de méthode *asynchrones* (c'est-à-dire l'appel de la méthode sur un thread secondaire).
+***==Les délégués sont essentiels lorsque vous souhaitez permettre à un objet de transférer un appel vers un autre objet et constituent la base de l'architecture événementielle .NET.==*** Comme vous le verrez dans les [[Chapitre 12#Les classes de base `System.MulticastDelegate` et `System.Delegate`|Chapitre 12]] et [[Chapitre 14#Le rôle des threads|Chapitre 14]], les délégués prennent en charge de manière intrinsèque le *multicast* (c'est-à-dire le transfert d'une requête vers plusieurs destinataires) et les appels de méthode *asynchrones* (c'est-à-dire l'appel de la méthode sur un thread secondaire).
 
 ## Types de Membres CTS
 
@@ -483,35 +482,36 @@ Maintenant que vous avez passé en revue chacun des types formalisés par le `CT
 - *constante* -> const
 - *événement* -> event
 
-**Le `CTS` définit divers ornements qui peuvent être associés à un membre donné**. Par exemple, ==chaque membre a un *trait de visibilité* donné== (par exemple, *public*, *privé*, *protégé*). **Certains membres peuvent être déclarés comme *abstraits*** (pour imposer un comportement polymorphe sur les types dérivés) **ou *virtuels*** (pour définir une implémentation prédéfinie, mais remplaçable). De plus, la plupart des membres peuvent être configurés comme *statiques* (liés au niveau de la classe) ou *instance* (liés au niveau de l'objet)**. La création de membres de type est examinée au cours des prochains chapitres.**
+**Le `CTS` définit divers ornements qui peuvent être associés à un membre donné**. Par exemple, ==chaque membre a un *trait de visibilité* donné== (*public*, *privé*, *protégé*,...). ==Certains membres peuvent être déclarés comme *abstraits*== (pour imposer un comportement polymorphe sur les types dérivés) ==ou *virtuels*== (pour définir une implémentation prédéfinie, mais remplaçable). De plus, la plupart des membres peuvent être configurés comme *statiques* (liés au niveau de la classe) ou *instance* (liés au niveau de l'objet)**. La création de membres de type est examinée au cours des prochains chapitres.**
 
->[!Info]-
->comme décrit dans le [[Chapitre 10#Le rôle des paramètres de type générique|Chapitre 10]], le language C# supporte aussi la création de type de donnée *générique* ainsi que de membre *générique*.
+>[!Info]
+>Comme décrit dans le [[Chapitre 10#Le rôle des paramètres de type générique|Chapitre 10]], le language C# supporte aussi la création de type de donnée *générique* ainsi que de membre *générique*.
 
 ## Types de données intrinsèques CTS
 
-Le dernier aspect du `CTS` à prendre en compte pour l'instant est qu'il établit un ensemble bien défini de types de données fondamentaux. Bien qu'un langage donné dispose généralement d'un mot-clé unique utilisé pour déclarer un type de données fondamental, tous les mots-clés des langages .NET se résolvent finalement au même type `CTS` défini dans un assembly nommé *mscorlib.dll*. Consultez le [[#Tableau 1-2 Les type de données intrinsèques CTS|Tableau 1-2]], qui documente la manière dont les types de données `CTS` clés sont exprimés en `VB.NET` et `C#`.
+**Le dernier aspect du `CTS` à prendre en compte pour l'instant est qu'il établit un ensemble bien défini de types de données fondamentaux.** Bien qu'un langage donné dispose généralement d'un mot-clé unique utilisé pour déclarer un type de données fondamental, tous les mots-clés des langages .NET se résolvent finalement au même type `CTS` défini dans un assembly nommé *mscorlib.dll*. Consultez le [[#Tableau 1-2 Les type de données intrinsèques CTS|Tableau 1-2]], qui documente la manière dont les types de données `CTS` clés sont exprimés en VB et C#.
+
 ###### Tableau 1-2: Les type de données intrinsèques CTS
 
 > Aussi appelé primitifs
 
 | Type de donnée CTS | Mot-clé VB | Mot-clé C# |
 | ------------------ | ---------- | ---------- |
-| `System.Byte`      | Byte       | byte       |
-| `System.SByte`     | SByte      | sbyte      |
-| `System.Int16`     | Short      | short      |
-| `System.Int32`     | Integer    | int        |
-| `System.Int64`     | Long       | long       |
-| `System.UInt16`    | UShort     | ushort     |
-| `System.UInt32`    | UInteger   | uint       |
-| `System.UInt64`    | ULong      | ulong      |
-| `System.Single`    | Single     | float      |
-| `System.Double`    | Double     | double     |
-| `System.Object`    | Object     | object     |
-| `System.Char`      | Char       | char       |
-| `System.String`    | String     | string     |
-| `System.Decimal`   | Decimal    | decimal    |
-| `System.Boolean`   | Boolean    | bool       |
+| `System.Byte`      | `Byte`     | `byte`     |
+| `System.SByte`     | `SByte`    | `sbyte`    |
+| `System.Int16`     | `Short`    | `short`    |
+| `System.Int32`     | `Integer`  | `int`      |
+| `System.Int64`     | `Long`     | `long`     |
+| `System.UInt16`    | `UShort`   | `ushort`   |
+| `System.UInt32`    | `UInteger` | `uint`     |
+| `System.UInt64`    | `ULong`    | `ulong`    |
+| `System.Single`    | `Single`   | `float`    |
+| `System.Double`    | `Double`   | `double`   |
+| `System.Object`    | `Object`   | `object`   |
+| `System.Char`      | `Char`     | `char`     |
+| `System.String`    | `String`   | `string`   |
+| `System.Decimal`   | `Decimal`  | `decimal`  |
+| `System.Boolean`   | `Boolean`  | `bool`     |
 
 Étant donné que les mots-clés uniques d'un langage géré ne sont que des notations abrégées pour un type réel dans le *namespace* du système, vous n'avez plus à vous soucier des conditions d'*overflow* et d'*underflow* pour les données numériques ou de la manière dont les chaînes et les booléens sont représentés en interne dans différents langages. Considérez les extraits de code suivants, qui définissent des variables numériques 32 bits en `C#` et `Visual Basic`, en utilisant des mots-clés de langage ainsi que le type de données `CTS` formel :
 
@@ -529,7 +529,7 @@ Dim j As System.Int32 = 0
 
 # Comprendre le Common Language Specification (CLS)
 
-Comme vous le savez, différents langages expriment les mêmes constructions de programmation en termes uniques et spécifiques à chaque langage. Par exemple, en C#, vous désignez la concaténation de chaînes à l'aide de l'opérateur plus (`+`), tandis qu'en VB, vous utilisez généralement l'esperluette (&). Même lorsque deux langages distincts expriment le même idiome programmatique (par exemple, une fonction sans valeur de retour), il y a de fortes chances que la syntaxe apparaisse très différente en surface.
+Comme vous le savez, ==différents langages expriment les mêmes constructions de programmation en termes uniques et spécifiques à chaque langage==. Par exemple, en C#, vous désignez la concaténation de chaînes à l'aide de l'opérateur plus (`+`), tandis qu'en VB, vous utilisez généralement l'esperluette (&). Même lorsque deux langages distincts expriment le même idiome programmatique (par exemple, une fonction sans valeur de retour), il y a de fortes chances que la syntaxe apparaisse très différente en surface.
 
 ```cs
 // C# method returning nothing.
@@ -546,11 +546,11 @@ Public Sub MyMethod()
 End Sub
 ```
 
-Du au fait que les deux language utilise le `CIL`, l**es deux compilateurs (*csc.exe* ou *vbc.exe*) émettent les mêmes jeux d'instructions**. Cependant, les langages peuvent également différer en ce qui concerne leur niveau global de fonctionnalité. Par exemple, un langage .NET peut ou non disposer d'un mot-clé pour représenter les données non signées et peut ou non prendre en charge les types de pointeurs. Compte tenu de ces variations possibles, l'idéal serait de disposer d'une base de référence à laquelle tous les langages .NET devraient se conformer.
+**Du au fait que les deux language utilise le `CIL`, les deux compilateurs** (*csc.exe* ou *vbc.exe*) **émettent les mêmes jeux d'instructions**. Cependant, les langages peuvent également différer en ce qui concerne leur niveau global de fonctionnalité. Par exemple, un langage .NET peut ou non disposer d'un mot-clé pour représenter les données non signées et peut ou non prendre en charge les types de pointeurs. Compte tenu de ces variations possibles, l'idéal serait de disposer d'une base de référence à laquelle tous les langages .NET devraient se conformer.
 
 **Le CLS est un ensemble de règles qui décrivent en détail l'ensemble minimal et complet de fonctionnalités qu'un compilateur .NET donné doit prendre en charge pour produire du code pouvant être hébergé par le runtime .NET, tout en étant accessible de manière uniforme par tous les langages ciblant la plateforme .NET**. À bien des égards, *le CLS peut être considéré comme un sous-ensemble de l'ensemble des fonctionnalités définies par le CTS*.
 
-Le `CLS` est en fin de compte un ensemble de règles auxquelles les développeurs de compilateurs doivent se conformer s'ils veulent que leurs produits fonctionnent de manière transparente dans l'univers `.NET`. Chaque règle se voit attribuer un nom simple (par exemple, règle `CLS 6`) et décrit comment cette règle affecte ceux qui développent les compilateurs ainsi que ceux qui (d'une manière ou d'une autre) interagissent avec eux. La crème de la crème du `CLS` est la règle 1.
+**==Le `CLS` est en fin de compte un ensemble de règles auxquelles les développeurs de compilateurs doivent se conformer s'ils veulent que leurs produits fonctionnent de manière transparente dans l'univers `.NET`.==** Chaque règle se voit attribuer un nom simple (par exemple, règle `CLS 6`) et décrit comment cette règle affecte ceux qui développent les compilateurs ainsi que ceux qui (d'une manière ou d'une autre) interagissent avec eux. La crème de la crème du `CLS` est la règle 1.
 
 > Règle 1: 
 Les règles CLS s'appliquent uniquement aux parties d'un type qui sont exposées en dehors de l'assembly de définition.
@@ -603,17 +603,17 @@ Le [[Chapitre 17#Comprendre le rôle des attributs .NET|Chapitre 17]] aborde en 
 
 # Comprendre le Runtime .NET
 
-Outre les spécifications `CTS` et `CLS`, la dernière pièce du puzzle à prendre en compte est le `runtime .NET`. D'un point de vue programmation, le terme *runtime* peut être compris comme un ==ensemble de services nécessaires à l'exécution d'une unité de code compilée donnée==. Par exemple, lorsque les développeurs Java déploient un logiciel sur un nouvel ordinateur, ils doivent s'assurer que la machine virtuelle Java (JVM) a été installée sur la machine afin de pouvoir exécuter leur logiciel. 
+Outre les spécifications `CTS` et `CLS`, la dernière pièce du puzzle à prendre en compte est le `runtime .NET`. ==D'un point de vue programmation, le terme *runtime* peut être compris comme un ensemble de services nécessaires à l'exécution d'une unité de code compilée donnée==. Par exemple, lorsque les développeurs Java déploient un logiciel sur un nouvel ordinateur, ils doivent s'assurer que la machine virtuelle Java (JVM) a été installée sur la machine afin de pouvoir exécuter leur logiciel. 
 
 La plateforme .NET offre un autre système d'exécution. La principale différence entre le runtime .NET et les autres runtimes que je viens de mentionner est que le runtime .NET fournit une couche d'exécution unique et bien définie qui est partagée par tous les langages et toutes les plateformes .NET.
 
 # Distinguer Assembly, Espace de Noms et Type
 
-Nous comprenons tous l'importance des bibliothèques de codes. L'intérêt des bibliothèques de frameworks est de fournir aux développeurs un ensemble bien défini de codes existants qu'ils peuvent exploiter dans leurs applications. Cependant, le langage C# n'est pas fourni avec une bibliothèque de codes spécifique. Les développeurs C# exploitent plutôt les bibliothèques .NET, qui sont indépendantes du langage. Afin de bien organiser tous les types dans les bibliothèques de classes de base, la plateforme .NET utilise largement le concept d'**espace de noms** (*namespace*).
+Nous comprenons tous l'importance des bibliothèques de codes. L'intérêt des bibliothèques de frameworks est de fournir aux développeurs un ensemble bien défini de codes existants qu'ils peuvent exploiter dans leurs applications. Cependant, le langage C# n'est pas fourni avec une bibliothèque de codes spécifique. **Les développeurs C# exploitent plutôt les bibliothèques .NET, qui sont indépendantes du langage.** ==Afin de bien organiser tous les types dans les bibliothèques de classes de base, la plateforme .NET utilise largement le concept d'*espace de noms* (*namespace*).==
 
 **Un espace de noms est un regroupement de types sémantiquement liés contenus dans un assemblage ou éventuellement répartis sur plusieurs assemblages liés**. Par exemple, l'espace de noms `System.IO` contient des types liés aux E/S de fichiers, l'espace de noms `System.Data` définit des types de base de données de base, etc. Il est important de souligner qu'un seul assemblage peut contenir un nombre illimité d'espaces de noms, chacun pouvant contenir un nombre illimité de types. 
 
-La principale différence entre cette approche et une bibliothèque spécifique à un langage réside dans le fait que tout langage ciblant le runtime .NET utilise les mêmes espaces de noms et les mêmes types. Par exemple, les deux programmes suivants illustrent l'application omniprésente Hello World, écrite en C# et VB :
+***==La principale différence entre cette approche et une bibliothèque spécifique à un langage réside dans le fait que tout langage ciblant le runtime .NET utilise les mêmes espaces de noms et les mêmes types.==*** Par exemple, les deux programmes suivants illustrent l'application omniprésente Hello World, écrite en C# et VB :
 
 >[!Note] 
 >le code suivant utilise la version C# 9 de la classe `Program` avec une méthode `void Main()` pour aider à illustrer cet exemple. Les nouveaux patrons en C# 10 utilise la *déclaration de haut niveau* (abordé dans le [[Chapitre 3#Utiliser les déclaration de haut niveaux (Nouveauté C 9.0)|Chapitre 3]]) et des déclaration *global implicit using* (abordé plus tard dans ce chapitre).
@@ -641,9 +641,9 @@ Public Module MyApp
 End Module
 ```
 
-**Les deux language utilisent la classe `Console` définie dans le namespace `System`.**
+==Notez que chaque langage utilise la classe `Console` définie dans l'espace de noms `System`.== Au-delà des variations syntaxiques évidentes, ces applications se ressemblent beaucoup, à la fois physiquement et logiquement.
 
-Une fois que vous maîtrisez le langage de programmation .NET de votre choix, votre prochain objectif en tant que développeur .NET est clairement d'apprendre à connaître la multitude de types définis dans les (nombreux) espaces de noms .NET. **L'espace de noms le plus fondamental à comprendre au départ est celui nommé `System`. Cet espace de noms fournit un ensemble de types essentiels dont vous aurez besoin à maintes reprises en tant que développeur .NET. En fait, vous ne pouvez pas créer d' application C# fonctionnelle sans faire au moins référence à l'espace de noms System, car les types de données de base (par exemple, System.Int32, System.String) y sont définis**. Le [[#Tableau 1-3 Un échantillon de namespace .NET|Tableau 1-3]] présente un aperçu de certains (mais certainement pas tous) des espaces de noms .NET regroupés par fonctionnalité.
+Une fois que vous maîtrisez le langage de programmation .NET de votre choix, votre prochain objectif en tant que développeur .NET est clairement d'apprendre à connaître la multitude de types définis dans les (nombreux) espaces de noms .NET. **L'espace de noms le plus fondamental à comprendre au départ est celui nommé `System`.** Cet espace de noms fournit un ensemble de types essentiels dont vous aurez besoin à maintes reprises en tant que développeur .NET. ***==En fait, vous ne pouvez pas créer d' application C# fonctionnelle sans faire au moins référence à l'espace de noms `System`, car les types de données de base==*** (par exemple, `System.Int32`, `System.String`) ***==y sont définis==***. Le [[#Tableau 1-3 Un échantillon de namespace .NET|Tableau 1-3]] présente un aperçu de certains (mais certainement pas tous) des espaces de noms .NET regroupés par fonctionnalité.
 
 ###### Tableau 1-3 Un échantillon de namespace .NET
 
@@ -665,9 +665,9 @@ Une fois que vous maîtrisez le langage de programmation .NET de votre choix, vo
 
 ## Accéder à un espace de noms par programmation
 
-Il convient de rappeler qu'un espace de noms n'est rien d'autre qu'un moyen pratique pour nous, simples humains, de comprendre et d'organiser logiquement des types connexes. Reprenons l'exemple de l'espace de noms `System`. De votre point de vue, vous pouvez supposer que `System.Console` représente une classe nommée `Console` contenue dans un espace de noms appelé `System`. Cependant, **aux yeux du runtime .NET, ce n'est pas le cas. Le moteur d'exécution ne voit qu'une seule classe nommée System.Console**. 
+**==Il convient de rappeler qu'un espace de noms n'est rien d'autre qu'un moyen pratique pour nous, simples humains, de comprendre et d'organiser logiquement des types connexes.==** Reprenons l'exemple de l'espace de noms `System`. De votre point de vue, vous pouvez supposer que `System.Console` représente une classe nommée `Console` contenue dans un espace de noms appelé `System`. Cependant, **aux yeux du runtime .NET, ce n'est pas le cas. Le moteur d'exécution ne voit qu'une seule classe nommée `System.Console`**. 
 
-En C#, le mot-clé `using` simplifie le processus de référence aux types définis dans un espace de noms particulier. Voici comment cela fonctionne. Pour revenir à l'exemple de programme *Calc* présenté plus haut dans ce chapitre, il y a une seule instruction `using` en haut du fichier.
+**En C#, le mot-clé `using` simplifie le processus de référence aux types définis dans un espace de noms particulier.** Voici comment cela fonctionne. Pour revenir à l'exemple de programme *Calc* présenté plus haut dans ce chapitre, il y a une seule instruction `using` en haut du fichier.
 
 ```cs
 using System;
@@ -679,7 +679,7 @@ Cette instruction est un raccourci permettant d'activer cette ligne de code :
 Console.WriteLine("10 + 84 = {0}", ans);
 ```
 
-Sans l'instruction using, le code devrait être écrit comme suit :
+**Sans l'instruction `using`, le code devrait être écrit comme suit :**
 
 ```cs
 System.Console.WriteLine("10 + 84 = {0}", ans);
@@ -687,21 +687,22 @@ System.Console.WriteLine("10 + 84 = {0}", ans);
 
 Bien que la définition d'un type à l'aide du nom complet offre une meilleure lisibilité, je pense que vous conviendrez que le mot-clé `using` de C# réduit le nombre de frappes. Dans ce texte, nous éviterons d'utiliser des noms complets (sauf en cas d'ambiguïté manifeste à résoudre) et opterons pour l'approche simplifiée du mot-clé `using` de C#.
 
-**Cependant, n'oubliez jamais que le mot-clé `using` est simplement une notation abrégée pour spécifier le nom complet d'un type, et que les deux approches aboutissent au même CIL sous-jacent** (étant donné que le code CIL utilise toujours des noms complets) **et n'ont aucun effet sur les performances ou la taille de l'assembly**. C'est pourquoi nous n'avons pas de raison de ne pas utiliser le mot-clé `using`.
+Cependant, ==n'oubliez jamais que le mot-clé `using` est simplement une notation abrégée pour spécifier le nom complet d'un type,== et que **les deux approches aboutissent au même CIL sous-jacent** (étant donné que le code CIL utilise toujours des noms complets) **et n'ont aucun effet sur les performances ou la taille de l'assembly.** C'est pourquoi nous n'avons pas de raison de ne pas utiliser le mot-clé `using`.
 
-## La Déclaration Global Using (Nouveauté C# 10)
+## La Déclaration `global using` (Nouveauté C# 10)
 
-Lorsque vous développez des applications C# plus complexes, vous aurez très probablement des espaces de noms qui se répètent dans plusieurs fichiers. Introduits dans C# 10, les espaces de noms peuvent être référencés globalement, puis être automatiquement disponibles dans tous les fichiers du projet. Il suffit d'ajouter le mot-clé `global` devant vos instructions `using`, comme ceci :
+Lorsque vous développez des applications C# plus complexes, vous aurez très probablement des espaces de noms qui se répètent dans plusieurs fichiers. **Introduits dans C# 10, les espaces de noms peuvent être référencés globalement, puis être automatiquement disponibles dans tous les fichiers du projet.** Il suffit d'ajouter le mot-clé `global` devant vos instructions `using`, comme ceci :
 
 ```cs
 global using System;
 ```
 
->[!warning] toutes les déclarations `global using` doivent venir avant toute déclaration n'utilisant pas `global`.
+>[!Attention] 
+>toutes les déclarations `global using` doivent venir avant toute déclaration n'utilisant pas `global`.
 
-Il est recommandé de placer les instructions `global using` avec vos instructions de niveau supérieur (abordées au [[Chapitre 3#Utiliser les déclaration de haut niveaux (Nouveauté C 9.0)|Chapitre 3]]) ou dans un fichier complètement séparé (tel que *GlobalUsings.cs*) pour une meilleure visibilité. Vous trouverez de nombreux exemples à ce sujet tout au long de ce texte.
+==Il est recommandé de placer les instructions `global using` avec vos instructions de niveau supérieur== (abordées au [[Chapitre 3#Utiliser les déclaration de haut niveaux (Nouveauté C 9.0)|Chapitre 3]]) ==ou dans un fichier complètement séparé== (tel que *GlobalUsings.cs*) ==pour une meilleure visibilité.== Vous trouverez de nombreux exemples à ce sujet tout au long de ce texte.
 
-En plus de placer les instructions using globales dans Program.cs (ou dans un fichier séparé), elles peuvent être placées dans le fichier de projet de l'application (fichier *.csproj*) en utilisant le format suivant :
+En plus de placer les instructions using globales dans *Program.cs* (ou dans un fichier séparé), elles peuvent être placées dans le fichier de projet de l'application (fichier *.csproj*) en utilisant le format suivant :
 
 ```xml
 <ItemGroup>
@@ -724,7 +725,7 @@ Une autre nouvelle fonctionnalité incluse dans .NET 6/C# 10 concerne les instru
 | `Web (Microsoft.NET.Sdk.Web)`               | Tout dans `Microsoft.NET.Sdk` plus:<br>`System.NET.Http.Json`<br>`Microsoft.AspNetCore.Builder`<br>`Microsoft.AspNetCore.Hosting`<br>`Microsoft.AspNetCore.Http`<br>`Microsoft.AspNetCore.Routing`<br>`Microsoft.Extensions.Configuration`<br>`Microsoft.Extensions.DepedencyInjection`<br>`Microsoft.Extensions.Hosting`<br>`Microsoft.Extensions.Logging` |
 | `Worker Service (Microsoft.NET.Sdk.Worker)` | Tout dans `Microsoft.NEt.Sdk` plus:<br>`Microsoft.Extensions.Configuration`<br>`Microsoft.Extensions.DepedencyInjection`<br>`Microsoft.Extentions.Hosting`<br>`Microsoft.Extensions.Logging`                                                                                                                                                                |
 
-La grande majorité des modèles de projet C# 10 activent par défaut les instructions using implicites globales à l'aide de l'élément `ImplicitUsings` dans le groupe `Property` principal du projet (fichier *.csproj*). Pour désactiver ce paramètre, mettez à jour le fichier de projet comme suit :
+***==La grande majorité des modèles de projet C# 10 activent par défaut les instructions `using` implicites globales à l'aide de l'élément `ImplicitUsings` dans le `PropertyGroup` principal du projet==*** (fichier *.csproj*). Pour désactiver ce paramètre, mettez à jour le fichier de projet comme suit :
 
 ```xml
 <PropertyGroup>
@@ -734,7 +735,7 @@ La grande majorité des modèles de projet C# 10 activent par défaut les instru
 </PropertyGroup>
 ```
 
-Pour voir les déclarations d'utilisation globales dans votre projet, recherchez le fichier *"nom du project".GlobalUsings.g.cs* dans le dossier `\obj\Debug\net6.0`. Pour le projet *Calc.cs*, voici le code généré :
+Pour voir les déclarations d'utilisation globales dans votre projet, recherchez le fichier *"nom du project".GlobalUsings.g.cs* dans le dossier `\obj\Debug\netX.X`. Pour le projet *Calc.cs*, voici le code généré :
 
 ```cs
 // <auto-generated/>
@@ -749,7 +750,7 @@ global using global::System.Threading.Tasks;
 
 ## Espaces de noms au niveau du fichier (Nouveauté C# 10)
 
-Autre nouveauté de C# 10, les espaces de noms au niveau du fichier suppriment la nécessité d'encadrer votre code entre accolades lorsque vous le placez dans un espace de noms personnalisé. Prenons l'exemple suivant de la classe `Calculator`, contenue dans l'espace de noms `CalculatorExamples`. Avant C# 10, pour placer une classe dans un espace de noms, il fallait la déclaration de l'espace de noms, une accolade ouvrante, le code (Calculator), puis une accolade fermante. Dans l'exemple:
+Autre nouveauté de C# 10, **les espaces de noms au niveau du fichier suppriment la nécessité d'encadrer votre code entre accolades lorsque vous le placez dans un espace de noms personnalisé.** Prenons l'exemple suivant de la classe `Calculator`, contenue dans l'espace de noms `CalculatorExamples`. Avant C# 10, pour placer une classe dans un espace de noms, il fallait la déclaration de l'espace de noms, une accolade ouvrante, le code (`Calculator`), puis une accolade fermante. Dans l'exemple:
 
 ```cs
 namespace CalculatorExamples
@@ -772,22 +773,22 @@ class Calculator()
 }
 ```
 
->[!Note]- 
+>[!Note]
 >Les espaces de noms personnalisé sont abordé en profondeur dans le [[Chapitre 16#Définition des espaces de noms personnalisés (MaJ C 10.0)|Chapitre 16]].
 
 ## Référencement d'assemblages externes
 
-Les versions antérieures du .NET Framework utilisaient un emplacement d'installation commun pour les bibliothèques du framework, appelé *Global Assembly Cache (GAC)*. Au lieu d'avoir un emplacement d'installation unique, .NET n'utilise pas le *GAC*. Chaque version (y compris les versions mineures) est installée dans son propre emplacement (par version) sur l'ordinateur. Sous Windows, chaque version du runtime et du SDK est installée dans `c:\ProgramFiles\dotnet`.
+*==Les versions antérieures, .NET Framework utilisaient un emplacement d'installation commun pour les bibliothèques du framework,==* appelé *Global Assembly Cache (GAC)*. Au lieu d'avoir un emplacement d'installation unique, .NET n'utilise pas le *GAC*. Chaque version (y compris les versions mineures) est installée dans son propre emplacement (par version) sur l'ordinateur. Sous Windows, chaque version du runtime et du SDK est installée dans `c:\ProgramFiles\dotnet`.
 
-L'ajout d'assemblages dans la plupart des projets .NET s'effectue en ajoutant des ==packages NuGet== (abordés plus loin dans ce texte). Cependant, les applications .NET ciblant (et développées sur) Windows ont toujours accès aux bibliothèques COM.
+**L'ajout d'assemblages dans la plupart des projets .NET s'effectue en ajoutant des ==packages NuGet==** (abordés plus loin dans ce texte). Cependant, les applications .NET ciblant (et développées sur) Windows ont toujours accès aux bibliothèques COM.
 
-Pour qu'un assemblage ait accès à un autre assemblage que vous créez (ou que quelqu'un a créé pour vous), vous devez ajouter une référence de votre assemblage à l'autre assemblage et avoir un accès physique à l'autre assemblage. Selon l'outil de développement que vous utilisez pour créer vos applications .NET, vous disposerez de différents moyens pour indiquer au compilateur les assemblages que vous souhaitez inclure pendant le cycle de compilation.
+**Pour qu'un assemblage ait accès à un autre assemblage que vous créez** (ou que quelqu'un a créé pour vous), **vous devez ajouter une référence de votre assemblage à l'autre assemblage et avoir un accès physique à l'autre assemblage.** Selon l'outil de développement que vous utilisez pour créer vos applications .NET, vous disposerez de différents moyens pour indiquer au compilateur les assemblages que vous souhaitez inclure pendant le cycle de compilation.
 
 # Exploration d'un assembly à l'aide de *ildasm.exe*
 
-Si vous commencez à vous sentir un peu dépassé à l'idée de devoir maîtriser tous les espaces de noms de la plateforme .NET, rappelez-vous simplement que **ce qui rend un espace de noms unique, c'est qu'il contient des types qui sont d'une manière ou d'une autre liés sémantiquement**. Par conséquent, ==si vous n'avez pas besoin d'une interface utilisateur au-delà d'une simple application console, vous pouvez oublier les espaces de noms desktop et web (entre autres). Si vous développez une application de peinture, les espaces de noms de base de données ne vous concernent probablement pas beaucoup==. Vous apprendrez au fil du temps quels sont les espaces de noms les plus pertinents pour vos besoins en matière de programmation.
+Si vous commencez à vous sentir un peu dépassé à l'idée de devoir maîtriser tous les espaces de noms de la plateforme .NET, rappelez-vous simplement que **ce qui rend un espace de noms unique, c'est qu'il contient des types qui sont d'une manière ou d'une autre liés sémantiquement**. Par conséquent, si vous n'avez pas besoin d'une interface utilisateur au-delà d'une simple application console, vous pouvez oublier les espaces de noms desktop et web (entre autres). Si vous développez une application de peinture, les espaces de noms de base de données ne vous concernent probablement pas beaucoup. **==Vous apprendrez au fil du temps quels sont les espaces de noms les plus pertinents pour vos besoins en matière de programmation.==**
 
-L'utilitaire *Intermediate Language Disassembler (ildasm)* vous permet de **créer un document texte représentant un assemblage .NET et d'en examiner le contenu, y compris le manifeste associé, le code CIL et les métadonnées de type**. Cet outil vous permet d'approfondir vos connaissances sur la manière dont le code C# est "mappé" vers le CIL et, au final, vous aide à comprendre le fonctionnement interne de la plateforme .NET. Même si vous n'avez pas besoin d'utiliser *ildasm* pour devenir un programmeur .NET compétent, je vous recommande vivement de lancer cet outil de temps en temps afin de mieux comprendre comment votre code C# est mappé vers les concepts d'exécution.
+**L'utilitaire *Intermediate Language Disassembler (ildasm)* vous permet de créer un fichier représentant un assemblage .NET et d'en examiner le contenu, y compris le manifeste associé, le code CIL et les métadonnées de type**. Cet outil vous permet d'approfondir vos connaissances sur la manière dont le code C# est "mappé" vers le CIL et, au final, vous aide à comprendre le fonctionnement interne de la plateforme .NET. ==Même si vous n'avez pas besoin d'utiliser *ildasm* pour devenir un programmeur .NET compétent, je vous recommande vivement de lancer cet outil de temps en temps afin de mieux comprendre comment votre code C# est mappé vers les concepts d'exécution.==
 
 > [!important]
 > L'utilitaire *ildasm.exe* n'est plus fourni avec le runtime .NET 6. Pour pouvoir récupérer l'outil: 
@@ -813,12 +814,12 @@ Voici un exemple de ligne de commande :
 	ildasm -all -metadata -out=csharp.il calc.cs.dll
 	```
 
-Cela créera un fichier nommé csharp.il exportant toutes les données disponibles dans le fichier. C'est le fichier d'où proviennent les exemples IL précédents.
+Cela créera un fichier nommé *csharp.il* exportant toutes les données disponibles dans le fichier. C'est le fichier d'où proviennent les exemples IL précédents.
 
 # Résumé du chapitre
 
 L'objectif de ce chapitre était de présenter le cadre conceptuel nécessaire à la compréhension du reste de cet ouvrage. J'ai commencé par examiner un certain nombre de limites et de complexités inhérentes aux technologies antérieures à .NET, puis j'ai présenté une vue d'ensemble de la manière dont .NET et C# tentent de simplifier la situation actuelle.
 
-==NET se résume essentiellement à un moteur d'exécution (le .NET Runtime) et à des bibliothèques de classes de base. Le runtime est capable d'héberger n'importe quel binaire .NET (alias assembly) qui respecte les règles du code géré. Comme vous l'avez vu, les assemblies contiennent des instructions CIL (en plus des métadonnées de type et du manifeste de l'assembly) qui sont compilées en instructions spécifiques à la plate-forme à l'aide d'un compilateur juste-à-temps. En outre, vous avez exploré le rôle de la spécification de langage commun(`CLS`) et du système de types commun(`CTS`).==
+**NET se résume essentiellement à un moteur d'exécution** (le .NET Runtime) **et à des bibliothèques de classes de base**. **==Le runtime est capable d'héberger n'importe quel binaire .NET (alias assembly) qui respecte les règles du code géré.==** Comme vous l'avez vu, **les assemblies contiennent des instructions CIL** (en plus des métadonnées de type et du manifeste de l'assembly) **qui sont compilées en instructions spécifiques à la plate-forme à l'aide d'un compilateur (Just-In-Time ou Ahead-of-Time)**. En outre, vous avez exploré le rôle de la spécification de langage commun(`CLS`) et du système de types commun(`CTS`).
 
 Dans le chapitre suivant, vous découvrirez les environnements de développement intégrés courants que vous pouvez utiliser pour créer vos projets de programmation C#. Vous serez heureux d'apprendre que dans ce livre, vous utiliserez des IDE entièrement gratuits (et riches en fonctionnalités), ce qui vous permettra de commencer à explorer l'univers .NET sans dépenser un centime.
