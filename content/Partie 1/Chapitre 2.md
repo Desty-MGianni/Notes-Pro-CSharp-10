@@ -7,25 +7,24 @@ publish: true
 
 Pour commencer à programmer en C#, il faut installer le *Kit de Développement Logiciel (SDK)* que 'on veut / à besoin).
 
->  `.NET 10` est une version LTS tandis que `.NET 11` est une version STS.
+>  Le SDK disponible lors de ma lecture du livre est .NET 10. Comme le chiffre est paire, cela signifie que c'est une version LTS. La prochaine version de .NET, .NET 11 est une version STS.
 
 Pour télécharger le SDK, il y a deux façons:
-1. Allez sur www.dot.net et télécharger "à la main" 
-2. avec Homebrew (MacOS): ```brew install --cask dotnet```
+1. Allez sur [Le site officiel](https://dotnet.microsoft.com/en-us/download) et télécharger "à la main" 
+2. avec *Homebrew* (MacOS): ```brew install --cask dotnet```
 
->**le SDK installe les runtimes .*NET Core* et *ASP.NET Core* pour le système d'exploitation ainsi que le processeur de la machine.**
+le SDK installera aussi les runtimes .*NET Core* et *ASP.NET Core* pour le système d'exploitation ainsi que le processeur de la machine.
 
->[!Info]-
 >Sur windows, le *SDK* installera aussi le runtime *.NET Desktop*. 
 >Plus d'informations plus loin dans ce chapitre.
 
 ## Comprendre le système de numérotation des versions .NET
 
-Au moment de la traduction de cet article, le *SDK .NET* est à la version *10.0.201* (avril 2026). **Les deux premiers chiffres (10.0) indiquent la version la plus élevée du runtime que vous pouvez cibler**. Dans ce cas, il s'agit de 10.0. Cela signifie que le SDK prend également en charge le développement pour une version inférieure du runtime, telle que .NET 5 ou .NET Core 3.1. ==Le chiffre suivant (2) correspond à la bande de fonctionnalités trimestrielle. Comme nous sommes actuellement dans le deuxième trimestre de l'année depuis la sortie, il s'agit d'un 2==. Les deux derniers chiffres (01) indiquent la version du correctif. Cela est un peu plus clair si vous ajoutez un séparateur dans la version dans votre esprit et que vous considérez la version actuelle comme *10.0.2.01*.
+Au moment de la traduction de cet article, le SDK .NET est à la version $10.0.201$ (avril 2026). Les deux premiers chiffres ($10.0$) indiquent la version la plus élevée du runtime que vous pouvez cibler. Cela signifie que **le SDK prend également en charge le développement pour une version inférieure du runtime,** telle que .NET 5 ou .NET Core 3.1. Le chiffre suivant ($2$) correspond à la bande de fonctionnalités trimestrielle. Comme nous sommes actuellement dans le deuxième trimestre de l'année depuis la sortie, il s'agit d'un $2$. Les deux derniers chiffres ($01$) indiquent la version du correctif. Cela est un peu plus clair si vous ajoutez un séparateur dans la version dans votre esprit et que vous considérez la version actuelle comme $10.0.2.01$.
 
 ## Confirmation de l'installation de .NET
 
-Pour confirmer l'installation du SDK et des runtimes, **ouvrez une fenêtre de commande et utilisez l'interface de ligne de commande (CLI) .NET**, ```dotnet.exe``` (**juste `dotnet` pour les versions plus récente**). Le CLI propose des options et des commandes SDK. Les commandes permettent notamment de créer, de compiler, d'exécuter et de publier des projets et des solutions. Vous trouverez des exemples de ces commandes plus loin dans ce document. Dans cette section, nous allons examiner les options SDK, qui sont au nombre de quatre, comme le montre le [[#Tableau 2-1 Options de .NET CLI SDK|Tableau 2-1]].
+==Pour confirmer l'installation du SDK et des runtimes, ouvrez une fenêtre de commande et utilisez l'interface de ligne de commande (CLI) .NET, `dotnet.exe` (juste `dotnet` pour les versions plus récente).== Le CLI propose des options et des commandes SDK. Les commandes permettent notamment de créer, de compiler, d'exécuter et de publier des projets et des solutions. Vous trouverez des exemples de ces commandes plus loin dans ce document. Dans cette section, nous allons examiner les options SDK, qui sont au nombre de quatre, comme le montre le [[#Tableau 2-1 Options de .NET CLI SDK|Tableau 2-1]].
 
 ###### Tableau 2-1: Options de .NET CLI SDK
 
@@ -79,11 +78,11 @@ dotnet sdk check
 >
 >Pour mettre à jour, suivez la même procédure décrite ci-dessus pour télécharger et installer la/les nouvelles versions.
 
-### Utiliser une version antérieure du SDK .NET (Core)
+### Utiliser une version antérieure de .NET
 
-Il peut parfois être utile de s'assurer que vous utilisez une version antérieure du SDK .NET. Par exemple, vous développez vos applications de production à l'aide de .NET 6. Une première version candidate de .NET 7 est disponible, et vous souhaitez commencer à l'essayer sans mettre en péril votre travail de production. Bien que Microsoft affirme que vous pouvez développer des versions précédentes d'applications .NET avec un SDK plus récent, de nombreux développeurs et organisations ne sont pas à l'aise avec les versions candidates, et encore moins avec les versions bêta/prévisualisation précoces.
+**Il peut parfois être utile de s'assurer que vous utilisez une version antérieure du SDK .NET.** Par exemple, vous développez vos applications de production à l'aide de .NET 6. Une première version candidate de .NET 7 est disponible, et vous souhaitez commencer à l'essayer sans mettre en péril votre travail de production. Bien que Microsoft affirme que vous pouvez développer des versions précédentes d'applications .NET avec un SDK plus récent, de nombreux développeurs et organisations ne sont pas à l'aise avec les versions candidates, et encore moins avec les versions bêta/prévisualisation précoces.
 
-==Si vous devez associer votre projet à une version antérieure du SDK .NET, vous pouvez le faire à l'aide d'un fichier *global.json*==. Pour créer ce fichier, vous pouvez utiliser cette commande, qui associe le dossier actuel et tous les sous-dossiers à la version 5.0.400 du SDK :
+**==Si vous devez associer votre projet à une version antérieure du SDK .NET, vous pouvez le faire à l'aide d'un fichier *global.json*==**. Pour créer ce fichier, vous pouvez utiliser cette commande, qui associe le dossier actuel et tous les sous-dossiers à la version $5.0.400$ du SDK :
 
 ```bash
 dotnet new globaljson --sdk-version 5.0.400
@@ -99,13 +98,13 @@ Cela va créer un fichier *global.json* qui ressemble à ca:
 }
 ```
 
-L'exécution de `dotnet --version` dans ce répertoire (ou dans n'importe quel sous-répertoire) renverra 5.0.400.
+L'exécution de `dotnet --version` dans ce répertoire (ou dans n'importe quel sous-répertoire) renverra $5.0.400$.
 
 >[!Attention] Pour que cette explication fonctionne, il faut avoir télécharger la version voulue de .NET avant.
 
 #### Utiliser une version antérieure du SDK .NET sans avoir à l'installer
 
-Il y a deux façons simples pour pouvoir utiliser, par exemple, un `.NET 10.0.201` installé dans la machine peut compiler et exécuter un programme qui cible `.NET 8.0.409.
+**Il y a deux façons simples pour pouvoir utiliser un `.NET 10.0.201` installé dans la machine pour compiler et exécuter un programme qui cible `.NET 8.0.409.**
 
 La première méthode consiste à modifier le fichier project (*.csproj*) avec la version de .NET ciblé ainsi qu'une option `RollForward`.
 
@@ -169,16 +168,16 @@ Pour ce livre, vous devrez installer les charges de travail suivantes :
 
 Dans l'onglet « Composants individuels », sélectionnez également Class Designer et Git pour Windows (tous sous « Outils de code »). Une fois que vous les avez tous sélectionnés, cliquez sur Installer. Vous disposerez ainsi de tout ce dont vous avez besoin pour travailler sur les exemples présentés dans ce livre.
 
->[!Info] Moi, Gianni, j'ai passer la création d'un nouveau projet sur Visual Studio car je ne l'utilise pas et c'est très simple.
+>J'ai passé la création d'un nouveau projet sur Visual Studio car je ne l'utilise pas et c'est très simple.
 
-Une fois le projet créé, vous verrez que le fichier de code C# initial (nommé *Program.cs*) s'est ouvert dans l'éditeur de code. Le modèle initial ne contient qu'un *commentaire (la ligne commençant par //)* et une seule ligne de code qui affiche `"Hello, World!"` dans la console :
+Une fois le projet créé, vous verrez que le fichier de code C# initial (nommé *Program.cs*) s'est ouvert dans l'éditeur de code. Le modèle initial ne contient qu'un *commentaire* (==la ligne commençant par `//`==) et une seule ligne de code qui affiche `"Hello, World!"` dans la console :
 
 ```cs
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 ```
 
-Ces deux lignes de code sont appelées *instructions de niveau supérieur (top level statement)* et ==servent de point d'entrée dans l'application. Le chapitre suivant traite en détail des instructions de niveau supérieur et des points d'entrée dans l'application==. Pour l'instant, sachez simplement que c'est là que commence l'exécution de votre application et qu'elle se termine lorsque toutes les lignes ont été exécutées. 
+==Ces deux lignes de code sont appelées *instructions de niveau supérieur* (*top level statement*) et servent de point d'entrée dans l'application.== Le chapitre suivant traite en détail des instructions de niveau supérieur et des points d'entrée dans l'application. **Pour l'instant, sachez simplement que c'est là que commence l'exécution de votre application et qu'elle se termine lorsque toutes les lignes ont été exécutées.**
 
 Remplacez le commentaire et la ligne de code unique par ce qui suit :
 
@@ -196,7 +195,7 @@ Console.BackgroundColor = default;
 Console.ReadLine();
 ```
 
-> [!Info]- Remarque:
+> [!Info] Remarque:
 >  Lorsque vous tapez, Visual Studio tente de compléter les mots à votre place. Cette fonctionnalité s'appelle **IntelliSense** (aide à la complétion de code) et est intégrée à Visual Studio et Visual Studio Code.
 
 Ici, vous utilisez la classe `Console` définie dans l'espace de noms `System`. L'espace de noms `System` est inclus dans les instructions *using implicites globales*, il n'est donc pas nécessaire de le spécifier explicitement. Ce programme ne fait rien de très intéressant, mais notez l'appel final à `Console.ReadLine()`. Il sert simplement à garantir que l'utilisateur doit appuyer sur une touche pour fermer l'application.
@@ -249,24 +248,32 @@ Dans les versions de .NET et du .NET Framework, la version de C# prise en charge
 
 Pour exécuter votre programme et voir le résultat, appuyez sur la combinaison de touches *Ctrl + F5*. Une fois que vous aurez fait cela, vous verrez une *fenêtre de terminal*  apparaître à l'écran avec votre message personnalisé (et coloré). **Sachez que lorsque vous « exécutez » votre programme avec *Ctrl+F5*, vous contournez le débogueur intégré**.
 
-> [!Note]-
-> Il est possible d'exécuter le programme dans le terminal: ```dotnet run``` quand on est dans le même   dossier ou se situe le ficher *.csproj*. ==Cette commande va automatiquement fabriquer (*build*) le projet==.
+> [!Note]
+> Il est possible d'exécuter le programme dans le terminal quand on est dans le même dossier où se siture le fichier *.csproj* : 
+> ```bash
+> dotnet run
+> ``` 
 > 
-> Quand on ne se situe pas au même niveau que le project: 
-> ```dotnet run --project <chemin_vers_projet>```
+>**Quand on ne se situe pas au même niveau que le project: **
+> 
+> ```bash
+> dotnet run --project <chemin_vers_projet>
+> ```
+> 
+>**Les deux commandes compileront** (*build*) **avant d'exécuter.**
 
 Si vous avez besoin de débogguer votre code (ce qui sera certainement important lors de la création de programmes plus volumineux), la première étape consiste à définir des points d'arrêt au niveau de l'instruction de code que vous souhaitez examiner (==Ajouter des points rouges à coté des numéros de lignes.==)
 
 Si vous appuyez maintenant sur la touche *F5* votre programme s'arrêtera à chaque point d'arrêt. Comme vous pouvez vous y attendre, vous pouvez interagir avec le déboggueur à l'aide des différents boutons de la barre d'outils et des options de menu de l'IDE. Une fois que vous avez évalué tous les points d'arrêt, l'application se fermera une fois les instructions terminées.
 
-> [!Info]-
+> [!note]
 > Les IDE Microsoft disposent de débogueurs sophistiqués, et vous découvrirez diverses techniques au fil des chapitres à venir. Pour l'instant, sachez simplement que lorsque vous êtes en session de débogage, un grand nombre d'options utiles apparaissent dans le menu Déboguer. Prenez le temps de le vérifier par vous-même.
 
 ### Utilisation de l'Explorateur de solutions
 
 Si vous regardez à droite de l'éditeur de texte, vous verrez la fenêtre Explorateur de solutions, qui affiche quelques éléments importants. Tout d'abord, ==remarquez que l'assistant de nouveau projet a créé une solution en même temps que le projet unique==. Cela peut prêter à confusion au début, car ils ont tous deux reçu le même nom (SimpleCSharpConsoleApp) **L'idée ici est qu'une « solution » peut contenir plusieurs projets qui fonctionnent tous ensemble**. Par exemple, votre solution peut inclure trois *bibliothèques de classes*, une application *WPF* et un service web *ASP. NET Core*. Les premiers chapitres de ce livre ne contiennent presque toujours qu'un seul exemple de code ; cependant, lorsque vous créerez des exemples plus complexes, vous verrez comment ajouter de nouveaux projets à votre solution initiale.
 
->[!Note]-
+>[!Note]
 >Sachez que lorsque vous sélectionnez la solution dans la fenêtre Explorateur de solutions, le système de menus de l’EDI affiche des options différentes de celles proposées lorsque vous sélectionnez un projet. Si vous vous demandez où est passé un élément de menu, vérifiez que vous n’avez pas sélectionné le mauvais nœud par erreur.
 
 ### Utilisation de l'outil de diagramme de classes visuel
@@ -278,9 +285,9 @@ Visual Studio vous permet également de concevoir des classes et d'autres types 
 
 Pour accéder aux outils de conception visuelle de classes, la première étape consiste à insérer un nouveau fichier de diagramme de classes. Pour ce faire, sélectionnez le projet dans l'Explorateur de solutions, puis activez l'option de menu Projet ➤ Ajouter un nouvel élément et localisez le type Diagramme de classes. 
 
-![[Figure 2.8.png|Insertion d'un fichier de diagramme de classes dans le projet actuel]]
+![[Figure 2.8.png|Insertion d'un fichier de diagramme de classes dans le projet actuel|756]]
 
-Au départ, le concepteur sera vide ; cependant, vous pouvez glisser-déposer des fichiers depuis votre fenêtre Solution Explorer sur la surface ou cliquer avec le bouton droit sur la surface de conception pour créer de nouvelles classes. Pour commencer, créez une nouvelle classe dans votre projet en cliquant avec le bouton droit sur le projet et en sélectionnant Add ➤ Class. Dans la boîte de dialogue Ajouter un élément – `SimpleCSharpConsoleApp`, sélectionnez `Class` et nommez-la *Car.cs*.
+Au départ, le concepteur sera vide ; cependant, vous pouvez glisser-déposer des fichiers depuis votre fenêtre Solution Explorer sur la surface ou cliquer avec le bouton droit sur la surface de conception pour créer de nouvelles classes. Pour commencer, créez une nouvelle classe dans votre projet en cliquant avec le bouton droit sur le projet et en sélectionnant Add ➤ Class. Dans la boîte de dialogue Ajouter un élément *SimpleCSharpConsoleApp*, sélectionnez `Class` et nommez-la *Car.cs*.
 
 ![[Figure 2.9.png|La boîte de dialogue Ajouter un nouvel élément]]
 
@@ -301,7 +308,8 @@ Après avoir enregistré le fichier, faites glisser le fichier *Car.cs* depuis l
 
 ![[Figure 2.10.png|Le visualiseur de diagrammes de classes]]
 
->[!note] Notez que la barre d'outils du concepteur de classes vous permet d'affiner les options d'affichage de l'interface.
+>[!note] 
+>La barre d'outils du concepteur de classes vous permet d'affiner les options d'affichage de l'interface.
 
 La fenêtre *Class Details* affiche non seulement les détails de l'élément actuellement sélectionné dans le diagramme, mais vous permet également de modifier les membres existants et d'en insérer de nouveaux à la volée.
 
@@ -334,13 +342,15 @@ namespace SimpleCSharpConsoleApp
 }
 ```
 
->[!note] Ne vous préoccupez pas des instructions `using` supplémentaires ni de la syntaxe des propriétés. Tout cela sera abordé dans les chapitres suivants.
+>[!note]
+>Ne vous préoccupez pas des instructions `using` supplémentaires ni de la syntaxe des propriétés. Tout cela sera abordé dans les chapitres suivants.
 
 Maintenant, réactivez le fichier du concepteur et faites glisser une nouvelle classe sur celui-ci. Nommez-la `SportsCar`. Cliquez sur l'icône *Héritage* dans la boîte à outils du concepteur de classes, puis sur l'icône `SportsCar`. Ensuite, cliquez sur l'icône de la classe `Car`. Si vous avez suivi correctement ces étapes, vous venez de créer la classe `SportsCar` *dérivée* de la classe `Car`.
 
 ![[Figure 2.13.png|Dérivé visuellement d'une classe existante]]
 
->[!info] Le concept d’héritage sera étudié en détail au [[Chapitre 6#Comprendre les mécanismes fondamentaux de l'héritage|Chapitre 6]].
+>[!note] 
+>Le concept d’héritage sera étudié en détail au [[Chapitre 6#Comprendre les mécanismes fondamentaux de l'héritage|Chapitre 6]].
 
 Pour compléter cet exemple, mettez à jour la classe `SportsCar` générée avec une méthode publique nommée `GetPetName()`, écrite comme suit :
 
@@ -369,6 +379,9 @@ Après avoir installé VS Code, vous devrez ajouter l'extension C# disponible ic
 
 https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp
 
+>[!note]
+>Visual Studio Code est utilisé pour développer de nombreux types d'applications différents basés sur une multitude de langues. Il existe des extensions pour Angular, View, php, Java et bien d'autres encore.
+
 ## Faire un tour de VS Code
 
 Essayons Visual Studio Code en créant la même application console .NET 6 à partir de l'exemple Visual Studio.
@@ -383,16 +396,17 @@ Deux manières différentes (pour les versions récentes):
     Cela fournira un équivalent à Visual Studio dans la manière de procéder
 
 2. Naviguer dans la fenêtre de l'explorateur jusqu'à l'emplacement souhaité
-    1. [cmd + j] pour ouvrir le terminal (il se positionnera ou on à besoin)
+    1. *cmd + j* pour ouvrir le terminal (il se positionnera ou on à besoin)
     2. Entrez cette commande:
 	
 		```bash
 		dotnet new sln -n SimpleCSharpConsoleApp -o .\VisualStudioCode
 		```
 
-Cela crée un nouveau fichier de solution nommé (*-n*) *SimpleCSharpConsoleApp* dans un sous-répertoire (du répertoire actuel) nommé *VisualStudioCode*. Lorsque vous utilisez Visual Studio Code avec une application à projet unique, il n'est pas nécessaire de créer un fichier de solution. ==Visual Studio est centré sur les solutions; Visual Studio Code est centré sur le code==. Nous avons créé un fichier de solution afin de reproduire le processus de l'exemple Visual Studio.
+Cela crée un nouveau fichier de solution nommé (`-n`) *SimpleCSharpConsoleApp* dans un sous-répertoire (du répertoire actuel) nommé `VisualStudioCode`. Lorsque vous utilisez Visual Studio Code avec une application à projet unique, il n'est pas nécessaire de créer un fichier de solution. ==Visual Studio est centré sur les solutions; Visual Studio Code est centré sur le code==. Nous avons créé un fichier de solution afin de reproduire le processus de l'exemple Visual Studio.
 
-> [!warning] les examples fournis utilisent les séparateur de dossier Windows. Il faut utiliser les séparateurs selon le système d'exploitation utilisé.
+> [!Attention] 
+> les examples fournis utilisent les séparateur de dossier Windows. Il faut utiliser les séparateurs selon le système d'exploitation utilisé.
 
 Ensuite, créez une nouvelle application console C# 9/.NET 5 (`-f net6.0`) nommée (`-n`) *SimpleCSharpConsoleApp* dans un sous-répertoire (`-o`) du même nom (notez que cette commande doit être saisie sur une seule ligne) :
 
@@ -414,7 +428,7 @@ SimpleCSharpConsoleApp
 
 ![[Figure 2.14.png|L'espace de travail Visual Studio Code]]
 
-Comme vous pouvez le voir, l'espace de travail Visual Studio Code est axé sur le code, mais offre également de nombreuses fonctionnalités supplémentaires pour vous aider à améliorer votre productivité. *L'explorateur (1)* est un explorateur de fichiers intégré et est sélectionné dans la figure. *Le contrôle de source (2) s'intègre à Git*. L'icône de *déboggage (3)* lance le déboggueur approprié (==une fois que l'extension correcte est installée==). La suivante est *le gestionnaire d'extensions(4 [Il y a une typo, c'est l'icône juste en dessous.])*. Le gestionnaire d'extensions est contextuel et fera des recommandations en fonction du type de code dans le répertoire ouvert et les sous-répertoires.
+Comme vous pouvez le voir, l'espace de travail Visual Studio Code est axé sur le code, mais offre également de nombreuses fonctionnalités supplémentaires pour vous aider à améliorer votre productivité. *L'explorateur (1)* est un explorateur de fichiers intégré et est sélectionné dans la figure. *Le contrôle de source (2) s'intègre à Git*. L'icône de *déboggage (3)* lance le déboggueur approprié (==une fois que l'extension correcte est installée==). La suivante est *le gestionnaire d'extensions(4)* **[Il y a une typo, c'est l'icône juste en dessous]**. ==Le gestionnaire d'extensions est contextuel et fera des recommandations en fonction du type de code dans le répertoire ouvert et les sous-répertoires.==
 
 L'*éditeur de code (5)* est doté d'un codage couleur et **prend en charge IntelliSense**. La *carte du code (6)* affiche la carte de l'ensemble de votre fichier de code, et la *fenêtre Problèmes/Sortie/Console de déboggage/Terminal (7)* reçoit la sortie des sessions de déboggage et accepte les entrées de l'utilisateur.
 
@@ -443,7 +457,7 @@ Pour exécuter votre projet sans déboggage, exécutez la commande CLI .NET suiv
 dotnet run
 ```
 
-#### La différence sémantique entre restaurer et compiler (Gemini)
+#### La différence sémantique entre restaurer et compiler (avec Gemini)
 
  **Restaurer**
  
@@ -460,8 +474,8 @@ dotnet run
 **En résumé**
 
 Considérez cela comme suit :
-- La restauration : c'est comme rassembler tous les ingrédients d'une recette. 
-- La compilation : c'est comme cuisiner ces ingrédients pour obtenir un plat fini. 
+- **La restauration** : c'est comme rassembler tous les ingrédients d'une recette. 
+- **La compilation** : c'est comme cuisiner ces ingrédients pour obtenir un plat fini. 
 Vous ne pouvez pas faire un gâteau (compiler) si vous n'avez pas d'abord de la farine et du sucre (restaurer). 
 
 ### Débogguer son projet
@@ -485,6 +499,9 @@ https://docs.microsoft.com/en-us/dotnet/core/
 
 # Résumé du chapitre
 
-L'objectif de ce chapitre était de vous fournir les informations nécessaires pour configurer votre environnement de développement avec le SDK et les runtimes .NET 6, ainsi que de vous présenter Visual Studio 2022 Community Edition et Visual Studio Code. Si vous souhaitez créer des applications .NET Core multiplateformes, vous disposez de trois choix . *Visual Studio* (Windows uniquement) et *Visual Studio Code* (multiplateforme) sont tous fournis par Microsoft, et *Rider* fournie par l'entreprise *JetBrains*. ==La création d'applications WPF ou WinForms nécessite toujours Visual Studio sur un ordinateur Windows==
+L'objectif de ce chapitre était de vous fournir les informations nécessaires pour configurer votre environnement de développement avec le SDK et les runtimes .NET 6, ainsi que de vous présenter Visual Studio 2022 Community Edition et Visual Studio Code. Si vous souhaitez créer des applications .NET Core multiplateformes, vous disposez de trois choix . *Visual Studio* (Windows uniquement) et *Visual Studio Code* (multiplateforme) sont tous fournis par Microsoft, et *Rider* fournie par l'entreprise *JetBrains*. ==La création d'applications WPF ou WinForms nécessite toujours Visual Studio sur un ordinateur Windows==.
 
->[!info] *MAUI* est une option qui permet de créer des applications à interface graphique multi-plateforme, bien que très peu utilisées.
+>[!info]
+>*MAUI* est une option qui permet de créer des applications à interface graphique multi-plateforme, bien que très peu utilisées.
+>>[!success] Une alternative à été trouvée.
+>Pour la partie entière dédié aux applications graphiques, il est possible d'utiliser *AvaloniaUI*, qui est un concurrent cross-platform de WPF.
