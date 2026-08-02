@@ -5,17 +5,18 @@ publish: true
 
 # <big><big><big><b><font color =green>Principes Fondamentaux de la Programmation C#, Partie 1</font></b></big></big></big>
 
-Ce chapitre marque le début de votre étude formelle du langage de programmation C# en présentant un certain nombre de sujets concis et indépendants que vous devez maîtriser pour explorer le framework .NET Core. **La première chose à faire est de comprendre comment créer l'objet application de votre programme et d'examiner la composition du point d'entrée d'un programme exécutable : la méthode `Main()` ainsi qu'une nouvelle fonctionnalité de C# 9.0, les *instructions de niveau supérieur***. Ensuite, vous étudierez les ==types de données fondamentaux de C# (et leurs équivalents dans l'espace de noms `System`), notamment les classes `System.String` et `System.Text.StringBuilder`.==
+Ce chapitre marque le début de votre étude formelle du langage de programmation C# en présentant un certain nombre de sujets concis et indépendants que vous devez maîtriser pour explorer le framework .NET Core. La première chose à faire est de **comprendre comment créer l'objet application de votre programme et d'examiner la composition du point d'entrée d'un programme exécutable** : la méthode `Main()` ainsi qu'une nouvelle fonctionnalité de C# 9.0, les *instructions de niveau supérieur*. Ensuite, **vous étudierez les types de données fondamentaux de C#** (et leurs équivalents dans l'espace de noms `System`), notamment les classes `System.String` et `System.Text.StringBuilder`.
 
-Une fois que vous connaîtrez les détails des types de données fondamentaux de .NET Core, ==vous examinerez plusieurs techniques de conversion de types de données==, notamment les opérations de rétrécissement, les opérations d'élargissement (*upcast* et *downcast*) et l'**utilisation des mots-clés `checked` et `unchecked`**. 
+Une fois que vous connaîtrez les détails des types de données fondamentaux de .NET Core, **vous examinerez plusieurs techniques de conversion de types de données**, notamment les opérations de rétrécissement, les opérations d'élargissement (*upcast* et *downcast*) **et l'utilisation des mots-clés `checked` et `unchecked`**.**
 
-Ce chapitre examinera également **le rôle du mot-clé `var` de C#**, qui vous permet de définir implicitement une variable locale. ==Comme vous le verrez plus loin dans cet ouvrage, le typage implicite est extrêmement utile, voire parfois obligatoire, lorsque vous travaillez avec l'ensemble de technologies `LINQ`==. Vous terminerez ce chapitre en examinant rapidement les *mots-clés et opérateurs C#* qui vous permettent de contrôler le flux d'une application à l'aide de diverses constructions de **boucles** et de **décisions**.
+**Ce chapitre examinera également le rôle du mot-clé `var` de C#**, qui vous permet de définir implicitement une variable locale. Comme vous le verrez plus loin dans cet ouvrage, le typage implicite est extrêmement utile, voire parfois obligatoire, lorsque vous travaillez avec l'ensemble de technologies LINQ. Vous terminerez ce chapitre en **examinant rapidement les *mots-clés et opérateurs C#* qui vous permettent de contrôler le flux d'une application à l'aide de diverses constructions de boucles et de décisions**.
 
 # Analyse d'un programme C# simple (MaJ C# 10)
 
-C# exige que toute la logique du programme soit contenue dans une définition de type (rappel du [[Chapitre 1#Comprendre le Common Type System (CTS)|Chapitre 1]] que le type est un terme général désignant un membre de l'ensemble {*classe, interface, structure, énumération, délégué*}). **Contrairement à de nombreux autres langages, il n'est pas possible en C# de créer des fonctions globales ou des points de données globaux**. Au contraire, ==tous les membres de données et toutes les méthodes doivent être contenus dans une définition de type==. Pour commencer, créez une nouvelle solution vide nommée *Chapter3_AllProject.sln* qui contient une application console C# nommée *SimpleCSharpApp*.
+**C# exige que toute la logique du programme soit contenue dans une définition de type** (rappel du [[Chapitre 1#Comprendre le Common Type System (CTS)|Chapitre 1]] que le type est un terme général désignant un membre de l'ensemble {*classe, interface, structure, énumération, délégué*}). *==Contrairement à de nombreux autres langages, il n'est pas possible en C# de créer des fonctions globales ou des points de données globaux==*. Au contraire, tous les membres de données et toutes les méthodes doivent être contenus dans une définition de type. Pour commencer, créez une nouvelle solution vide nommée *Chapter3_AllProject.sln* qui contient une application console C# nommée *SimpleCSharpApp*.
 
-<small><small>Dans Visual Studio, sélectionnez le modèle Blank Solution (Solution vide) dans l'écran « Create a new project » (Créer un nouveau projet). Lorsque la solution s'ouvre, cliquez avec le bouton droit sur la solution dans Solution Explorer et sélectionnez Add ➤ New Project (Ajouter ➤ Nouveau projet). Sélectionnez « Application console C# » parmi les modèles, nommez-la SimpleCSharpApp, puis cliquez sur Suivant. Sélectionnez .NET 6.0 pour le framework, puis cliquez sur Créer.</small></small>
+>[!note]- Pour Visual Studio
+>Dans Visual Studio, sélectionnez le modèle Blank Solution (Solution vide) dans l'écran « Create a new project » (Créer un nouveau projet). Lorsque la solution s'ouvre, cliquez avec le bouton droit sur la solution dans Solution Explorer et sélectionnez Add ➤ New Project (Ajouter ➤ Nouveau projet). Sélectionnez « Application console C# » parmi les modèles, nommez-la SimpleCSharpApp, puis cliquez sur Suivant. Sélectionnez .NET 6.0 pour le framework, puis cliquez sur Créer.
 
 Pour créer une solution et une application console, puis ajouter cette application console à la solution, à partir de la ligne de commande (ou de la fenêtre du terminal Visual Studio Code), exécutez la commande suivante :
 
@@ -37,7 +38,7 @@ Dans le projet créé, vous verrez un fichier (nommé *Program.cs*) contenant un
 Console.WriteLine("Hello, World!");
 ```
 
-Si vous débutez avec C#, cette ligne semble assez simple. Elle affiche le message « Hello, World ! » dans la fenêtre de sortie standard de la console. *Avant C# 10, il fallait beaucoup plus de code pour obtenir le même effet. Pour créer le même programme dans les versions de C# antérieures à C# 10, vous deviez écrire ce qui suit* :
+Si vous débutez avec C#, cette ligne semble assez simple. Elle affiche le message « Hello, World ! » dans la fenêtre de sortie standard de la console. **Avant C# 10, il fallait beaucoup plus de code pour obtenir le même effet.** Pour créer le même programme dans les versions de C# antérieures à C# 10, vous deviez écrire ce qui suit :
 
 ```cs
 using System;
@@ -53,42 +54,43 @@ namespace SimpleCSharpApp
 }
 ```
 
-La classe `Console` est contenue dans l'espace de noms `System`, et avec les espaces de noms globaux implicites fournis par .NET 6/C# 10, **l'instruction `using System;` n'est plus nécessaire**. La ligne suivante crée un espace de noms personnalisé (abordé au [[Chapitre 16]]) pour encapsuler la classe Program. **L'espace de noms et la classe `Program` peuvent tous deux être supprimés grâce à la fonctionnalité d'instruction de niveau supérieur introduite dans C# 9** (abordée brièvement). Cela nous ramène à la ligne de code unique permettant d'écrire le message dans la console.
+La classe `Console` est contenue dans l'espace de noms `System`, et **==avec les espaces de noms globaux implicites fournis par .NET 6/C# 10, l'instruction `using System` n'est plus nécessaire==**. La ligne suivante crée un espace de noms personnalisé (abordé au [[Chapitre 16#Définition des espaces de noms personnalisés (MaJ C 10.0)|Chapitre 16]]) pour encapsuler la classe Program. **L'espace de noms et la classe `Program` peuvent tous deux être supprimés grâce à la fonctionnalité d'instruction de niveau supérieur introduite dans C# 9** (abordée brièvement). Cela nous ramène à la ligne de code unique permettant d'écrire le message dans la console.
 
-==Pour l'instant, afin de couvrir certaines variations importantes du point d'entrée dans les applications C#, nous utiliserons l'ancien style de code (plus verbeux) au lieu de la version simplifiée de C# 10==. Dans ce contexte, mettez à jour la méthode `Main()` de votre classe `Program` avec les instructions de code suivantes :
+Pour l'instant, afin de couvrir certaines variations importantes du point d'entrée dans les applications C#, nous utiliserons l'ancien style de code (plus verbeux) au lieu de la version simplifiée de C# 10. Dans ce contexte, mettez à jour la méthode `Main()` de votre classe `Program` avec les instructions de code suivantes :
 
 ```cs
 class Program
 {
     static void Main(string[] args)
     {
-        // Display a simple message to the user.
+        // Affiche un simple message à l'utilisateur
         Console.WriteLine("***** My First C# App *****");
         Console.WriteLine("Hello World!");
         Console.WriteLine();
         
-        // Wait for Enter key to be pressed before shutting down.
+        // Attend que la touche Entrée soit tappée pour finir le programme.
         Console.ReadLine();
     }
 }
 ```
 
 > [!warning] Important:
-> **C# est un language sensible à la casse**, `Main` et `main` ne sont pas les mêmes choses, et `ReadLine` n'est pas la même chose que `Readline`.
+> **C# est un language sensible à la casse !** `Main` et `main` ne sont pas les mêmes choses, et `ReadLine` n'est pas la même chose que `Readline`.
 > 
 > Sachez que tous les mots-clés C# sont en minuscules (par exemple, `public`, `lock`, `class`, `dynamic`), tandis que les espaces de noms, les types et les noms de membres commencent (*par convention*) par une majuscule initiale et que la première lettre de tout mot intégré est en majuscule (*CamelCase*) ,par exemple, `Console.WriteLine`,  `System.Windows.MessageBox`, `System.Data.SqlClient`). **En règle générale, lorsque vous recevez une erreur de compilation concernant des « symboles non définis », vérifiez d'abord l'orthographe et la casse !**
 
-Le code précédent contient une définition pour un type de classe qui prend en charge une seule méthode nommée `Main()`. **Par défaut, les modèles de projet C# qui n'utilisent pas d'instructions de niveau supérieur nomment la classe contenant la méthode `Main()` `Program`** ; cependant, vous êtes libre de modifier cela si vous le souhaitez. ==**Avant C# 9.0, chaque application C# exécutable** (programme console, programme Windows Desktop ou service Windows) **devait contenir une classe définissant une méthode `Main()`, utilisée pour indiquer le point d'entrée de l'application**==.
+Le code précédent contient une définition pour un type de classe qui prend en charge une seule méthode nommée `Main()`. **Par défaut, les modèles de projet C# qui n'utilisent pas d'instructions de niveau supérieur nomment la classe contenant la méthode `Main()` `Program`** ; cependant, vous êtes libre de modifier cela si vous le souhaitez. Avant C# 9.0, chaque application C# exécutable (programme console, programme Windows Desktop ou service Windows) devait contenir une classe définissant une méthode `Main()`, utilisée pour indiquer le point d'entrée de l'application.
  
-Formellement parlant, ==la classe qui définit la méthode `Main()` est appelée *objet d'application*==. ==Il est possible qu'une seule application exécutable ait *plusieurs objets d'application*== (ce qui peut être utile lors de la réalisation de tests unitaires), ==mais le compilateur doit alors savoir quelle méthode `Main()` doit être utilisée comme point d'entrée==. ==Cela peut être fait via l'élément `<StartupObject>` dans le fichier de projet (*.csproj*)==.
+**Formellement parlant, la classe qui définit la méthode `Main()` est appelée *objet d'application*. ll est possible qu'une seule application exécutable ait *plusieurs objets d'application* (ce qui peut être utile lors de la réalisation de tests unitaires), mais le compilateur doit alors savoir quelle méthode `Main()` doit être utilisée comme point d'entrée. Cela peut être fait via l'élément `<StartupObject>` dans le fichier de projet (*.csproj*).**
 
-Notez que la signature de `Main()` est agrémentée du mot-clé `static`, qui sera examiné en détail au [[Chapitre 5#Comprendre le mot-clé `static`|Chapitre 5]]. Pour l'instant, il suffit de comprendre que ==**les membres statiques ont une portée au niveau de la classe** (plutôt qu'au niveau de l'objet) **et peuvent donc être invoqués sans qu'il soit nécessaire de créer au préalable une nouvelle instance de classe**==. 
+==Notez que la signature de `Main()` est agrémentée du mot-clé `static`,== qui sera examiné en détail au [[Chapitre 5#Comprendre le mot-clé `static`|Chapitre 5]]. Pour l'instant, il suffit de comprendre que **les membres statiques ont une portée au niveau de la classe** (plutôt qu'au niveau de l'objet) et peuvent donc être invoqués sans qu'il soit nécessaire de créer au préalable une nouvelle instance de classe.
 
-En plus du mot-clé `static`, cette méthode `Main()` possède ==un seul paramètre==, qui se trouve être un ==tableau de chaînes (`string[] args`)==. Bien que vous ne vous souciez pas actuellement de traiter ce tableau, **ce paramètre peut contenir un nombre quelconque d'arguments de ligne de commande entrants** (***vous verrez comment y accéder dans un instant***). Enfin, cette méthode `Main()` a été configurée avec une ==valeur de retour `void`, ce qui signifie que vous ne définissez pas explicitement de valeur de retour à l'aide du mot-clé `return` avant de quitter la portée de la méthode==.
+En plus du mot-clé `static`, ***==cette méthode `Main()` possède un seul paramètre, qui se trouve être un tableau de chaînes (`string[] args`)==***. Bien que vous ne vous souciez pas actuellement de traiter ce tableau, **ce paramètre peut contenir un nombre quelconque d'arguments de ligne de commande entrants** (vous verrez comment y accéder dans un instant). Enfin, ***==cette méthode `Main()` a été configurée avec une valeur de retour `void`,==*** **ce qui signifie que vous ne définissez pas explicitement de valeur de retour à l'aide du mot-clé `return` avant de quitter la portée de la méthode.**
 
-La logique de la classe `Program` se trouve dans `Main()`. Ici, vous utilisez la classe `Console`, qui est définie dans l'espace de noms `System`. ==Parmi ses membres figure la méthode statique `WriteLine()`, qui, comme vous pouvez le supposer, envoie une chaîne de texte et un retour chariot vers la sortie standard (*stdout*)==. Vous appelez également `Console.ReadLine()` pour vous assurer que le programme reste visible. 
+La logique de la classe `Program` se trouve dans `Main()`. Ici, vous utilisez la classe `Console`, qui est définie dans l'espace de noms `System`. Parmi ses membres figure la méthode statique `WriteLine()`, qui, comme vous pouvez le supposer, envoie une chaîne de texte et un retour chariot vers la sortie standard (*stdout*). Vous appelez également `Console.ReadLine()` pour vous assurer que le programme reste visible.
 
-<small>Lorsque vous exécutez des applications .NET Core Console avec Visual Studio (en mode Debug ou Release), la fenêtre de console reste visible par défaut. Ce comportement peut être modifié en activant le paramètre « Fermer automatiquement la console lorsque le débogage s'arrête » qui se trouve sous Outils ➤ Options ➤ Débogage. La méthode Console.ReadLine() permet de garder la fenêtre ouverte si le programme est exécuté à partir de l'Explorateur Windows en double-cliquant sur le fichier *.exe du produit. Vous en apprendrez davantage sur la classe System.Console dans quelques instants.</small>
+>[!note]- Note Visual Studio
+>Lorsque vous exécutez des applications .NET Core Console avec Visual Studio (en mode Debug ou Release), la fenêtre de console reste visible par défaut. Ce comportement peut être modifié en activant le paramètre « Fermer automatiquement la console lorsque le débogage s'arrête » qui se trouve sous Outils ➤ Options ➤ Débogage. La méthode Console.ReadLine() permet de garder la fenêtre ouverte si le programme est exécuté à partir de l'Explorateur Windows en double-cliquant sur le fichier *.exe* du produit. Vous en apprendrez davantage sur la classe System.Console dans quelques instants.
 
 ### Comment passer d'une déclaration de haut-niveau à bas niveau
 
@@ -100,9 +102,11 @@ deux Manières différentes sur VSCode:
 
 2. Quand le fichier utilise une déclaration de haut niveau, cliquer sur l'icône lampe : ![[lampe IntelliSense.png|20]] et sélectionner `Convert to 'Program.main' style program` ou `Convert to top-level statement`  selon la déclaration présente (le raccourcis *cmd + .* est disponible)
 
+>Dans mon setup (*Neovim* avec *Roslyn*), les ***code actions*** sont disponible avec `[leader] -> c -> a`.
+
 ## Utilisation des variantes de la méthode `Main()` (MaJ C# 7.1)
 
-Par défaut, le modèle de projet console .NET ==génère une méthode `Main()` qui a une valeur de retour `void` et un *tableau* de type `string` comme seul paramètre d'entrée(`string[]`)==. Cependant, **ce n'est pas la seule forme possible de `Main()`**. Il est possible de construire le point d'entrée de votre application en utilisant l'une des signatures suivantes (==en supposant qu'elle soit contenue dans une définition de classe ou de structure C#==) :
+**Par défaut, le modèle de projet console .NET génère une méthode `Main()` qui a une valeur de retour `void` et un tableau de type `string` comme seul paramètre d'entrée(`string[]`)**. Cependant, ce n'est pas la seule forme possible de `Main()`. **==Il est possible de construire le point d'entrée de votre application en utilisant l'une des signatures suivantes==** (en supposant qu'elle soit contenue dans une définition de classe ou de structure C#) :
 
 ```cs
 // int return type, array of strings as the parameter.
@@ -125,7 +129,7 @@ static int Main()
 }
 ```
 
-**Avec la sortie de C# 7.1, la méthode `Main()` peut être asynchrone**. La programmation asynchrone est abordée au [[Chapitre 15]], mais pour l'instant, sachez qu'il existe quatre signatures supplémentaires.
+**Avec la sortie de C# 7.1, la méthode `Main()` peut être asynchrone**. La programmation asynchrone est abordée au [[Chapitre 15#Appels asynchrones utilisant le modèle `async`/`await`|Chapitre 15]], mais pour l'instant, sachez qu'il existe quatre signatures supplémentaires.
 
 ```cs
 static Task Main()
@@ -134,10 +138,10 @@ static Task<int> Main()
 static Task<int> Main(string[])
 ```
 
->[!note]- Notes sur la méthode `Main`:
->La méthode `Main()` peut également être définie comme publique plutôt que privée. Notez que le modificateur d'accès est présumé privé si vous ne fournissez pas de modificateur d'accès spécifique. Les modificateurs d'accès sont décrits en détail au [[Chapitre 5#Comprendre les modificateurs d'accès (MaJ C 7.2)|Chapitre 5]].
+>[!note] 
+>La méthode `Main()` peut également être définie comme `public` plutôt que `private`. Notez que le modificateur d'accès est présumé `private` si vous ne fournissez pas de modificateur d'accès spécifique. Les modificateurs d'accès sont décrits en détail au [[Chapitre 5#Comprendre les modificateurs d'accès (MaJ C 7.2)|Chapitre 5]].
 
-Évidemment, votre choix quant à la manière de construire `Main()` dépendra de trois questions: 
+**Évidemment, votre choix quant à la manière de construire `Main()` dépendra de trois questions: **
 
 - Premièrement, souhaitez-vous renvoyer une valeur au système lorsque `Main()` est terminé et que votre programme se termine ? 
     - Si oui, vous devez renvoyer un type de données `int` (`byte`) plutôt que `void`. 
@@ -145,13 +149,13 @@ static Task<int> Main(string[])
     - Si oui, ils seront stockés dans le tableau de chaînes (`string[]`). 
 - Enfin, avez-vous besoin d'appeler du code *asynchrone* à partir de la méthode `Main()` ? 
 
-Nous examinerons les deux premières options plus en détail après avoir présenté les instructions de niveau supérieur. 
+==Nous examinerons les deux premières options plus en détail après avoir présenté les instructions de niveau supérieur.==
 
->Les options asynchrones seront abordées au [[Chapitre 15]].
+>Les options asynchrones seront abordées au [[Chapitre 15#Appels asynchrones utilisant le modèle `async`/`await`|Chapitre 15]].
 
 ## Utiliser les déclaration de haut niveaux (Nouveauté C# 9.0)
 
-S'il est vrai qu'avant C# 9.0, toutes les applications C# .NET Core devaient disposer d'une méthode `Main()`, C# 9.0 a introduit des instructions de niveau supérieur qui ==éliminent la plupart des formalités liées au point d'entrée de l'application C#==. La classe (`Program`) et les méthodes `Main()` peuvent toutes deux être supprimées. ==Pour voir cela en action, mettez à jour la classe *Program.cs* comme suit== :
+S'il est vrai qu'avant C# 9.0, toutes les applications C# .NET Core devaient disposer d'une méthode `Main()`, **C# 9.0 a introduit des instructions de niveau supérieur qui éliminent la plupart des formalités liées au point d'entrée de l'application C#.** **==La classe (`Program`) et les méthodes `Main()` peuvent toutes deux être supprimées.==** Pour voir cela en action, mettez à jour la classe *Program.cs* comme suit :
 
 ```cs
 // Display a simple message to the user.
@@ -165,16 +169,16 @@ Console.ReadLine();
 
 Vous verrez que lorsque vous exécuterez le programme, vous obtiendrez le même résultat ! **Il existe certaines règles concernant l'utilisation des instructions de niveau supérieur** :
 
-- **Un seul fichier de l'application peut utiliser des instructions de niveau supérieur.**
-- ==Lorsque vous utilisez des instructions de niveau supérieur, le programme ne peut pas avoir de point d'entrée déclaré==.
+- Un seul fichier de l'application peut utiliser des instructions de niveau supérieur.
+- Lorsque vous utilisez des instructions de niveau supérieur, le programme ne peut pas avoir de point d'entrée déclaré.
 - Les instructions de niveau supérieur ne peuvent pas être incluses dans un espace de noms.
-- ==Les instructions de niveau supérieur accèdent toujours à un tableau de chaînes de caractères d'arguments==.
+- Les instructions de niveau supérieur accèdent toujours à un tableau de chaînes de caractères d'arguments.
 - Les instructions de niveau supérieur renvoient un code d'application (voir la section suivante) à l'aide d'un retour.
 - **Les fonctions qui auraient été déclarées dans la classe `Program` deviennent des fonctions locales pour les instructions de niveau supérieur**. (Les fonctions locales sont abordées au [[Chapitre 4#Comprendre les fonctions locales (Nouveauté C 7.0, MaJ C 9.0)|Chapitre 4]]).
 - **Les instructions de niveau supérieur sont compilées dans une classe nommée `Program`, ce qui permet d'ajouter une classe `Program` *partielle* pour contenir des méthodes régulières**. Les classes partielles sont abordées au [[Chapitre 5#Comprendre les classes partielles|Chapitre 5]]. 
-- Des types supplémentaires peuvent être déclarés après toutes les instructions de niveau supérieur. ==Tout type déclaré avant la fin des instructions de niveau supérieur entraînera une erreur de compilation==.
+- Des types supplémentaires peuvent être déclarés après toutes les instructions de niveau supérieur. **Tout type déclaré avant la fin des instructions de niveau supérieur entraînera une erreur de compilation.**
 
-**En arrière-plan, le compilateur comble les lacunes. En examinant le code IL généré pour le code mis à jour, vous verrez le `TypeDef` suivant pour le point d'entrée dans l'application**:
+**En arrière-plan, le compilateur comble les lacunes.** En examinant le code IL généré pour le code mis à jour, vous verrez le `TypeDef` suivant pour le point d'entrée dans l'application:
 
 ```CIL
 // TypeDef #1 (02000002)
@@ -204,28 +208,30 @@ Remarquez que dans l'exemple du [[Chapitre 1#Le rôle des métadonnée des types
 
 ## Spécification d'un code d'erreur d'application (MaJ C# 9.0)
 
-Bien que la grande majorité de vos méthodes `Main()` (ou instructions de niveau supérieur) renvoient la valeur void comme valeur de retour, ==la possibilité de renvoyer un `int` (ou `Task<int>`) permet à C# de rester cohérent avec les autres langages basés sur C==. Par convention, le renvoi de la valeur *0* indique que le programme s'est *terminé avec succès*, tandis qu'une autre valeur (telle que *-1*) représente une *condition d'erreur* (==notez que la valeur 0 est automatiquement renvoyée, même si vous construisez une méthode Main() prototypée pour renvoyer void==).
+Bien que la grande majorité de vos méthodes `Main()` (ou instructions de niveau supérieur) renvoient la valeur `void` comme valeur de retour, **la possibilité de renvoyer un `int` (ou `Task<int>`) permet à C# de rester cohérent avec les autres langages basés sur le C**. ==Par convention, le renvoi de la valeur `0` indique que le programme s'est terminé avec succès, tandis qu'une autre valeur représente une *condition d'erreur*==.
 
-Lorsque vous utilisez des instructions de niveau supérieur, si le code en cours d'exécution renvoie un entier (`int`), celui-ci constitue le code de retour. Si rien n'est explicitement renvoyé, la valeur 0 est tout de même renvoyée, comme lors de l'utilisation explicite d'une méthode Main().
+>notez que la valeur $0$ est automatiquement renvoyée, même si vous construisez une méthode `Main()` prototypée pour renvoyer `void`.
 
-**Sous le système d'exploitation *Windows*, la valeur de retour d'une application est stockée dans une variable d'environnement système nommée `%ERRORLEVEL%`**
+Lorsque vous utilisez des instructions de niveau supérieur, si le code en cours d'exécution renvoie un entier (`int`), celui-ci constitue le code de retour. **Si rien n'est explicitement renvoyé, la valeur `0` est tout de même renvoyée, comme lors de l'utilisation explicite d'une méthode `Main()`.**
 
-**Sous les systèmes d'exploitation basés sur *UNIX*, la variable d'environnement qui stocke la valeur de retour est `$?`.**
+***==Sous le système d'exploitation Windows, la valeur de retour d'une application est stockée dans une variable d'environnement système nommée `%ERRORLEVEL%`==***
+
+**==Sous les systèmes d'exploitation basés sur UNIX, la variable d'environnement qui stocke la valeur de retour est `$?`.==**
 
  Si vous deviez créer une application qui lance par programmation un autre exécutable (un sujet examiné au [[Chapitre 17#Chargement dynamique d'assemblies|Chapitre 17]]), vous pouvez obtenir la valeur de `%ERRORLEVEL%` ou `$?` à l'aide de la propriété `ExitCode` du processus lancé.
 
 Étant donné que la valeur de retour d'une application est transmise au système au moment où l'application se termine, **il n'est évidemment pas possible pour une application d'obtenir et d'afficher son code d'erreur final pendant son exécution**. Cependant, pour illustrer comment afficher ce niveau d'erreur à la fin du programme, commencez par mettre à jour les instructions de niveau supérieur comme suit :
 
 ```cs
-// Note we are explicitly returning an int, rather than void.
-// Display a message and wait for Enter key to be pressed.
+// Notez que nous renvoyons explicitement un int, plutôt que void.
+// Affiche un message et attend que la touche Entrée soit enfoncée.
 Console.WriteLine("***** My First C# App *****");
 Console.WriteLine();
 Console.WriteLine("Hello World!");
 Console.WriteLine();
 Console.ReadLine();
 
-// Return an arbitrary error code.
+// Renvois un code d'erreur arbitraire.
 return -1;
 ```
 
@@ -291,7 +297,7 @@ echo "All Done."
 
 >Ici, on stock `$?` (qui est la variable du dernier code de retours) sinon à chaque commande cette valeur change, tandis que l'on veut seulement la valeur de retour de la commande `dotnet run`
 
-À ce stade, ouvrez une invite de commande (ou utilisez le terminal Visual Studio Code) et accédez au dossier contenant votre nouveau fichier *.cmd* / *.zsh*. Exécutez le fichier en tapant son nom et en appuyant sur la touche Entrée. ==Vous devriez obtenir le résultat suivant, à condition que vos instructions de niveau supérieur (ou méthode `Main()`) renvoient $-1$==. Si les instructions de niveau supérieur (ou la méthode `Main()`) renvoyaient 0, le message « Cette application a réussi ! » s'afficherait dans la console.
+À ce stade, ouvrez une invite de commande (ou utilisez le terminal Visual Studio Code) et accédez au dossier contenant votre nouveau fichier *.cmd* / *.zsh*. Exécutez le fichier en tapant son nom et en appuyant sur la touche Entrée. **Vous devriez obtenir le résultat suivant, à condition que vos instructions de niveau supérieur (ou méthode `Main()`) renvoient $-1$**. Si les instructions de niveau supérieur (ou la méthode `Main()`) renvoyaient $0$, le message "This application succeeded !" s'afficherait dans la console.
 
 ```
 ***** My First C# App *****
@@ -322,13 +328,14 @@ Write-Host "All Done."
 set-executionpolicy -executionpolicy remotesigned -scope currentuser
 >```
 
->[!warning] En utilisant ce type de script, la variable retourné aura pour valeur `0` dans le terminal car le dernier processus s'est exécuté sans erreur (le script *.cmd* /*.sh* / *.ps1* / *zsh*).
+>[!Attention] 
+>En utilisant ce type de script, la variable retourné aura pour valeur `0` dans le terminal car le dernier processus s'est exécuté sans erreur (le script *.cmd* /*.sh* / *.ps1* / *zsh*).
 
-*La grande majorité (sinon la totalité) de vos applications C# utiliseront `void` comme valeur de retour de `Main()`*, qui, comme vous vous en souvenez, renvoie implicitement le code d'erreur `0`. À cette fin, les méthodes `Main()` utilisées dans ce texte (au-delà de l'exemple actuel) renverront `void`.
+**La grande majorité (sinon la totalité) de vos applications C# utiliseront `void` comme valeur de retour de `Main()`**, qui, comme vous vous en souvenez, renvoie implicitement le code d'erreur $0$. À cette fin, les méthodes `Main()` utilisées dans ce texte (au-delà de l'exemple actuel) renverront `void`.
 
 ## Traitement des arguments de ligne de commande (MaJ C# 9.0)
 
- Maintenant que vous comprenez mieux la valeur de retour de la méthode Main() ou des instructions de niveau supérieur, ==examinons le tableau de données de type chaîne `string`. Supposons qu'on traite tous les paramètres de ligne de commande possibles==. **Pour ce faire, vous pouvez utiliser une boucle `for` en C#. (Notez que les constructions d'itération en C# seront examinées plus en détail vers la fin de ce chapitre.)**
+ Maintenant que vous comprenez mieux la valeur de retour de la méthode `Main()` ou des instructions de niveau supérieur, ==examinons le tableau de données de type chaîne `string`. Supposons qu'on traite tous les paramètres de ligne de commande possibles==. **Pour ce faire, vous pouvez utiliser une boucle `for` en C#.** (Notez que les constructions d'itération en C# seront examinées plus en détail vers la fin de ce chapitre.).
 
 ```cs
 // Display a message and wait for Enter key to be pressed.
@@ -345,9 +352,10 @@ Console.ReadLine();
 return 0;
 ```
 
->[!note] Notez que cet exemple utilise des instructions globales, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
+>[!note] 
+>Notez que cet exemple utilise des instructions globales, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
 
-Une fois encore, en examinant le CIL généré pour le programme à l'aide d'instructions de niveau supérieur, notez que la méthode `<Main>$` accepte un tableau de chaines (`string`) nommé `args`, comme indiqué ici (abrégé pour gagner de la place) :
+Une fois encore, en examinant le CIL généré pour le programme à l'aide d'instructions de niveau supérieur, **notez que la méthode `<Main>$` accepte un tableau de chaines (`string`) nommé `args`, comme indiqué ici (abrégé pour gagner de la place) :**
 
 ```CIL
 // =============== CLASS MEMBERS DECLARATION ===================
@@ -376,7 +384,7 @@ static int Main(string[] args)
 }
 ```
 
-Maintenant, **vous vérifiez si le tableau de chaînes contient un certain nombre d'éléments à l'aide de la propriété `Length` de `System.Array`**. Comme vous le verrez au [[Chapitre 4#Comprendre les Tableaux C|Chapitre 4]], **tous les tableaux C# sont en fait des alias de la classe `System. Array` et partagent donc un ensemble commun de membres**. Lorsque vous parcourez chaque élément du tableau, sa valeur est affichée dans la fenêtre de la console. ***La fourniture des arguments dans la ligne de commande est tout aussi simple, comme illustré ici*** :
+Maintenant, **vous vérifiez si le tableau de chaînes contient un certain nombre d'éléments à l'aide de la propriété `Length` de `System.Array`**. Comme vous le verrez au [[Chapitre 4#Comprendre les Tableaux C|Chapitre 4]], ***==tous les tableaux C# sont en fait des alias de la classe `System. Array` et partagent donc un ensemble commun de membres==***. Lorsque vous parcourez chaque élément du tableau, sa valeur est affichée dans la fenêtre de la console. La fourniture des arguments de la ligne de commande est tout aussi simple, comme illustré ici:
 
 ```bash
 dotnet run /arg1 -arg2 
@@ -390,12 +398,14 @@ Arg: /arg1
 Arg: -arg2
 ```
 
-> [!note]  Pour que ce qui suit `run` soit considéré comme **un seul `string`, il faut utilisé des `"` ou des `'`**. 
+> [!info]  
+> Pour que ce qui suit `run` soit considéré comme un seul argument , il faut utilisé des `"` ou des `'`. 
 
-Comme alternative à la boucle `for` standard, vous pouvez itérer sur un tableau de `string` entrant à l'aide du mot-clé C# `foreach`. Voici quelques exemples d'utilisation (mais, encore une fois, vous verrez plus loin dans ce chapitre les spécificités des constructions de boucles):
+==Comme alternative à la boucle `for` standard, vous pouvez itérer sur un tableau de `string` entrant à l'aide du mot-clé C# `foreach`.== Voici quelques exemples d'utilisation (mais, encore une fois, vous verrez plus loin dans ce chapitre les spécificités des constructions de boucles):
 
 ```cs
-// Notez qu'il n'est pas nécessaire de vérifier la taille du tableau lorsque vous utilisez « foreach ».
+// Notez qu'il n'est pas nécessaire de vérifier la taille 
+// du tableau lorsque vous utilisez « foreach ».
 // Traitez les arguments entrants à l'aide de foreach.
 foreach (string arg in args)
 {
@@ -405,9 +415,9 @@ Console.ReadLine();
 return 0;
 ```
 
-==Enfin, vous pouvez également accéder aux arguments de ligne de commande à l'aide de la *méthode statique* `GetCommandLineArgs()` du type `System.Environment`==. La valeur renvoyée par cette méthode est un tableau de `string`. ==La première entrée contient le nom de l'application elle-même (le chemin d'accès)==, tandis que les autres éléments du tableau contiennent les arguments de ligne de commande individuels.
+Enfin, **vous pouvez également accéder aux arguments de ligne de commande à l'aide de la *méthode statique* `GetCommandLineArgs()` du type `System.Environment`.** La valeur renvoyée par cette méthode est un tableau de `string`. La première entrée contient le nom de l'application elle-même (le chemin d'accès), tandis que les autres éléments du tableau contiennent les arguments de ligne de commande individuels.
 
->[!tip]- La différence entre `GetCommandLineArgs()` et `args`
+>[!tip] La différence entre `GetCommandLineArgs()` et `args`
 > La méthode `GetCommandLineArgs` ne reçoit pas les arguments de l'application via la méthode `Main()` et ne dépend pas du paramètre `string[] args`.
 >>[!note] Le code suivant n'utilise pas la déclaration de haut niveau pour prouver ce point.
 
@@ -434,11 +444,11 @@ Arg: /arg1
 Arg: -arg2
 ```
 
-Bien sûr, c'est à vous de déterminer à quels arguments de ligne de commande votre programme répondra (le cas échéant) et comment ils doivent être formatés (par exemple avec un préfixe `-` ou `/`). **Ici, on a simplement passé une série d'options qui ont été affichées directement à l'invite de commande**. ==Supposons toutefois que vous créiez un nouveau jeu vidéo et que vous ayez programmé votre application pour traiter une option nommée `-godmode`==. Si l'utilisateur démarre votre application avec ce drapeau, vous savez qu'il s'agit en fait d'un tricheur et vous pouvez prendre les mesures appropriées.
+**==Bien sûr, c'est à vous de déterminer à quels arguments de ligne de commande votre programme répondra==** (le cas échéant) **==et comment ils doivent être formatés==** (par exemple avec un préfixe `-` ou `/`). Ici, on a simplement passé une série d'options qui ont été affichées directement à l'invite de commande. Supposons toutefois que vous créiez un nouveau jeu vidéo et que vous ayez programmé votre application pour traiter une option nommée `-godmode`. Si l'utilisateur démarre votre application avec ce drapeau, vous savez qu'il s'agit en fait d'un tricheur et vous pouvez prendre les mesures appropriées.
 
 # Membres supplémentaires de la classe `System.Environment` (MaJ C# 10.0)
 
-**La classe `Environment` expose un certain nombre de méthodes extrêmement utiles au-delà de `GetCommandLineArgs()`**. Plus précisément, ==cette classe vous permet d'obtenir un certain nombre de détails concernant le système d'exploitation qui héberge actuellement votre application .NET à l'aide de divers membres statiques==. Pour illustrer l'utilité de `System.Environment`, mettez à jour votre code afin d'appeler une méthode locale nommée `ShowEnvironmentDetails()`.
+La classe `Environment` expose un certain nombre de méthodes extrêmement utiles au-delà de `GetCommandLineArgs()`. Plus précisément, **cette classe vous permet d'obtenir un certain nombre de détails concernant le système d'exploitation qui héberge actuellement votre application .NET à l'aide de divers membres statiques**. Pour illustrer l'utilité de `System.Environment`, mettez à jour votre code afin d'appeler une méthode locale nommée `ShowEnvironmentDetails()`.
 
 ```cs
 // Méthode locale dasn la déclaration de haut niveau.
@@ -498,7 +508,7 @@ Le type `Environment` définit des membres autres que ceux indiqués dans l'exem
 | `ExitCode`               | Obtient ou définit le code de sortie de l'application.                                                                                                      |
 | `Is64BitOperatingSystem` | Renvoie une valeur booléenne indiquant si la machine hôte exécute un système d'exploitation 64 bits.                                                        |
 | `MachineName`            | Obtient le nom de la machine actuelle                                                                                                                       |
-| `NewLine`                | Récupère le symbole de nouvelle ligne pour l'environnement actuel (/n par exemple).                                                                         |
+| `NewLine`                | Récupère le symbole de nouvelle ligne pour l'environnement actuel (`/n` par exemple).                                                                       |
 | `ProcessId` (C# 10)      | Obtient l'identifiant unique du processus actuel.                                                                                                           |
 | `ProcessPath` (C# 10)    | Renvoie le chemin d'accès de l'exécutable qui a lancé le processus en cours d'exécution ;<br>renvoie `null` lorsque le chemin d'accès n'est pas disponible. |
 | `SystemDirectory`        | Renvoie le chemin d'accès complet vers le répertoire système.                                                                                               |
