@@ -1262,9 +1262,11 @@ static void StringConcatenation()
 ```
 
 >[!tip] Simplification des appels des membre de la classe `String`.
+>
 >Les EDI modernes (avec le nouvel analyseur de code *roslyn*) indique que l'on peut simplifier l'appel `String.Concat()` par cet appel -> `string.Concat()`. Cette simplification est du même registre que pour l'appel de la méthode `Parse` (vu [[#Convertir des valeurs à partir de données de type chaîne|précédement]]): `int.Parse()` au lieu de `Int32.Parse()`
 >
 >>[!quote] Documentation Miscrosoft ([Lien ici](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/#:~:text=In%20C%23%2C%20the%20string%20keyword,%2C%20manipulating%2C%20and%20comparing%20strings.)):
+>>
 >>En C#, le mot-clé `string` est un alias de `String` ; par conséquent, `String` et `string` sont équivalents. **Utilisez l'alias `string` fourni, car il fonctionne même sans `System`**. La classe `String` offre de nombreuses méthodes pour créer, manipuler et comparer des chaînes de caractères en toute sécurité.
 
 ## Utilisation des caractères d'échappement
@@ -2138,7 +2140,7 @@ Examinons rapidement chaque construction de boucle à tour de rôle, à l'aide d
 
 ## Utilisation de la boucle `for`
 
-Lorsque vous devez itérer un bloc de code un nombre fixe de fois, l'instruction `for` offre une grande flexibilité. En substance, vous pouvez spécifier le nombre de fois qu'un bloc de code doit se répéter, ainsi que la condition de fin. Sans trop insister sur ce point, voici un exemple de syntaxe :
+Lorsque vous devez itérer un bloc de code un nombre fixe de fois, l'instruction `for` offre une grande flexibilité. **En substance, vous pouvez spécifier le nombre de fois qu'un bloc de code doit se répéter, ainsi que la condition de fin.** Sans trop insister sur ce point, voici un exemple de syntaxe :
 
 ```cs
 // Une boucle for basique
@@ -2153,13 +2155,13 @@ static void ForLoopExample()
 }
 ```
 
-Toutes vos anciennes astuces C, C++ et Java restent valables lorsque vous créez une instruction `for` en C#. Vous pouvez créer des conditions de fin complexes, créer des boucles infinies, boucler en sens inverse (via l'opérateur `--`) et utiliser les mots-clés de saut `goto`, `continue` et `break`.
+**Toutes vos anciennes astuces C, C++ et Java restent valables lorsque vous créez une instruction `for` en C#. Vous pouvez créer des conditions de fin complexes, créer des boucles infinies, boucler en sens inverse (via l'opérateur `--`) et utiliser les mots-clés de saut `goto`, `continue` et `break`.**
 
 ## Utilisation de la boucle `foreach`
 
-Le mot-clé `foreach` de C# vous permet d'itérer sur tous les éléments d'un conteneur ==sans avoir à tester une limite supérieure==. Contrairement à une boucle `for`, cependant, **la boucle foreach parcourt le conteneur uniquement de manière linéaire** ($n+1$) (vous ne pouvez donc pas revenir en arrière dans le conteneur, sauter un élément sur trois, etc.).
+**Le mot-clé `foreach` de C# vous permet d'itérer sur tous les éléments d'un conteneur sans avoir à tester une limite supérieure.** Contrairement à une boucle `for`, cependant, ***==la boucle foreach parcourt le conteneur uniquement de manière linéaire ($n+1$)==*** (vous ne pouvez donc pas revenir en arrière dans le conteneur, sauter un élément sur trois, etc.).
 
-Cependant, lorsque vous avez simplement besoin de parcourir une collection élément par élément, la boucle `foreach` est le choix idéal. ==Voici deux exemples utilisant `foreach` : l'un pour parcourir un tableau de chaînes de caractères et l'autre pour parcourir un tableau d'entiers==. Notez que le type de données avant le mot-clé `in` représente le type de données dans le conteneur.
+Cependant, **lorsque vous avez simplement besoin de parcourir une collection élément par élément, la boucle `foreach` est le choix idéal.** Voici deux exemples utilisant `foreach` : l'un pour parcourir un tableau de chaînes de caractères et l'autre pour parcourir un tableau d'entiers. ==Notez que le type de données avant le mot-clé `in` représente le type de données dans le conteneur.==
 
 ```cs
 // Parcourir les éléments du tableau à l'aide de foreach.
@@ -2183,7 +2185,7 @@ static void ForEachLoopExample()
 
 ## Utilisation du typage implicite dans les constructions `foreach`
 
-Il est également possible d'utiliser le typage implicite dans une construction de boucle `foreach`. Comme on peut s'y attendre, **le compilateur déduira correctement le « type de type » approprié**. Rappelez-vous l'exemple de la méthode `LINQ` présenté plus haut dans ce chapitre. **Étant donné que vous ne connaissez pas le type de données sous-jacent exact de la variable `subset`, vous pouvez itérer sur le jeu de résultats à l'aide du typage implicite**.
+**Il est également possible d'utiliser le typage implicite dans une construction de boucle `foreach`. Comme on peut s'y attendre, le compilateur déduira correctement le « type de type » approprié**. Rappelez-vous l'exemple de la méthode `LINQ` présenté plus haut dans ce chapitre. **Étant donné que vous ne connaissez pas le type de données sous-jacent exact de la variable `subset`, vous pouvez itérer sur le jeu de résultats à l'aide du typage implicite**.
 
 ```cs
 static void LinqQueryOverInts()
@@ -2203,7 +2205,7 @@ static void LinqQueryOverInts()
 
 ## Utilisation des structures de boucle `while` et `do`/`while` 
 
-**La boucle `while` est utile si vous souhaitez exécuter un bloc d'instructions jusqu'à ce qu'une condition de fin soit atteinte.** Dans le cadre d'une boucle `while`, ==vous devez vous assurer que cet événement de fin est bien défini, sinon vous serez pris dans une boucle sans fin==. Dans l'exemple suivant, le message `In while loop` sera affiché en continu jusqu'à ce que l'utilisateur mette fin à la boucle en entrant `yes` à l'invite de commande :
+**La boucle `while` est utile si vous souhaitez exécuter un bloc d'instructions jusqu'à ce qu'une condition de fin soit atteinte.** Dans le cadre d'une boucle `while`, ***==vous devez vous assurer que cet événement de fin est bien défini, sinon vous serez pris dans une boucle sans fin.==*** Dans l'exemple suivant, le message `"In while loop"` sera affiché en continu jusqu'à ce que l'utilisateur mette fin à la boucle en entrant `"yes"` à l'invite de commande :
 
 ```cs
 static void WhileLoopExample()
@@ -2220,7 +2222,7 @@ static void WhileLoopExample()
 }
 ```
 
-La boucle `do/while` est étroitement liée à la boucle `while`. ==Tout comme une boucle `while` simple, `do/while` est utilisée lorsque vous devez effectuer une action un nombre indéterminé de fois==. **La différence réside dans le fait que les boucles `do/while` garantissent l'exécution du bloc de code correspondant au moins une fois**. ==En revanche, il est possible qu'une boucle `while` simple ne s'exécute jamais si la condition de fin est fausse dès le départ==.
+**La boucle `do/while` est étroitement liée à la boucle `while`.** Tout comme une boucle `while` simple, `do/while` est utilisée lorsque vous devez effectuer une action un nombre indéterminé de fois. **La différence réside dans le fait que les boucles `do/while` garantissent l'exécution du bloc de code correspondant au moins une fois. En revanche, il est possible qu'une boucle `while` simple ne s'exécute jamais si la condition de fin est fausse dès le départ.**
 
 ```cs
 static void DoWhileLopExample()
@@ -2238,7 +2240,7 @@ static void DoWhileLopExample()
 
 # Une brève discussion sur la portée
 
-Comme tous les langages basés sur le C (C#, Java, etc.), **une portée est créée à l'aide d'accolades**. Vous l'avez déjà vu dans de nombreux exemples jusqu'à présent, notamment dans les espaces de noms, les classes et les méthodes. **Les constructions d'itération et de décision fonctionnent également dans une portée,** comme dans l'exemple suivant :
+Comme tous les langages basés sur le C (C#, Java, etc.), **une portée est créée à l'aide d'accolades`{}`**. Vous l'avez déjà vu dans de nombreux exemples jusqu'à présent, notamment dans les espaces de noms, les classes et les méthodes. **Les constructions d'itération et de décision fonctionnent également dans une portée,** comme dans l'exemple suivant :
 
 ```cs
 for(int i = 0; i < 4; i++)
@@ -2254,7 +2256,7 @@ for(int i = 0; i < 4; i++)
 	Console.WriteLine("Number is {0}", i);
 ```
 
-**Bien que cela soit autorisé, ce n'est généralement pas une bonne idée**. ==Le problème ne vient pas de l'instruction à une ligne, mais de l'instruction qui s'étend sur plusieurs lignes==. **Sans les accolades, des erreurs pourraient être commises lors de l'extension du code dans les constructions d'itération/décision**. Par exemple, les deux exemples suivants ne sont pas identiques :
+**Bien que cela soit autorisé, ce n'est généralement pas une bonne idée. Le problème ne vient pas de l'instruction à une ligne, mais de l'instruction qui s'étend sur plusieurs lignes**. *==Sans les accolades, des erreurs pourraient être commises lors de l'extension du code dans les constructions d'itération/décision==*. Par exemple, les deux exemples suivants ne sont pas identiques :
 
 ```cs
 for(int i = 0; i < 4; i++)
@@ -2267,7 +2269,7 @@ for(int i = 0; i < 4; i++)
 	Console.WriteLine("Number plus 1 is: {0} ", i+1)
 ```
 
-Si vous avez de la chance (comme dans cet exemple), ==la ligne de code supplémentaire génère une erreur de compilation, car la variable `i` n'est définie que dans la portée de la boucle `for`==. **Si vous n'avez pas de chance, vous exécutez du code qui n'est pas signalé comme une erreur de compilation, mais qui est une erreur logique, plus difficile à trouver et à débuguer.**
+**Si vous avez de la chance (comme dans cet exemple), la ligne de code supplémentaire génère une erreur de compilation, car la variable `i` n'est définie que dans la portée de la boucle `for`. Si vous n'avez pas de chance, vous exécutez du code qui n'est pas signalé comme une erreur de compilation, mais qui est une erreur logique, plus difficile à trouver et à débuguer.**
 
 # Utilisation des constructions décisionnelles et des opérateurs relationnels/d'égalité
 
@@ -2277,11 +2279,12 @@ Maintenant que vous savez itérer sur un bloc d'instructions, le concept suivant
 - La déclaration `switch`
 
 >[!Note]- préambule: 
+>
 >C# 7 étend l'instructions `is`  et la déclaration `switch` grâce à une technique appelée  *pattern matching*  (correspondance de motifs). Les principes de base de l'impact de ces extensions sur les instructions `if/else` et `switch` sont présentés ici à des fins d'exhaustivité. Ces extensions seront plus faciles à comprendre après avoir lu le [[Chapitre 6#Comprendre les règles de conversion de classes de base et dérivées|Chapitre 6]], qui traite des règles relatives aux classes de base/classes dérivées, au casting et à l'opérateur standard `is`.
 
 ## Utilisation de l'instruction `if/else`
 
-==Tout d'abord, l'instruction `if/else`. Contrairement à C et C++, l'instruction `if/else` en C# ne fonctionne qu'avec des expressions booléennes, et non avec des valeurs arbitraires telles que -1 ou 0==.
+Tout d'abord, l'instruction `if/else`. **Contrairement à C et C++, l'instruction `if/else` en C# ne fonctionne qu'avec des expressions booléennes, et non avec des valeurs arbitraires telles que $-1$ ou $0$**.
 
 ## Utilisation des opérateurs d'égalité et relationnels
 
@@ -2298,7 +2301,7 @@ Les instructions `if/else` en C# impliquent généralement l'utilisation des op�
 | `<=`      | `if(bonus <= 2000)` | Renvois `true` seulement si l'expression A (`bonus`) est plus petite ou égale à l'expression B (`2000`) |
 | `>=`      | `if(bonus >= 2000)` | Renvois `true` seulement si l'expression A (`bonus`) est plus grande ou égale à l'expression B (`2000`) |
 
-==Une fois encore, les programmeurs C et C++ doivent savoir que les anciennes astuces consistant à tester une condition pour une valeur différente de zéro ne fonctionnent pas en C#==. Supposons que vous souhaitiez vérifier si la chaîne sur laquelle vous travaillez comporte plus de zéro caractère. Vous pourriez être tenté d'écrire ceci :
+Une fois encore, **les programmeurs C et C++ doivent savoir que les anciennes astuces consistant à tester une condition pour une valeur différente de zéro ne fonctionnent pas en C#**. Supposons que vous souhaitiez vérifier si la chaîne sur laquelle vous travaillez comporte plus de zéro caractère. Vous pourriez être tenté d'écrire ceci :
 
 ```cs
 static void IfElseExample()
@@ -2318,7 +2321,7 @@ static void IfElseExample()
 }
 ```
 
-Si vous voulez utilisez la propriété `String.Length` pour déterminer la véracité ou la fausseté, vous devrez modifier votre expression conditionnelle pour aboutir à un *Booléen*
+==Si vous voulez utilisez la propriété `String.Length` pour déterminer la véracité ou la fausseté, vous devrez modifier votre expression conditionnelle pour aboutir à un *Booléen*==
 
 ```cs
 // Légale, du fait que la résolution est soit vrai ou faux
@@ -2330,7 +2333,7 @@ if (stringData.Length > 0)
 
 ## Utilisation de `if/else` avec la correspondance de motifs (Nouveauté C# 7.0)
 
-==Nouveauté dans C# 7.0, la *correspondance de motifs* est autorisée dans les instructions `if/else`.== **La correspondance de motifs permet au code d'inspecter un objet à la recherche de certains traits et propriétés et de prendre des décisions en fonction de l'existence (ou non) de ces propriétés et traits**. Ne vous inquiétez pas si vous débutez dans la programmation orientée objet ; la phrase précédente sera expliquée en détail dans les chapitres suivants. Sachez simplement (pour l'instant) que **vous pouvez vérifier le type d'un objet à l'aide du mot-clé `is`, attribuer cet objet à une variable si le motif correspond, puis utiliser cette variable**.
+**Nouveauté dans C# 7.0, la *correspondance de motifs* est autorisée dans les instructions `if/else`. La correspondance de motifs permet au code d'inspecter un objet à la recherche de certains traits et propriétés et de prendre des décisions en fonction de l'existence (ou non) de ces propriétés et traits**. Ne vous inquiétez pas si vous débutez dans la programmation orientée objet ; la phrase précédente sera expliquée en détail dans les chapitres suivants. ***==Sachez simplement (pour l'instant) que vous pouvez vérifier le type d'un objet à l'aide du mot-clé `is`, attribuer cet objet à une variable si le motif correspond, puis utiliser cette variable==***.
 
 La méthode `IfElsePatternMatching` examine deux variables d'objet et détermine si elles sont de type `string` ou `int`, puis affiche les résultats dans la console :
 
@@ -2361,11 +2364,12 @@ static void IfElsePatternMatching()
 ```
 
 >[!tip] Petite précision
+>
 >Dans le code précédent, les variables situé après le mot clé `is` ==ne sont crée seulement si la correspondance de motif réussit==, de la même manière que pour une variable de sortie d'une méthode `TryParse`, vu [[#Utilisation de `TryParse` pour convertir les valeurs à partir de données de type chaîne|précédement]].
 
 ## Améliorations apportées à la correspondance de motifs (C# 9.0)
 
-C# 9.0 a introduit toute une série d'améliorations à la correspondance de motifs, comme le montre le [[#Tableau 3-9 Améliorations de la correspondance de motifs|Tableau 3-9]].
+**C# 9.0 a introduit toute une série d'améliorations à la correspondance de motifs**, comme le montre le [[#Tableau 3-9 Améliorations de la correspondance de motifs|Tableau 3-9]].
 
 ###### Tableau 3-9: Améliorations de la correspondance de motifs
 
@@ -2389,25 +2393,25 @@ static void IfElsePatternMatchingUpdatedInCSharp9()
     Type t = typeof(string);
     char c = 'f';
 
-    //Type patterns
+    // Motifs de Type
     if (t is Type)
     {
         Console.WriteLine($"{nameof(t)}: {t} is a Type");
     }
-
-    // Relational, Conjuctive and Disjunctive patterns
+	
+	// Motifs relationnels, conjonctifs et disjonctifs
     if (c is >= 'a' and <= 'z' or >= 'A' and <= 'Z')
     {
         Console.WriteLine($"{nameof(c)}: {c} is a character");
     }
 
-    // Parenthisized patterns
+    // Motif d'Accolade
     if (c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or '.' or ',')
     {
         Console.WriteLine($"{nameof(c)}: {c} is a character or separator");
     }
 
-    // Negative patterns
+    // Motifs Négatif
     if (testItem1 is not string)
     {
         Console.WriteLine($"{nameof(testItem1)}: {testItem1} is not a string");
@@ -2423,7 +2427,7 @@ static void IfElsePatternMatchingUpdatedInCSharp9()
 
 ## Utilisation de l'opérateur conditionnel (MaJ C# 7.2 et 9.0)
 
-L'opérateur conditionnel (`?:`), aussi appelé ***opérateur ternaire***, est ==une méthode abrégée pour écrire une instruction `if/else` simple==. La syntaxe fonctionne comme suit:
+**L'opérateur conditionnel (`?:`), aussi appelé *opérateur ternaire*, est une méthode abrégée pour écrire une instruction `if/else` simple. La syntaxe fonctionne comme suit:**
 
 ```
 condition ? première_expression : seconde_expression;
@@ -2442,7 +2446,7 @@ static void ExecuteIfElseUsingConditionalOperator()
 }
 ```
 
-**Il existe certaines restrictions concernant l'opérateur conditionnel.** Tout d'abord, ==les deux types `première_expression` et `seconde_expression` doivent pouvoir être convertis implicitement l'un vers l'autre== ou, *nouveauté dans C# 9.0*, ==chacun doit pouvoir être converti implicitement vers un type cible==. Deuxièmement, ==l'opérateur conditionnel ne peut être utilisé que dans les instructions d'affectation==. 
+**Il existe certaines restrictions concernant l'opérateur conditionnel. Tout d'abord, les deux types `première_expression` et `seconde_expression` doivent pouvoir être convertis implicitement l'un vers l'autre ou, *nouveauté dans C# 9.0*, chacun doit pouvoir être converti implicitement vers un type cible. Deuxièmement, l'opérateur conditionnel ne peut être utilisé que dans les instructions d'affectation.**
 
 >[!info] Le code suivant entraînera cette erreur de compilation:
 >```
@@ -2455,7 +2459,7 @@ stringData.Length > 0
 	: Console.WriteLine("string is not greater than 0 characters);
 ```
 
-==**Nouveauté dans C# 7.2**, l'opérateur conditionnel peut être utilisé pour renvoyer une référence au résultat de la condition==. Prenons l'exemple suivant, qui utilise deux formes de l'opérateur conditionnel par référence :
+**==Nouveauté dans C# 7.2, l'opérateur conditionnel peut être utilisé pour renvoyer une référence au résultat de la condition==**. Prenons l'exemple suivant, qui utilise deux formes de l'opérateur conditionnel par référence :
 
 ```cs
 static void ConditionalRefExample()
@@ -2478,33 +2482,37 @@ static void ConditionalRefExample()
 }
 ```
 
-Si vous n'êtes pas familier avec le mot-clé `ref`, ne vous inquiétez pas trop pour l'instant, car il sera abordé en détail dans le chapitre suivant. En résumé, le premier exemple renvoie une référence à l'emplacement du tableau vérifié avec la condition et attribue la variable `refValue` à cette référence. **Considérez la référence de manière conceptuelle comme un point vers l'emplacement dans le tableau et non comme la valeur réelle de la position du tableau. Cela permet de modifier directement la valeur du tableau à cette position en modifiant la valeur attribuée à la variable.** Le résultat de la définition de la valeur de la variable `refValue` à `0` modifie les valeurs du deuxième tableau en `10,20,0,40,50`. Le deuxième exemple met à jour la deuxième valeur du premier tableau à `100`, ce qui donne `1,2,100,4,5`.
+Si vous n'êtes pas familier avec le mot-clé `ref`, ne vous inquiétez pas trop pour l'instant, car il sera abordé en détail dans le chapitre suivant. En résumé, le premier exemple renvoie une référence à l'emplacement du tableau vérifié avec la condition et attribue la variable `refValue` à cette référence. **Considérez la référence (`ref`) de manière conceptuelle comme un point vers l'emplacement dans le tableau et non comme la valeur réelle de la position du tableau. Cela permet de modifier directement la valeur du tableau à cette position en modifiant la valeur attribuée à la variable.** Le résultat de la définition de la valeur de la variable `refValue` à `0` modifie les valeurs du deuxième tableau en `10,20,0,40,50`. Le deuxième exemple met à jour la deuxième valeur du premier tableau à `100`, ce qui donne `1,2,100,4,5`.
 
 >[!tip] Le mot clé `ref`, qui sera abordé plus en profondeur dans le [[Chapitre 4#Utilisation du modificateur `ref`|Chapitre 4]] est l'équivalent d'un *pointeur* en C, avec la différence qu'en C#, tout est automatique (grâce en partie au *garbage collector*).
 
 ## Utilisation des opérateurs logiques
 
-Une instruction `if` peut également être composée d'expressions complexes et contenir des instructions `else` pour effectuer des tests plus complexes. La syntaxe est identique à celle du C (et du C++) et du Java. Pour créer des expressions complexes, C# propose un ensemble d'opérateurs logiques, comme indiqué dans le [[#Tableau 3-10 Les opérateurs logiques C|Tableau 3-10]].
+**Une instruction `if` peut également être composée d'expressions complexes et contenir des instructions `else` pour effectuer des tests plus complexes.** La syntaxe est identique à celle du C (et du C++) et du Java. Pour créer des expressions complexes, C# propose un ensemble d'opérateurs logiques, comme indiqué dans le [[#Tableau 3-10 Les opérateurs logiques C|Tableau 3-10]].
 
 ###### Tableau 3-10: Les opérateurs logiques C# 
 
-| Opérateur | Example                            | Description                                                                       |
-| --------- | ---------------------------------- | --------------------------------------------------------------------------------- |
-| &&        | if (age == 30 && name == "Fred")   | Opérateur `AND` (*ET*). Retourne `true` si toute les expressions sont vraie.      |
-| \| \|     | if (age == 30 \|\| name == "Fred") | Opérateur `OR` (*OU*). Retourne `true` si au moins une des expressions est vraie. |
-| `!        | if (!myBool)                       | Opérateur `NOT` (*NON*). Retourne `true` si faux ou `false` si vrai.              |
+| Opérateur | Example                              | Description                                                                       |
+| --------- | ------------------------------------ | --------------------------------------------------------------------------------- |
+| `&&`      | `if (age == 30 && name == "Fred")`   | Opérateur `AND` (*ET*). Retourne `true` si toute les expressions sont vraie.      |
+| `\| \|`   | `if (age == 30 \|\| name == "Fred")` | Opérateur `OR` (*OU*). Retourne `true` si au moins une des expressions est vraie. |
+| `!`       | `if (!myBool)`                       | Opérateur `NOT` (*NON*). Retourne `true` si faux ou `false` si vrai.              |
 
 >[!tip]- les équivalent à un caractère (`&` et `|`)
->Les opérateurs `&&` et `||` provoquent tous deux un « court-circuit » lorsque cela est nécessaire. Cela signifie qu'une ==fois qu'une expression complexe a été jugée fausse, les sous-expressions restantes ne seront pas vérifiées==. **Si vous souhaitez que toutes les expressions soient testées, vous pouvez utiliser les opérateurs `&` et `|` associés.**
->> Cela veut dire que, par exemple:
->> ```
+>
+>Les opérateurs `&&` et `||` provoquent tous deux un « court-circuit » lorsque cela est nécessaire. Cela signifie qu'une fois qu'une expression complexe a été jugée fausse, les sous-expressions restantes ne seront pas vérifiées. Si vous souhaitez que toutes les expressions soient testées, vous pouvez utiliser les opérateurs `&` et `|` associés.
+>
+>>[!example] 
+>>
+>> ```cs
 >> if (condition1 & condition2)
 >> ```
+>> 
 >> Ce code vérifiera les deux conditions, même si la première est `false`.
 
 ## Utilisation de l'instruction `switch`
 
-L'autre structure de sélection simple offerte par C# est l'instruction `switch`. Comme dans d'autres langages basés sur C, **l'instruction `switch` vous permet de gérer le flux du programme en fonction d'un ensemble prédéfini de choix.** Par exemple, la logique suivante affiche un message spécifique en fonction de l'une des deux sélections possibles (**le cas `default` gère une sélection non valide**) :
+L'autre structure de sélection simple offerte par C# est l'instruction `switch`. **Comme dans d'autres langages basés sur C, l'instruction `switch` vous permet de gérer le flux du programme en fonction d'un ensemble prédéfini de choix.** Par exemple, la logique suivante affiche un message spécifique en fonction de l'une des deux sélections possibles (**le cas `default` gère une sélection non valide**) :
 
 ```cs
 // Switch sur une valeur numérique.
@@ -2533,83 +2541,83 @@ static void SwitchExample()
 ```
 
 >[!Attention]
->C# exige que **chaque cas (y compris le cas `default`) contenant des instructions exécutables soit terminé d'un `return`,  `break` ou d'un `goto` afin d'éviter de passer à l'instruction suivante**.
+>C# exige que chaque cas (y compris le cas `default`) contenant des instructions exécutables soit terminé d'un `return`,  `break` ou d'un `goto` afin d'éviter de passer à l'instruction suivante.
 
-Une fonctionnalité intéressante de l'instruction `switch` en C# est qu'elle permet **d'évaluer des données de type chaîne en plus des données numériques.** En fait, ==toutes les versions de C# peuvent évaluer les types de données `char`, `string`, `bool`, `int`, `long` et `enum`==. Comme vous le verrez dans la section suivante, ==C# 7 ajoute des fonctionnalités supplémentaires==. Voici une instruction `switch` mise à jour qui évalue une variable de type `string` :
+**Une fonctionnalité intéressante de l'instruction `switch` en C# est qu'elle permet d'évaluer des données de type chaîne en plus des données numériques.** En fait, toutes les versions de C# peuvent évaluer les types de données `char`, `string`, `bool`, `int`, `long` et `enum`. Comme vous le verrez dans la section suivante, **C# 7 ajoute des fonctionnalités supplémentaires**. Voici une instruction `switch` mise à jour qui évalue une variable de type `string` :
 
 ```cs
 static void SwitchOnStringExample()
 {
-   Console.WriteLine("======= Switch On String Example =======");
-
-   Console.WriteLine("C# or VB");
-   Console.Write("Please pick your language preference");
-
-   string langChoice = Console.ReadLine();
-   switch (langChoice.ToUpper())
-   {
-      case "C#":
-         Console.WriteLine("Good choice, C# is a fine language.");
-         break;
-      case "VB":
-         Console.WriteLine("VB: OOP, multithreading and more!");
-         break;
-      default:
-         Console.WriteLine("Well...good luck with that!");
-         break;
-   }
+	Console.WriteLine("======= Switch On String Example =======");
+	
+	Console.WriteLine("C# or VB");
+	Console.Write("Please pick your language preference");
+	
+	string langChoice = Console.ReadLine();
+	switch (langChoice.ToUpper())
+	{
+		case "C#":
+			Console.WriteLine("Good choice, C# is a fine language.");
+			break;
+		case "VB":
+			Console.WriteLine("VB: OOP, multithreading and more!");
+			break;
+		default:
+			Console.WriteLine("Well...good luck with that!");
+			break;
+	}
 }
 ```
 
-**Il est également possible d'activer un type de données énumération**. Comme vous le verrez au [[Chapitre 4#Utilisation du type `System.Enum`|Chapitre 4]], ==le mot-clé C# `enum` vous permet de définir un ensemble personnalisé de *paires nom-valeur*==. Pour vous mettre en appétit, considérez la fonction d'aide finale suivante, qui effectue un test `switch` sur l'énumération `System.DayOfWeek`. Vous remarquerez certaines syntaxes que je n'ai pas encore examinées, mais concentrez-vous sur la question du passage dans l'`enum` elle-même; les éléments manquants seront complétés au fil des chapitres à venir.
+**Il est également possible d'évaluer un type de données `enum`**. Comme vous le verrez au [[Chapitre 4#Utilisation du type `System.Enum`|Chapitre 4]], **le mot-clé C# `enum` vous permet de définir un ensemble personnalisé de *paires nom-valeur***. Pour vous mettre en appétit, considérez la fonction d'aide finale suivante, qui effectue un test `switch` sur l'énumération `System.DayOfWeek`. Vous remarquerez certaines syntaxes que je n'ai pas encore examinées, mais concentrez-vous sur la question du passage dans l'`enum` elle-même; les éléments manquants seront complétés au fil des chapitres à venir.
 
 ```cs
 static void SwitchOnEnumExample()
 {
-    Console.WriteLine("======= Switch On Enum Example =======");
-    Console.Write("Enter your favorite day of the week: ");
-    DayOfWeek favDay;
-
-    // Non utilisation de la méthode TryParse pour montrer une déclaration
-    // switch sans cas default.
-    try
-    {
-        favDay = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), Console.ReadLine());
-    }
-    catch (Exception)
-    {
-        Console.WriteLine("Bad input!");
-        return;
-    }
-    switch (favDay)
-    {
-        case DayOfWeek.Sunday:
-            Console.WriteLine("Football!!");
-            break;
-        case DayOfWeek.Monday:
-            Console.WriteLine("Another day, another dollar");
-            break;
-        case DayOfWeek.Tuesday:
-            Console.WriteLine("At least it is not Monday");
-            break;
-        case DayOfWeek.Wednesday:
-            Console.WriteLine("A fine day.");
-            break;
-        case DayOfWeek.Thursday:
-            Console.WriteLine("Almost Friday...");
-            break;
-        case DayOfWeek.Friday:
-            Console.WriteLine("Yes, Friday rules!");
-            break;
-        case DayOfWeek.Saturday:
-            Console.WriteLine("Great day indeed.");
-            break;
-    }
-    Console.WriteLine();
+	Console.WriteLine("======= Switch On Enum Example =======");
+	Console.Write("Enter your favorite day of the week: ");
+	DayOfWeek favDay;
+	
+	// Non utilisation de la méthode TryParse pour montrer une déclaration
+	// switch sans cas default.
+	try
+	{
+		favDay = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), Console.ReadLine());
+	}
+	catch (Exception)
+	{
+		Console.WriteLine("Bad input!");
+		return;
+	}
+	switch (favDay)
+	{
+		case DayOfWeek.Sunday:
+			Console.WriteLine("Football!!");
+			break;
+		case DayOfWeek.Monday:
+			Console.WriteLine("Another day, another dollar");
+			break;
+		case DayOfWeek.Tuesday:
+			Console.WriteLine("At least it is not Monday");
+			break;
+		case DayOfWeek.Wednesday:
+			Console.WriteLine("A fine day.");
+			break;
+		case DayOfWeek.Thursday:
+			Console.WriteLine("Almost Friday...");
+			break;
+		case DayOfWeek.Friday:
+			Console.WriteLine("Yes, Friday rules!");
+			break;
+		case DayOfWeek.Saturday:
+			Console.WriteLine("Great day indeed.");
+			break;
+	}
+	Console.WriteLine();
 }
 ```
 
-==Il n'est pas possible de passer d'une instruction `case` à une autre==, mais **que se passe-t-il si plusieurs instructions `case` produisent le même résultat ?** Heureusement, ==elles peuvent être combinées==, comme le montre l'extrait de code suivant:
+**Il n'est pas possible de passer d'une instruction `case` à une autre, mais que se passe-t-il si plusieurs instructions `case` produisent le même résultat ?** Heureusement, ==elles peuvent être combinées==, comme le montre l'extrait de code suivant:
 
 ```cs
 case DayOfWeek.Saturday:
@@ -2618,37 +2626,38 @@ case DayOfWeek.Sunday:
 	break;
 ```
 
-Si un code était inclus entre les instructions case, le compilateur générerait une erreur. **Tant qu'il s'agit d'instructions consécutives, comme indiqué précédemment, les instructions `case` peuvent être combinées pour partager du code commun.**
+*==Si un code était inclus entre les instructions `case`, le compilateur générerait une erreur==*. **Tant qu'il s'agit d'instructions consécutives, comme indiqué précédemment, les instructions `case` peuvent être combinées pour partager du code commun.**
 
-En plus des instructions `return` et `break` présentées dans les exemples de code précédents, l'instruction **`switch` prend également en charge l'utilisation d'un `goto` pour quitter une condition `case` et exécuter une autre instruction `case`**. Bien que cela soit pris en charge, ==cette pratique est généralement considérée comme un anti-modèle et n'est généralement pas utilisée==. Voici un exemple d'utilisation de l'instruction `goto` dans un bloc `switch` :
+**En plus des instructions `return` et `break` présentées dans les exemples de code précédents, l'instruction `switch` prend également en charge l'utilisation d'un `goto` pour quitter une condition `case` et exécuter une autre instruction `case`**. Bien que cela soit pris en charge, *==cette pratique est généralement considérée comme un anti-modèle et n'est généralement pas utilisée==*. Voici un exemple d'utilisation de l'instruction `goto` dans un bloc `switch` :
 
 ```cs
 static void SwitchWithGoto()
 {
-   var foo = 5;
-   switch (foo)
-   {
-      case 1:
-         // Do something
-         goto case 2;
-      case 2:
-         // Do something
-         break;
-      case 3:
-         // Do something
-         goto default;
-      default:
-         //default action
-         break;
-   }
+	var foo = 5;
+	switch (foo)
+	{
+		case 1:
+			// Fait quelque chose...
+			goto case 2;
+		case 2:
+			// Fait quelque chose...
+			break;
+		case 3:
+			// Fait quelque chose...
+			goto default;
+		default:
+			// Action par défaut
+			break;
+	}
 }
 ```
 
 ## Exécution de la correspondance de modèles dans les instructions switch (Nouveauté C# 7.0, MaJ C# 9.0)
 
-Avant C# 7, les expressions de correspondance dans les instructions `switch` se limitaient à comparer une variable à des valeurs constantes, parfois appelées *constant pattern*. ==Dans C# 7, les instructions `switch` peuvent également utiliser le *type pattern*, dans lequel les instructions `case` peuvent évaluer le *type* de la variable vérifiée et les expressions `case` ne sont plus limitées aux valeurs constantes ==. La règle selon laquelle chaque instruction `case` doit se terminer par un retour ou une rupture s'applique toujours ; ==cependant, les instructions `goto` ne sont pas prises en charge avec le modèle de type==.
+Avant C# 7, les expressions de correspondance dans les instructions `switch` se limitaient à comparer une variable à des valeurs constantes, parfois appelées *constant pattern*. **Dans C# 7, les instructions `switch` peuvent également utiliser le *type pattern*, dans lequel les instructions `case` peuvent évaluer le *type* de la variable vérifiée et les expressions `case` ne sont plus limitées aux valeurs constantes**. ***==La règle selon laquelle chaque instruction `case` doit se terminer par un retour ou une rupture s'applique toujours ; cependant, les instructions `goto` ne sont pas prises en charge avec le modèle de type==***.
 
 >[!Note:]- Note pour les débutant en *POO*.
+>
 >Si vous débutez dans la programmation orientée objet, cette section peut vous sembler un peu confuse. Tout deviendra clair au [[Chapitre 6#Retour sur la correspondance de motifs (Nouveauté C 7.0)|Chapitre 6]], lorsque vous revisiteriez les nouvelles fonctionnalités de correspondance de modèles de C# 7 dans le contexte des classes et des classes de base. Pour l'instant, contentez-vous de comprendre qu'il existe une nouvelle façon puissante d'écrire des instructions `switch`.
 
 Ajouter une autre méthode nommée `ExecutePatternMatchingSwitch()` et ajoutez-y le code suivant:
@@ -2700,9 +2709,9 @@ static void ExecutePatternMatchingSwitch()
 
 ```
 
-La première instruction `switch` utilise le modèle constant standard et est incluse uniquement pour configurer cet exemple (triviale). 
+**La première instruction `switch` utilise le modèle constant standard et est incluse uniquement pour configurer cet exemple** (triviale). 
 
-==Dans la deuxième instruction `switch`, la variable est de type `objet` et, en fonction de la saisie de l'utilisateur, peut être analysée en un type de données `int`, `string` ou `decimal`==. En fonction du type de la variable, différentes instructions `case` sont associées. **En plus de vérifier le type de données, une variable est attribuée dans chacune des instructions `case` (à l'exception du cas par `défaut`)**. Mettez à jour le code comme suit pour utiliser les valeurs dans les variables :
+**Dans la deuxième instruction `switch`, la variable est de type `objet` et, en fonction de la saisie de l'utilisateur, peut être analysée en un type de données `int`, `string` ou `decimal`**. En fonction du type de la variable, différentes instructions `case` sont associées. **En plus de vérifier le type de données, une variable est attribuée dans chacune des instructions `case` (à l'exception du cas par `défaut`)**. Mettez à jour le code comme suit pour utiliser les valeurs dans les variables :
 
 ```cs
 switch (choice)
@@ -2722,7 +2731,7 @@ switch (choice)
 }
 ```
 
-En plus d'évaluer le type de l'expression de correspondance, **des clauses `when` peuvent être ajoutées aux instructions `case` pour évaluer les conditions sur la variable**. **==Dans cet exemple, en plus de vérifier le type, la valeur du type converti est également vérifiée pour une correspondance==** :
+En plus d'évaluer le type de l'expression de correspondance, **des clauses `when` peuvent être ajoutées aux instructions `case` pour évaluer les conditions sur la variable**. Dans cet exemple, en plus de vérifier le type, la valeur du type converti est également vérifiée pour une correspondance :
 
 ```cs
 static void ExecutePatternMatchingSwitchWithWhen()
@@ -2754,37 +2763,32 @@ static void ExecutePatternMatchingSwitchWithWhen()
 }
 ```
 
->[!example]- Explication du code précédent 
->On vérifie si on a entré un chiffre ou si on a entré le "nom" du cas (`C#` ou `VB`). 
+> [!info]- Explication du code précédent
+> On vérifie si on a entré un chiffre ou si on a entré le "nom" du cas (`C#` ou `VB`).
+> Si la saisie est un chiffre (`TryParse`), alors on convertit en `int`, sinon, on le garde tel quel (`string`). Ensuite, la logique du bloc `switch` est la suivante:
 >
->Si la saisie est un chiffre (`TryParse`), alors on convertit en `int`, sinon, on le garde tel quel (`string`). Ensuite, la logice du bloc `switch` est la suivante:
->
-> 1) Dans le cas ou `choice` est un int 
-> 	1) *ET QUAND* la valeur est `2` 
-> 2) **OU** Dans le cas ou `choice` est un `string` 
-> 	1) *ET QUAND* la valeur est `"VB"`, 
-> 	2) -> On affiche `"VB: OOP, multithreading, and more!"`
-> 3) Dans le cas ou `choice` est un int
->	1) *ET QUAND* la valeur est `1`
-> 4) **OU** Dans le cas ou `choice` est un `string`
-> 	1) *ET QUAND* la valeur est `C#`
-> 	2) -> On affiche `"Good choice, C# is a fine language."`
-> 5) Par défault
-> 	1) -> On affiche `"Well...good luck with that!"`
+> 1. Dans le cas ou `choice` est un `int` **ET QUAND** la valeur est `2`
+> 2. OU Dans le cas ou `choice` est un `string` **ET QUAND** la valeur est `"VB"`
+>    - → On affiche `"VB: OOP, multithreading, and more!"`
+> 3. Dans le cas ou `choice` est un `int` **ET QUAND** la valeur est `1`
+> 4. OU Dans le cas ou `choice` est un `string` **ET QUAND** la valeur est `"C#"`
+>    - → On affiche `"Good choice, C# is a fine language."`
+> 5. Par défaut
+>    - → On affiche `"Well...good luck with that!"`
 
-==Cela ajoute une nouvelle dimension à l'instruction `switch`, car l'ordre des instructions `case` est désormais significatif==. Avec le modèle constant, chaque instruction `case` devait être unique. Avec le modèle de type, ce n'est plus le cas. Par exemple, le code suivant correspondra à chaque entier dans la première instruction `case` et n' exécutera jamais la deuxième ou la troisième (en fait, le code suivant échouera à la compilation) :
+**Cela ajoute une nouvelle dimension à l'instruction `switch`, car l'ordre des instructions `case` est désormais significatif. Avec le modèle constant, chaque instruction `case` devait être unique. Avec le modèle de type, ce n'est plus le cas.** Par exemple, le code suivant correspondra à chaque entier dans la première instruction `case` et n' exécutera jamais la deuxième ou la troisième (en fait, le code suivant échouera à la compilation) :
 
 ```cs
 switch (choice)
 {
 	case int i:
-		// do something
+		// Fait quelque chose...
 		break;
 	case int i when i == 0:
-		// do semething
+		// Fait quelque chose...
 		break;
 	case int i when i == -1:
-		// do semething
+		// Fait quelque chose...
 		break;
 ```
 
@@ -2800,50 +2804,50 @@ Lors de la sortie initiale de C# 7, il y avait un petit problème avec la corres
 ```cs
 static string FromRainboxClassic(string colorBand)
 {
-   switch (colorBand)
-   {
-      case "Red":
-         return "#FF0000";
-      case "Orange":
-         return "#FF7F00";
-      case "Yellow":
-         return "#FFFF00";
-      case "Green":
-         return "#00FF00";
-      case "Blue":
-         return "#0000FF";
-      case "Indigo":
-         return "#4B0082";
-      case "Violet":
-         return "#9400D3";
-      default:
-         return "#FFFFFF";
-   }
+	switch (colorBand)
+	{
+		case "Red":
+			return "#FF0000";
+		case "Orange":
+			return "#FF7F00";
+		case "Yellow":
+			return "#FFFF00";
+		case "Green":
+			return "#00FF00";
+		case "Blue":
+			return "#0000FF";
+		case "Indigo":
+			return "#4B0082";
+		case "Violet":
+			return "#9400D3";
+		default:
+			return "#FFFFFF";
+	}
 }
 ```
 
 **Avec les nouvelles expressions `switch` dans C# 8, la méthode précédente peut être écrite comme suit, ce qui est beaucoup plus concis :**
 
 ```cs
- static string FromRainbow(string colorBand)
+static string FromRainbow(string colorBand)
 {
-   return colorBand switch
-   {
-      "Red" => "#FF0000",
-      "Orange" => "#FF7F00",
-      "Yellow" => "#FFFF00",
-      "Green" => "#00FF00",
-      "Blue" => "#0000FF",
-      "Indigo" => "#4B0082",
-      "Violet" => "#9400D3",
-      _ => "#FFFFFF",
-   };
+	return colorBand switch
+	{
+		"Red" => "#FF0000",
+		"Orange" => "#FF7F00",
+		"Yellow" => "#FFFF00",
+		"Green" => "#00FF00",
+		"Blue" => "#0000FF",
+		"Indigo" => "#4B0082",
+		"Violet" => "#9400D3",
+		_ => "#FFFFFF",
+	};
 }
 ```
 
-Cet exemple comporte de nombreux éléments à décortiquer, ==des expressions lambda (`=>`) aux expressions de suppression (`_`). Tous ces éléments seront abordés plus en détail dans les chapitres suivants==, tout comme cet exemple. 
+***==Cet exemple comporte de nombreux éléments à décortiquer, des expressions lambda (`=>`) aux expressions de suppression (`_`). Tous ces éléments seront abordés plus en détail dans les chapitres suivants, tout comme cet exemple.==***
 
-Il y a un autre exemple avant de terminer le sujet des expressions `switch`, et il concerne **les tuples**. Les tuples sont abordés en détail au [[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ C 7.0)|Chapitre 4]], alors pour l'instant, considérez un tuple comme une construction simple contenant plusieurs valeurs et définie par des parenthèses, comme ce tuple qui contient un `string` et un `int` :
+Il y a un autre exemple avant de terminer le sujet des expressions `switch`, et il concerne **les tuples**. Les tuples sont abordés en détail au [[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ C 7.0)|Chapitre 4]], alors pour l'instant, **considérez un tuple comme une construction simple contenant plusieurs valeurs et définie par des parenthèses,** comme ce tuple qui contient un `string` et un `int` :
 
 ```cs
 (string, int)
@@ -2880,13 +2884,10 @@ Cet exemple sera repris au [[Chapitre 4#Comprendre les tuples (Nouveauté / MaJ 
 
 # Résumé du chapitre
 
-L'objectif de ce chapitre était de vous présenter les nombreux aspects fondamentaux du langage de programmation C#. Vous avez examiné les constructions courantes dans toute application que vous pourriez être amené à créer. **Après avoir étudié le rôle d'un objet d'application, vous avez appris que chaque programme exécutable C# doit avoir un type définissant une méthode `Main()`, soit explicitement, soit à l'aide d'instructions de niveau supérieur. Cette méthode sert de point d'entrée au programme.**
+**==L'objectif de ce chapitre était de vous présenter les nombreux aspects fondamentaux du langage de programmation C#.==** Vous avez examiné les constructions courantes dans toute application que vous pourriez être amené à créer. **Après avoir étudié le rôle d'un objet d'application, vous avez appris que chaque programme exécutable C# doit avoir un type définissant une méthode `Main()`, soit explicitement, soit à l'aide d'instructions de niveau supérieur. Cette méthode sert de point d'entrée au programme.**
 
-Ensuite, vous avez approfondi les détails des types de données intégrés à C# et compris que **chaque mot-clé de type de données (par exemple, `int`) est en réalité une notation abrégée pour un type complet dans l'espace de noms `System`** (`System.Int32`, dans ce cas). ==De ce fait, chaque type de données C# possède un certain nombre de membres intégrés==. Dans le même ordre d'idées, vous avez également découvert **le rôle de l'*élargissement (Upcast)* et du *rétrécissement (Downcast)*, ainsi que celui des mots-clés `checked` et `unchecked`**. 
+Ensuite, vous avez approfondi les détails des types de données intégrés à C# et compris que **chaque mot-clé de type de données (par exemple, `int`) est en réalité une notation abrégée pour un type complet dans l'espace de noms `System`** (`System.Int32`, dans ce cas). ***==De ce fait, chaque type de données C# possède un certain nombre de membres intégrés==***. Dans le même ordre d'idées, **vous avez également découvert le rôle de l'*élargissement (Upcast)* et du *rétrécissement (Downcast)*, ainsi que celui des mots-clés `checked` et `unchecked`**. 
 
 Le chapitre s'est terminé par la présentation du rôle du **typage implicite à l'aide du mot-clé `var`**. Comme indiqué, le typage implicite est **particulièrement utile lorsque vous travaillez avec le modèle de programmation `LINQ`**. Enfin, vous avez rapidement examiné les **différentes constructions d'itération et de décision prises en charge par C#**.
 
 Maintenant que vous comprenez certains des principes de base, le chapitre suivant ([[Chapitre 4|Chapitre 4]]) complètera votre examen des fonctionnalités principales du langage. Vous serez alors prêt à examiner les fonctionnalités orientées objet de C# à partir du [[Chapitre 5|Chapitre 5]].
-
-[^1]: Seulement pour Windows
-[^2]: Pour une explication imagée, voir dans le vault ***Notes Code et CLI***. ou la [documentation .NET](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/reference-types#the-string-type)
