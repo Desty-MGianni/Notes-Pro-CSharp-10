@@ -155,7 +155,9 @@ La deuxième façon utilise les mêmes options, la différences est que l'on uti
 Les éditions Community et Professional sont essentiellement identiques. La différence la plus significative réside dans le modèle de licence. La licence Community est destinée à une utilisation open source, académique et dans les petites entreprises. Les éditions Professional et Enterprise sont des produits commerciaux dont la licence couvre tout type de développement, y compris le développement en entreprise. Comme on peut s'y attendre, l'édition Enterprise offre de nombreuses fonctionnalités supplémentaires par rapport à l'édition Professional.
 
 >[!Note]-
+>
 >Voir www.visualstudio.com pour les modalités de liscences.
+>
 >>[!warning] Le lien pour Visual Studio 2022 ne fonctionne plus.
 
 Toutes les éditions de Visual Studio sont livrées avec des éditeurs de code sophistiqués, des débogueurs intégrés, des concepteurs d'interface graphique pour les applications de bureau, et bien plus encore. Comme elles partagent toutes un ensemble commun de fonctionnalités, la bonne nouvelle est qu'il est facile de passer de l'une à l'autre et de se sentir à l'aise avec leur fonctionnement de base.
@@ -291,7 +293,7 @@ Au départ, le concepteur sera vide ; cependant, vous pouvez glisser-déposer de
 
 ![[Figure 2.9.png|La boîte de dialogue Ajouter un nouvel élément]]
 
-> Cette fonctionnalité n'est disponible nativement que pour Visual Studio, pour VSCode, il faut installer une extension https://marketplace.visualstudio.com/items?itemName=pierre3.csharp-to-plantuml
+> Cette fonctionnalité n'est disponible nativement que pour Visual Studio, pour VSCode, il faut installer [cette extension](https://marketplace.visualstudio.com/items?itemName=pierre3.csharp-to-plantuml).
 
 Mettez à jour le code comme suit pour créer une classe `Car` (vous apprendrez tout sur les classes dans les prochains chapitres) :
 
@@ -405,7 +407,7 @@ Deux manières différentes (pour les versions récentes):
 
 Cela crée un nouveau fichier de solution nommé (`-n`) *SimpleCSharpConsoleApp* dans un sous-répertoire (du répertoire actuel) nommé `VisualStudioCode`. Lorsque vous utilisez Visual Studio Code avec une application à projet unique, il n'est pas nécessaire de créer un fichier de solution. ==Visual Studio est centré sur les solutions; Visual Studio Code est centré sur le code==. Nous avons créé un fichier de solution afin de reproduire le processus de l'exemple Visual Studio.
 
-> [!Attention] 
+> [!Attention]
 > les examples fournis utilisent les séparateur de dossier Windows. Il faut utiliser les séparateurs selon le système d'exploitation utilisé.
 
 Ensuite, créez une nouvelle application console C# 9/.NET 5 (`-f net6.0`) nommée (`-n`) *SimpleCSharpConsoleApp* dans un sous-répertoire (`-o`) du même nom (notez que cette commande doit être saisie sur une seule ligne) :
@@ -449,6 +451,7 @@ dotnet build
 ```
 
 >[!TIp]- les commandes `restore` et `build` liés avec des solutions :
+>
 >Lorsque `dotnet restore` et `dotnet build` sont exécutés dans un répertoire contenant un fichier de solution (*.sln ou .slnx*), tous les projets de la solution sont concernés. Les commandes peuvent également être exécutées sur un seul projet en exécutant la commande dans le répertoire du fichier de projet C# (*.csproj*).
 
 Pour exécuter votre projet sans déboggage, exécutez la commande CLI .NET suivante dans le même répertoire que le fichier de projet (*SimpleCSharpConsoleApp.csproj*) :
@@ -502,8 +505,10 @@ https://docs.microsoft.com/en-us/dotnet/core/
 L'objectif de ce chapitre était de vous fournir les informations nécessaires pour configurer votre environnement de développement avec le SDK et les runtimes .NET 6, ainsi que de vous présenter Visual Studio 2022 Community Edition et Visual Studio Code. Si vous souhaitez créer des applications .NET Core multiplateformes, vous disposez de trois choix . *Visual Studio* (Windows uniquement) et *Visual Studio Code* (multiplateforme) sont tous fournis par Microsoft, et *Rider* fournie par l'entreprise *JetBrains*. ==La création d'applications WPF ou WinForms nécessite toujours Visual Studio sur un ordinateur Windows==.
 
 >[!info]
+>
 >*MAUI* est une option qui permet de créer des applications à interface graphique multi-plateforme, bien que très peu utilisées.
-
->[!success] Une alternative à été trouvée
->Pour la partie entière dédié aux applications graphiques, il est possible d'utiliser *AvaloniaUI*, qui est un concurrent cross-platform de WPF.
+>
+>>[!success] Une alternative à été trouvée
+>>
+>>Pour la partie entière dédié aux applications graphiques, il est possible d'utiliser *AvaloniaUI*, qui est un concurrent cross-platform de WPF.
 

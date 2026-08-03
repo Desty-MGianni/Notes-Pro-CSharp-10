@@ -323,10 +323,13 @@ Write-Host "All Done."
 ```
 
 >[!Note]- Erreur lors de l'exécution du script *.ps1* 
+>
 >Si vous recevez une erreur de stratégie de sécurité lors de l'exécution du script PowerShell, vous pouvez définir la stratégie pour autoriser les scripts locaux non signés en exécutant la commande suivante dans PowerShell :
+>
 >```powershell
-set-executionpolicy -executionpolicy remotesigned -scope currentuser
+>set-executionpolicy -executionpolicy remotesigned -scope currentuser
 >```
+>
 
 >[!Attention] 
 >En utilisant ce type de script, la variable retourné aura pour valeur `0` dans le terminal car le dernier processus s'est exécuté sans erreur (le script *.cmd* /*.sh* / *.ps1* / *zsh*).
@@ -353,7 +356,7 @@ return 0;
 ```
 
 >[!note] 
->Notez que cet exemple utilise des instructions globales, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
+>Cet exemple utilise des instructions globales, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
 
 Une fois encore, en examinant le CIL généré pour le programme à l'aide d'instructions de niveau supérieur, **notez que la méthode `<Main>$` accepte un tableau de chaines (`string`) nommé `args`, comme indiqué ici (abrégé pour gagner de la place) :**
 
@@ -418,7 +421,9 @@ return 0;
 Enfin, **vous pouvez également accéder aux arguments de ligne de commande à l'aide de la *méthode statique* `GetCommandLineArgs()` du type `System.Environment`.** La valeur renvoyée par cette méthode est un tableau de `string`. La première entrée contient le nom de l'application elle-même (le chemin d'accès), tandis que les autres éléments du tableau contiennent les arguments de ligne de commande individuels.
 
 >[!tip] La différence entre `GetCommandLineArgs()` et `args`
+>
 > La méthode `GetCommandLineArgs` ne reçoit pas les arguments de l'application via la méthode `Main()` et ne dépend pas du paramètre `string[] args`.
+> 
 >>[!note] Le code suivant n'utilise pas la déclaration de haut niveau pour prouver ce point.
 
 ```cs
@@ -523,7 +528,7 @@ Presque toutes les applications d'exemple créées au cours des premiers chapitr
 
 **Comme son nom l'indique, la classe `Console` encapsule les manipulations des flux d'entrée, de sortie et d'erreur pour les applications basées sur la console** (*stdin*, *stdout* et *stderr* sur les systèmes basés sur *Unix*). Le [[#Tableau 3-2 Sélection de membres de la classe `Console`|tableau 3-2]] répertorie certains membres intéressants (mais certainement pas tous). Comme vous pouvez le constater, ***==la classe `Console` fournit certains membres qui peuvent enrichir une application en ligne de commande simple, tels que la possibilité de modifier les couleurs d'arrière-plan et de premier plan et d'émettre des bips sonores.==***
 
->[!Info] Seulement pour windows
+>[!Info]- Seulement pour windows
 >La méthode `Console.Beep` permet de modifier la tonalité du bip sonore (avec un paramètre dédié).
 
 ###### Tableau 3-2: Sélection de membres de la classe `Console`
@@ -561,7 +566,9 @@ static void GetUserData()
 ```
 
 >[!tip] Les extraits de codes.
+>
 >Visual Studio et Visual Studio Code prennent tous deux en charge un certain nombre d'«extraits de code» (*snippets*) qui insèrent du code une fois activés. L'extrait de code `cw` est très utile dans les premiers chapitres de ce texte, car il se développe automatiquement en `Console.WriteLine()` ! Pour le tester par vous-même, tapez `cw` quelque part dans votre code et appuyez sur la touche Tab.
+>
 >>[!example] Dans Visual Studio Code, vous appuyez une fois sur la touche Tab ; dans Visual Studio, vous devez appuyer deux fois sur la touche Tab.
 
 
@@ -1259,9 +1266,11 @@ static void StringConcatenation()
 ```
 
 >[!tip]- Simplification des appels des membre de la classe `String`.
+>
 >Les EDI modernes (avec le nouvel analyseur de code *roslyn*) indique que l'on peut simplifier l'appel `String.Concat()` par cet appel -> `string.Concat()`. Cette simplification est du même registre que pour l'appel de la méthode `Parse` (vu [[#Convertir des valeurs à partir de données de type chaîne|précédement]]): `int.Parse()` au lieu de `Int32.Parse()`
 >
->>[!quote] [Documentation miscrosoft](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/#:~:text=In%20C%23%2C%20the%20string%20keyword,%2C%20manipulating%2C%20and%20comparing%20strings.):
+>>[!quote] Documentation Miscrosoft ([Lien ici](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/#:~:text=In%20C%23%2C%20the%20string%20keyword,%2C%20manipulating%2C%20and%20comparing%20strings.)):
+>>
 >>En C#, le mot-clé `string` est un alias de `String` ; par conséquent, `String` et `string` sont équivalents. **Utilisez l'alias `string` fourni, car il fonctionne même sans `System`**. La classe `String` offre de nombreuses méthodes pour créer, manipuler et comparer des chaînes de caractères en toute sécurité.
 
 ## Utilisation des caractères d'échappement
