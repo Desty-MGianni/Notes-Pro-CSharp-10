@@ -1261,7 +1261,7 @@ static void StringConcatenation()
 }
 ```
 
->[!tip]- Simplification des appels des membre de la classe `String`.
+>[!tip] Simplification des appels des membre de la classe `String`.
 >Les EDI modernes (avec le nouvel analyseur de code *roslyn*) indique que l'on peut simplifier l'appel `String.Concat()` par cet appel -> `string.Concat()`. Cette simplification est du même registre que pour l'appel de la méthode `Parse` (vu [[#Convertir des valeurs à partir de données de type chaîne|précédement]]): `int.Parse()` au lieu de `Int32.Parse()`
 >
 >>[!quote] Documentation Miscrosoft ([Lien ici](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/#:~:text=In%20C%23%2C%20the%20string%20keyword,%2C%20manipulating%2C%20and%20comparing%20strings.)):
