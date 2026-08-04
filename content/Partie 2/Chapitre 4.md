@@ -5,17 +5,17 @@ publish: true
 
 # <big><big><big><b><font color =green>Principes Fondamentaux de la Programmation C#, partie 2</font></b></big></big></big>
 
-Ce chapitre reprend là où le [[Chapitre 3#Résumé du chapitre|Chapitre 3]] s'est arrêté et complète votre étude des aspects fondamentaux du langage de programmation C#. Vous commencerez par **étudier les détails de la manipulation des tableaux à l'aide de la syntaxe C# et découvrirez les fonctionnalités contenues dans le type de classe `System.Array` associé.**
+Ce chapitre reprend là où le [[Chapitre 3#Résumé du chapitre|Chapitre 3]] s'est arrêté et complète votre étude des aspects fondamentaux du langage de programmation C#. Vous commencerez par étudier les détails de la manipulation des tableaux à l'aide de la syntaxe C# et découvrirez les fonctionnalités contenues dans le type de classe `System.Array` associé.
 
-Ensuite, vous examinerez divers détails concernant la **construction des méthodes C#**, ==en explorant les mots-clés `out`, `ref` et` params`==. Au cours de cette étape, vous examinerez également le rôle des ==paramètres facultatifs et nommés==. Je termine la discussion sur les méthodes en abordant la ==surcharge des méthodes==.
+Ensuite, vous examinerez divers détails concernant la construction des méthodes C#, en explorant les mots-clés `out`, `ref` et` params`. Au cours de cette étape, vous examinerez également le rôle des paramètres facultatifs et nommés. Je termine la discussion sur les méthodes en abordant la surcharge des méthodes.
 
-Ce chapitre aborde ensuite la **construction des types d'énumération et de structure, y compris un examen détaillé de la distinction entre un *type de valeur* et un *type de référence*. Ce chapitre se termine par l' examen du rôle des types de données *annulbles* et des opérateurs associés.
+Ce chapitre aborde ensuite la **construction des types d'énumération et de structure, y compris un examen détaillé de la distinction entre un *type de valeur* et un *type de référence*.** Ce chapitre se termine par l' examen du rôle des types de données *annulbles* et des opérateurs associés.
 
-Une fois ce chapitre terminé, vous serez parfaitement prêt à découvrir les capacités *orientées objet de C#*, à partir du [[Chapitre 5]].
+**Une fois ce chapitre terminé, vous serez parfaitement prêt à découvrir les capacités *orientées objet de C#***, à partir du [[Chapitre 5]].
 
 # Comprendre les Tableaux C#
 
-Comme vous le savez sans doute déjà, **un tableau est un ensemble d'éléments de données auxquels on accède à l'aide d'un index numérique.** Plus précisément, ==un tableau est un ensemble de points de données contigus du même type (un tableau de`int`, un tableau de `SportsCar`, etc.)==. La déclaration, le remplissage et l'accès à un tableau avec C# sont tous assez simples. Pour illustrer cela, créez un nouveau projet d'application console nommé *FunWithArrays* qui contient une méthode d'aide nommée `SimpleArrays()` comme suit :
+Comme vous le savez sans doute déjà, **un tableau est un ensemble d'éléments de données auxquels on accède à l'aide d'un index numérique. Plus précisément, un tableau est un ensemble de points de données contigus du même type** (un tableau de`int`, un tableau de `SportsCar`, etc.). La déclaration, le remplissage et l'accès à un tableau avec C# sont tous assez simples. Pour illustrer cela, créez un nouveau projet d'application console nommé *FunWithArrays* qui contient une méthode d'aide nommée `SimpleArrays()` comme suit :
 
 >Chaque chapitre possède sa solution, avec dedans tout les projets du chapitre. Pour lancer tout les projets du chapitre, utilisez [[Launcher.cs]]
 
@@ -39,9 +39,9 @@ static void SimpleArrays()
 
 ```
 
-Examinez attentivement les commentaires du code précédent. **Lorsque vous déclarez un tableau C# à l'aide de cette syntaxe, le nombre utilisé dans la déclaration du tableau représente le nombre total d'éléments, et non la limite supérieure**. Notez également que ==la limite inférieure d'un tableau commence toujours à 0==. Ainsi, lorsque vous écrivez ```int[] myInts = new int[3]```j, vous obtenez un tableau contenant trois éléments, indexés aux positions `0`, `1` et `2`.
+Examinez attentivement les commentaires du code précédent. **Lorsque vous déclarez un tableau C# à l'aide de cette syntaxe, le nombre utilisé dans la déclaration du tableau représente le nombre total d'éléments, et non la limite supérieure**. ***==Notez également que la limite inférieure d'un tableau commence toujours à $0$==***. Ainsi, lorsque vous écrivez ```int[] myInts = new int[3]```, vous obtenez un tableau contenant trois éléments, indexés aux positions `0`, `1` et `2`.
 
-Après avoir défini une variable de tableau, vous pouvez remplir les éléments index par index, comme indiqué ici dans la méthode `SimpleArrays()` mise à jour :
+**Après avoir défini une variable de tableau, vous pouvez remplir les éléments index par index,** comme indiqué ici dans la méthode `SimpleArrays()` mise à jour :
 
 ```cs
 static void SimpleArrays()

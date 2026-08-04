@@ -742,7 +742,112 @@ SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId"
 
 ## Trier les enregistrements
 
+**Les méthodes `OrderBy()` et `OrderByDescending()` définissent le ou les tris de la requête, respectivement par ordre croissant ou décroissant. Si des tris supplémentaires sont nécessaires, utilisez les méthodes `ThenBy()` et/ou `ThenByDescending()`.**
 
+```cs
+static void SortData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Retourne toutes les voitures triées par couleurs
+    IOrderedQueryable<Car> cars1 = context.Cars.OrderBy(c => c.Color);
+    Console.WriteLine("**** Cars ordered by Color ****");
+    foreach (Car c in cars1)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+    // Retourne toutes les voitures triées par couleurs puis par nom familier.
+    IOrderedQueryable<Car> cars2 = context
+        .Cars.OrderBy(c => c.Color)
+        .ThenBy(c => c.PetName);
+    Console.WriteLine("***** Cars ordered by Color then by PetName");
+    foreach (Car c in cars2)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+    // Retourne toutes les voitures triées par couleurs descendantes.
+    IOrderedQueryable<Car> cars3 = context.Cars.OrderByDescending(c => c.Color);
+    Console.WriteLine("**** Cars ordered by Color descending ****");
+    foreach (Car c in cars3)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+==Notez que le type de données renvoyé par une requête LINQ avec `OrderBy()`/`OrderByDescending()` est `IOrderedQueryable<Car>`.==
+
+**Le tri ascendant et descendant peut être combiné**, comme illustré ici :
+
+```cs
+static void SortData()
+{
+	...
+	
+    // Retourne toutes les voitures triées par couleurs
+    // puis par nom familier descendant.
+    IOrderedQueryable<Car> cars4 = context
+        .Cars.OrderBy(c => c.Color)
+        .ThenByDescending(c => c.PetName);
+    Console.WriteLine(
+        "**** Cars ordered by Color then by PetName descending ****"
+    );
+    foreach (Car c in cars4)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+
+```
+
+### Tri inversé des enregistrements
+
+**La méthode `Reverse()` inverse l'ordre de tri complet,** comme illustré ici :
+
+```cs
+static void SortData()
+{
+	...
+	
+    // Retourne toutes les voitures triées par couleurs
+    // puis par nom familier inversé.
+    IQueryable<Car> cars5 = context
+        .Cars.OrderBy(c => c.Color)
+        .ThenBy(c => c.PetName)
+        .Reverse();
+    Console.WriteLine("**** Cars ordered by Color ****");
+    foreach (Car c in cars4)
+        Console.WriteLine($"{c.PetName} is {c.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+==Notez que le type de données renvoyé par une requête LINQ avec une clause `Reverse()` est `IQueryable<Car>`, et non `IOrderedQueryable<Car>`==.
+
+La requête LINQ précédente est traduite comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
+ORDER BY i."Color", i."PetName" DESC
+```
+
+>[!warning] Différence entre SQL Server et PosgreSQL (Avec Claude)
+>
+>`Reverse()` avec Npgsql/PostgreSQL peut avoir un comportement différent de SQL Server. Pour garantir un tri descendant sur toutes les colonnes, utiliser explicitement `OrderByDescending()` et `ThenByDescending()` au lieu de `Reverse()` :
+>
+>```csharp
+>// Au lieu de
+>context.Cars.OrderBy(c => c.Color).ThenBy(c => c.PetName).Reverse();
+>
+>// Utiliser
+>context.Cars.OrderByDescending(c => c.Color).ThenByDescending(c => c.PetName);
+>```
+
+### Pagination
+
+EF Core offre des fonctionnalités de pagination grâce aux méthodes `Skip()` et `Take()`. `Skip()` ignore le nombre spécifié d'enregistrements, tandis que `Take()` récupère le nombre spécifié d'enregistrements.
+
+L'utilisation de la méthode `Skip()` avec SQL Server exécute une requête avec une commande `OFFSET`. La commande `OFFSET` est l'équivalent, pour SQL Server, de l'omission d'enregistrements qui seraient normalement renvoyés par la requête. Ajoutez la méthode suivante au fichier *Program.cs* :
 
 ## Résilience de la connection
 
