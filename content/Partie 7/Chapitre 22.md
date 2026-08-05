@@ -845,9 +845,294 @@ ORDER BY i."Color", i."PetName" DESC
 
 ### Pagination
 
-EF Core offre des fonctionnalités de pagination grâce aux méthodes `Skip()` et `Take()`. `Skip()` ignore le nombre spécifié d'enregistrements, tandis que `Take()` récupère le nombre spécifié d'enregistrements.
+**EF Core offre des fonctionnalités de pagination grâce aux méthodes `Skip()` et `Take()`. `Skip()` ignore le nombre spécifié d'enregistrements, tandis que `Take()` récupère le nombre spécifié d'enregistrements.**
 
-L'utilisation de la méthode `Skip()` avec SQL Server exécute une requête avec une commande `OFFSET`. La commande `OFFSET` est l'équivalent, pour SQL Server, de l'omission d'enregistrements qui seraient normalement renvoyés par la requête. Ajoutez la méthode suivante au fichier *Program.cs* :
+**L'utilisation de la méthode `Skip()` avec SQL Server et PostgresSQL exécute une requête avec une commande `OFFSET`. La commande `OFFSET` est l'équivalent de l'omission d'enregistrements qui seraient normalement renvoyés par la requête.*** Ajoutez la méthode suivante au fichier *Program.cs* :
+
+```cs
+static async Task Paging()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    Console.WriteLine("**** Paging ****");
+    // Passe les deux premiers enregistrements
+    var cars = await context.Cars.Skip(2).ToListAsync();
+}
+```
+
+L'exemple de code ignore les deux premiers enregistrements et renvoie les suivants. La requête, légèrement modifiée pour plus de clarté, est présentée ici :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      OFFSET @p
+```
+
+***==Sur SQL Server, la requête généré ajoute une clause `ORDER BY`, même quand on ne l'a pas ajouté dans la déclaration LINQ. C'est parque que la commande `OFFSET` dans SQL Server ne peux pas être exécutée sans la clause `ORDER BY`.==***
+
+PostgreSQL prend en charge une syntaxe historique et simplifiée où `OFFSET` et `LIMIT` se suffisent à eux-mêmes. Bien qu'il accepte d'exécuter cette requête, **omettre le tri est une mauvaise pratique en production**.
+
+**En base de données, sans clause `ORDER BY` explicite, l'ordre de retour des lignes est dit indéterminé**. PostgreSQL renvoie les lignes selon leur disposition physique sur le disque (le "relation scan").
+
+>[!tip] 
+>
+>Pour garantir une pagination fiable et identique sur n'importe quel système de gestion de base de données (SQL Server, PostgreSQL, SQLite, etc.), forcez toujours un tri dans votre expression LINQ avant d'utiliser `.Skip()` ou `.Take()`.
+
+**La méthode `Take()` génère une requête utilisant la commande `TOP` pour SQL Server et `LIMIT` pour PostgreSQL.** L'ajout suivant à la méthode `Paging()` utilise la méthode `Clear()` sur `ChangeTracker` pour réinitialiser l'`ApplicationDbContext`, puis la méthode `Take()` pour renvoyer deux enregistrements.
+
+```cs
+static async Task Paging()
+{
+	...
+	
+	context.ChangeTracker.Clear();
+	// Prend les deux premiers enregistrements
+	cars = await context.Cars.Take(2).ToListAsync();
+}
+```
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      LIMIT @p
+```
+
+>[!note]
+>
+>Rappelons ([[Chapitre 13#Pagination des données avec des plages (Nouveauté C 10.0)|Chapitre 13]]) qu'avec .NET 6/C# 10, la méthode `Take()` pouvait accepter une plage de valeurs. Cette fonctionnalité n'est pas prise en charge par EF Core.
+
+**La combinaison des méthodes `Skip()` et `Take()` permet la pagination des données.** Par exemple, si vous avez une page de deux éléments (en raison de la petite taille de notre base de données) et que vous devez obtenir la deuxième page, exécutez la requête LINQ suivante :
+
+```cs
+static async Task Paging()
+{
+	...
+    // Passe les deux premiers enregistrements et prend les deux suivantes.
+    cars = await context.Cars.Skip(2).Take(2).ToListAsync();
+}
+```
+
+==Lorsqu'il combine `Skip()` et `Take()`, SQL Server n'utilise pas la commande `TOP`, mais une autre version de la commande `OFFSET`==, comme illustré ici :
+
+```sql
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+	FROM [dbo].[Inventory] AS [i]
+	ORDER BY (SELECT 1)
+	OFFSET 2 ROWS FETCH NEXT 2 ROWS ONLY
+```
+
+**==Pour PostgreSQL, les commandes `LIMIT` et `OFFSET` sont combinées :==**
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      LIMIT @p OFFSET @p
+```
+
+## Récupérer un seul enregistrement
+
+**Il existe trois méthodes principales (avec leurs variantes `OrDefault` ) pour récupérer un seul enregistrement lors d'une requête : `First()`/`FirstOrDefault()`, `Last()`/`LastOrDefault()` et `Single()`/`SingleOrDefault()`.** Bien que toutes trois, récupèrent un seul enregistrement, leur fonctionnement diffère. Ces trois méthodes et leurs variantes sont détaillées ici :
+
+- La méthode `First()` renvoie le premier enregistrement correspondant à la condition de la requête et à ses éventuelles clauses de tri. Si aucun tri n'est spécifié, l'enregistrement renvoyé est celui qui figure dans la base de données. Si aucun enregistrement n'est renvoyé, une exception est levée.
+- La méthode `FirstOrDefault()` se comporte de la même manière que `First()`, sauf que si aucun enregistrement ne correspond à la requête, elle renvoie la valeur par défaut du type (`null`).
+- La méthode `Single()` renvoie le premier enregistrement correspondant à la condition de la requête et à ses éventuelles clauses de tri. Si aucun tri n'est spécifié, l'enregistrement renvoyé est celui qui figure dans la base de données. Si aucun enregistrement ou plusieurs enregistrements correspondent à la requête, une exception est levée.
+- La méthode `SingleOrDefault()` se comporte de la même manière que `Single()`, sauf que si aucun enregistrement ne correspond à la requête, elle renvoie la valeur par défaut du type (`null`).
+- La méthode `Last()` renvoie le dernier enregistrement correspondant à la condition de la requête et à toute clause de tri. Si aucun tri n'est spécifié, une exception est levée. Si aucun enregistrement n'est renvoyé, une exception est levée.
+- Le comportement de `LastOrDefault()` est identique à celui de `Last()`, sauf que si aucun enregistrement ne correspond à la requête, la méthode renvoie la valeur par défaut du type (`null`).
+
+**Toutes les méthodes peuvent également accepter une `Expression<Func<T, bool>>` pour filtrer l'ensemble de résultats. Cela signifie que vous pouvez placer l'expression `Where()` dans l'appel des méthodes `First()`/`Single()` tant qu'il n'y a qu'une seule clause `Where()`. Les instructions suivantes sont équivalentes :**
+
+```cs
+Context.Cars.Where(c=>c.Id < 5).First();
+Context.Cars.First(c=>c.Id < 5);
+```
+
+>[!info] 
+>
+>Les six méthodes présenté ici **ont aussi leurs variante asynchrone**, illustré par les examples suivants. 
+
+### Utilisation de `First`
+
+Lorsqu'on utilise la forme sans paramètre de `First()` et `FirstOrDefault()`, le premier enregistrement (selon l'ordre de la base de données ou toute clause de tri précédente) est renvoyé. L'exemple suivant récupère le premier enregistrement en fonction de l'ordre de la base de données :
+
+```cs
+static async Task SingleRecordQuery()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    Console.WriteLine("**** Single Record with database sort ****");
+    var firstCar = await context.Cars.FirstAsync();
+    Console.WriteLine($"{firstCar.PetName} is {firstCar.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête LINQ précédente est traduite comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+	FROM public."Inventory" AS i
+	LIMIT 1
+```
+
+Le code suivant récupère le premier enregistrement en fonction de l'ordre de `Color` :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Single Record with OrderBy sort ****");
+    var firstCarByColor = await context.Cars.OrderBy(c => c.Color).FirstAsync();
+    Console.WriteLine($"{firstCarByColor.PetName} is {firstCarByColor.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête LINQ précédente est traduite comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      ORDER BY i."Color"
+      LIMIT 1
+```
+
+**Le code suivant montre comment utiliser `First()` avec une clause `Where()` puis comment utiliser `First()` comme clause `Where()`** :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+    Console.WriteLine("**** Single Record with Where clause ****");
+    var firstCarIdThree = await context.Cars.Where(c => c.Id == 3).FirstAsync();
+    Console.WriteLine(
+	    $"{firstCarIdThree.PetName} is {firstCarIdThree.Color}"
+	);
+    context.ChangeTracker.Clear();
+
+    Console.WriteLine("**** Single Record Using First as Where clause ****");
+    var firstCarIdThree1 = await context.Cars.FirstAsync(c => c.Id == 3);
+    Console.WriteLine(
+        $"{firstCarIdThree1.PetName} is {firstCarIdThree1.Color}"
+    );
+    context.ChangeTracker.Clear();
+}
+
+```
+
+Les deux instructions précédentes sont traduites en SQL comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      WHERE i."Id" = 3
+      LIMIT 1
+```
+
+**L'exemple suivant montre qu'une exception est levée en l'absence de correspondance lors de l'utilisation de `First()`** :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Exception when no Record is found ****");
+    try
+    {
+        var firstCarNotFound = await context.Cars.FirstAsync(c => c.Id == 27);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête LINQ précédente est traduite comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      WHERE i."Id" = 27
+      LIMIT 1
+```
+
+**Lorsqu'on utilise `FirstOrDefault()`, au lieu d'une exception, le résultat est `null` lorsqu'aucune donnée n'est renvoyée.**
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine(
+        "**** Return Default (null) when no Record is found ****"
+    );
+    var firstCarNotFound1 = await context.Cars.FirstOrDefaultAsync(c =>
+        c.Id == 27
+    );
+    Console.WriteLine(firstCarNotFound1 == null);
+    context.ChangeTracker.Clear();
+}
+```
+
+**==La requête LINQ précédente est traduite dans le même SQL que l'exemple précédent.==**
+
+>[!note]
+>
+>Rappelons ([[Chapitre 13#Définition de la valeur par défaut pour les méthodes `[First/Last/Single]OrDefault` (Nouveauté C 10)|Chapitre 13]]), qu'avec .NET 6/C# 10, les méthodes `OrDefault()` peuvent spécifier une valeur par défaut lorsqu'aucune valeur n'est renvoyée par la requête. Malheureusement, cette fonctionnalité n'est pas prise en charge par EF Core.
+
+### Utilisation de `Last`
+Lors de l'utilisation de la forme sans paramètre de `Last()` et `LastOrDefault()`, le dernier enregistrement (basé sur n'importe quel clauses de commande précédentes) seront retournées. **Lors de l'utilisation de `Last()` ou `LastOrDefault()`, la requête LINQ doit avoir une clause  `OrderBy()`/`OrderByDescending()` ou une `InvalidOperationException` sera levée** :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Exception with Last and no OrderBy ****");
+    try
+    {
+        await context.Cars.LastAsync();
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+```
+
+Le test suivant obtient le dernier enregistrement en fonction de l'ordre de `Color` :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+     Console.WriteLine("**** Get Last Record sorted by Color ****");
+    var lastCar = await context.Cars.OrderBy(c => c.Color).LastAsync();
+    Console.WriteLine($"{lastCar.PetName} is {lastCar.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+**EF Core inverse les instructions `ORDER BY` puis prend `TOP(1)` (SQL Server) ou `LIMIT 1` (PostgreSQL) pour obtenir le résultat.** Voici la requête exécutée
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      ORDER BY i."Color" DESC
+      LIMIT 1
+```
+
+### Utilisation de `Single`
+
+Conceptuellement, Single()/SingleOrDefault() fonctionne de la même manière que First()/FirstOrDefault(). Le principal La différence est que Single()/SingleOrDefault() renvoie Top(2) au lieu de Top(1) et lève une exception si deux enregistrements sont renvoyés de la base de données. 
+
+Les tests suivants récupèrent l'enregistrement unique où `Id == 1` :
 
 ## Résilience de la connection
 
