@@ -1130,9 +1130,976 @@ SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId"
 
 ### Utilisation de `Single`
 
-Conceptuellement, Single()/SingleOrDefault() fonctionne de la même manière que First()/FirstOrDefault(). Le principal La différence est que Single()/SingleOrDefault() renvoie Top(2) au lieu de Top(1) et lève une exception si deux enregistrements sont renvoyés de la base de données. 
+Conceptuellement, `Single()`/`SingleOrDefault()` fonctionne de la même manière que `First()`/`FirstOrDefault()`. **Le principal La différence est que `Single()`/`SingleOrDefault()` renvoie `TOP(2)`/`LIMIT 2` au lieu de `TOP(1)`/`LIMIT 1` et lève une exception si deux enregistrements sont renvoyés de la base de données.**
 
 Les tests suivants récupèrent l'enregistrement unique où `Id == 1` :
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Get Single Record ****");
+    var singleCar = await context.Cars.SingleAsync(c => c.Id == 3);
+    Console.WriteLine($"{singleCar.PetName} is {singleCar.Color}");
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête LINQ précédente est traduite comme suit :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      WHERE i."Id" = 3
+      LIMIT 2
+```
+
+*==La fonction `Single()` lève une exception si aucun enregistrement n'est renvoyé ou si plusieurs enregistrements sont renvoyés :==*
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Exception when more than one Record is found ****");
+    try
+    {
+        await context.Cars.SingleAsync(c => c.Id > 1);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    context.ChangeTracker.Clear();
+
+    Console.WriteLine("**** Exception when no Records are found ****");
+    try
+    {
+        await context.Cars.SingleAsync(c => c.Id == 27);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    context.ChangeTracker.Clear();
+}
+```
+
+*==Lors de l'utilisation de `SingleOrDefault()`, une exception est également levée si plusieurs enregistrements sont renvoyés :==*
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Exception when more than one Record is found ****");
+    try
+    {
+        await context.Cars.SingleOrDefaultAsync(c => c.Id > 1);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    context.ChangeTracker.Clear();
+}
+
+```
+
+Lors de l'utilisation de `SingleOrDefault()`, au lieu d'une exception, le résultat est `null` lorsqu'aucune donnée n'est renvoyée.
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine(
+        "**** Return default (null) when Single car not found ****"
+    );
+    var defaultSingleNotFoundCar = await context.Cars.SingleOrDefaultAsync(c =>
+        c.Id == 27
+    );
+    Console.WriteLine(defaultSingleNotFoundCar == null);
+    context.ChangeTracker.Clear();
+}
+
+```
+
+### Utilisation de `Find`
+
+==La méthode `Find()` renvoie également un seul enregistrement, mais son comportement diffère légèrement des autres méthodes de recherche d'enregistrements uniques.== **Les paramètres de la méthode `Find()` représentent la ou les clés primaires de l'entité. Elle recherche ensuite dans le `ChangeTracker` une instance de l'entité correspondant à la clé primaire et la renvoie si elle est trouvée. Sinon, elle effectue un appel à la base de données pour récupérer l'enregistrement.**
+
+```cs
+static async Task SingleRecordQuery()
+{
+	...
+	
+    Console.WriteLine("**** Search car using Find ****");
+    var foundCar = await context.Cars.FindAsync(27);
+    Console.WriteLine(foundCar == null);
+    context.ChangeTracker.Clear();
+}
+```
+
+**Si l'entité possède une clé primaire composée, transmettez les valeurs représentant cette clé composée :**
+
+```cs
+var item = context.MaClasseAvecCléComposite.Find(27, 3);
+```
+
+## Méthodes d'agrégation
+
+**EF Core prend également en charge les méthodes d'agrégation côté serveur (`Max()`, `Min()`, `Count()` et `Average()`). Toutes les méthodes d'agrégation peuvent être utilisées conjointement avec les méthodes `Where()` et renvoient une seule valeur. Les requêtes d'agrégation s'exécutent côté serveur. Les filtres de requête globaux affectent également les méthodes d'agrégation et peuvent être désactivés avec `IgnoreQueryFilters()`. Les filtres de requête globaux sont abordés plus loin dans ce chapitre.**
+
+**Notez que chaque méthode d'agrégation est une fonction terminale. Autrement dit, elles mettent fin à l'instruction LINQ lors de leur exécution, car chaque méthode renvoie une seule valeur numérique. L'exécution de la requête est également immédiate, comme pour les méthodes d'enregistrement unique présentées précédemment.**
+
+==Toutes les instructions SQL présentées dans cette section ont été collectées à l'aide de== :
+
+- SQL Server Profiler (Uniquement SQL Server)
+- **La méthode `LogTo` dans les options de `ApplicationDbContext` (Le reste)**
+
+==Nous utiliserons ces outils car la méthode `ToQueryString()` ne fonctionne pas avec l'agrégation.==
+
+Ce premier exemple compte tous les enregistrements de voitures dans la base de données.
+
+>[!info] 
+>
+>Tous les exemples affiché ici utiliseront leurs variantes `Async` si disponible
+
+```cs
+static async Task Aggregation()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var count = await context.Cars.CountAsync();
+}
+```
+
+La requête SQL exécutée est affichée ici :
+
+```sql
+SELECT count(*)::int
+      FROM public."Inventory" AS i
+```
+
+**La méthode `Count()` peut contenir l'expression de filtre, tout comme `First()` et `Single()`.** Les exemples suivants illustrent la méthode `Count()` avec une condition `WHERE`. Le premier ajoute l'expression directement dans la méthode `Count()`, et le second ajoute la méthode `Count()` à la fin de l'instruction LINQ, après la méthode `Where()`.
+
+```cs
+static async Task Aggregation()
+{
+	...
+	
+    var countByMake = await context.Cars.CountAsync(x => x.MakeId == 1);
+    Console.WriteLine($"Count: {countByMake}");
+    var countByMake2 = await context
+        .Cars.Where(x => x.MakeId == 1)
+        .CountAsync();
+    Console.WriteLine($"Count: {countByMake2}");
+}
+```
+
+Les deux lignes de code génèrent les mêmes appels SQL au serveur, comme illustré ici :
+
+```sql
+SELECT count(*)::int
+      FROM public."Inventory" AS i
+      WHERE i."MakeId" = 1
+```
+
+**Les exemples suivants présentent les fonctions `Min()`, `Max()` et `Average()`. Chaque méthode prend une expression permettant de spécifier la propriété sur laquelle porte l'opération :**
+
+```cs
+static async Task Aggregation()
+{
+	...
+	
+    var max = await context.Cars.MaxAsync(x => x.Id);
+    var min = await context.Cars.MinAsync(x => x.Id);
+    var avg = await context.Cars.AverageAsync(x => x.Id);
+    Console.WriteLine($"Max ID: {max} Min ID: {min} Avg ID: {avg}");
+}
+```
+
+```sql
+SELECT max(i."Id")
+      FROM public."Inventory" AS i
+      
+SELECT min(i."Id")
+      FROM public."Inventory" AS i
+      
+SELECT avg(i."Id"::double precision)
+      FROM public."Inventory" AS i
+```
+
+## Les méthodes `Any()` et `All()`
+
+**Les méthodes `Any()` et `All()` vérifient si un ensemble d'enregistrements correspond aux critères (`Any()`) ou si tous les enregistrements correspondent aux critères (`All()`).** Tout comme les méthodes d'agrégation, la méthode `Any()` (mais pas la méthode `All()`) peut être ajoutée à la fin d'une requête LINQ avec les méthodes `Where()`, ou l'expression de filtre peut être contenue dans la méthode elle-même. Les méthodes `Any()` et `All()` s'exécutent côté serveur et renvoient une valeur `bool`. ***==Ce sont deux fonctions de terminaison.==*** Les filtres de requête globaux affectent également les fonctions `Any()` et `All()` et peuvent être désactivés avec `IgnoreQueryFilters()`.
+
+==La méthode `ToQueryString()` ne fonctionne pas non plus avec les fonctions Any()/All(), c'est pourquoi toutes les instructions SQL présentées dans cette section ont été avec les mêmes moyens que les sections précédentes.==
+
+Ce premier exemple vérifie si des enregistrements de `Car` ont un `MakeId` égal à $1$.
+
+```cs
+static async Task AnyAndAll()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var resultAny = await context.Cars.AnyAsync(x => x.MakeId == 1);
+    // Ceci exécute la même requête que la ligne du dessus
+    var resultAnyWithWhere = await context
+        .Cars.IgnoreQueryFilters()
+        .Where(x => x.MakeId == 1)
+        .AnyAsync();
+
+    Console.WriteLine($"Exist? {resultAny}");
+    Console.WriteLine($"Exist? {resultAnyWithWhere}");
+}
+```
+
+Le code SQL exécuté pour le premier exemple est présenté ici :
+
+```sql
+SELECT EXISTS (
+	  SELECT 1
+	  FROM public."Inventory" AS i
+	  WHERE i."MakeId" = 1)
+```
+
+Ce deuxième exemple vérifie si *tous* les enregistrements de `Car` possèdent un `MakeId` spécifique.
+
+```cs
+static async Task AnyAndAll()
+{
+	...
+	
+    var resultAll = await context.Cars.AllAsync(x => x.MakeId == 1);
+    Console.WriteLine($"All? {resultAll}");
+}
+```
+
+Le code SQL exécuté pour le premier exemple théorique est présenté ici :
+
+```sql
+SELECT NOT EXISTS (
+	  SELECT 1
+	  FROM public."Inventory" AS i
+	  WHERE i."MakeId" <> 1)
+```
+
+## Récupération de données à partir de procédures stockées
+
+>[!Attention] Différence importantes entre SQL Server et PostgreSQL
+>
+>- SQL Server -> `PROCEDURE`
+>- PosgreSQL :
+>	- Avant PosgresSQL 11 -> `FUNCTION`
+>	- Après PostgreSQL 11 -> `PROCEDURE` / `FUNCTION`
+>
+>Pour plus d'information, voir [[Chapitre 20#Création de la procédure stockée / fonction `GetPetName()`|Chapitre 20]]
+>
+> **Dans cette exemple, j'utiliserai une `PRODEDURE`, contrairement aux chapitres précédents.**
+
+Le dernier modèle de récupération de données à examiner concerne les procédures stockées. ~~Bien qu'EF Core présente certaines lacunes concernant les procédures stockées (comparé à EF 6),~~ n'oubliez pas qu'EF Core repose sur ADO.NET. Il suffit de revenir à la notion de procédure stockée telle qu'on la concevait avant l'introduction des ORM.
+
+La première étape consiste à créer la procédure stockée dans notre base de données :
+
+```sql
+CREATE OR REPLACE PROCEDURE "GetPetName"(
+    IN carId INT,
+    OUT petName VARCHAR(50)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    SELECT "PetName"
+    INTO  petName
+    FROM "Inventory"
+    WHERE "Id" = carId;
+END;
+$$;
+```
+
+La méthode suivante crée les paramètres requis (entrée et sortie), exploite la propriété `Database` de l'objet `ApplicationDbContext` et appelle la fonction `ExecuteSqlRaw()` :
+
+```cs
+static async Task<string> GetPetName(ApplicationDbContext context, int id)
+{
+    var parameterId = new NpgsqlParameter
+    {
+        ParameterName = "@carId",
+        NpgsqlDbType = NpgsqlDbType.Integer,
+        Value = id,
+    };
+
+    var parameterName = new NpgsqlParameter
+    {
+        ParameterName = "@petName",
+        NpgsqlDbType = NpgsqlDbType.Varchar,
+        Size = 50,
+        Direction = ParameterDirection.Output,
+    };
+
+    var result = await context.Database.ExecuteSqlRawAsync(
+        "CALL \"GetPetName\"(@carId, NULL)",
+        parameterId,
+        parameterName
+    );
+    return (string)parameterName.Value;
+}
+```
+
+>[!info] 
+>
+> Même si le deuxième paramètre dans la chaîne brute SQL de `GetPetName` est `NULL`, Npgsql renvois quand même la valeur de la procédure et utilisera `parameterName` pour cela.
+
+L'étape suivante consiste à récupérer les enregistrements de `Car` (pour obtenir les valeurs d'identification de chaque enregistrement de `Car`), à ​​les parcourir et à utiliser la procédure stockée pour obtenir `PetName` :
+
+```cs
+static async Task GetDataFromStoredProc()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var cars = context.Cars.IgnoreQueryFilters().ToList();
+    foreach (var c in cars)
+    {
+        Console.WriteLine($"PetName: {await GetPetName(context, c.Id)}");
+    }
+}
+```
+
+>[!note]
+>
+>Cet exemple est quelque peu artificiel, car récupérer tous les enregistrements de voitures permet également de récupérer les propriétés PetName de ces enregistrements. Récupérer tous les enregistrements est un moyen pratique de démontrer l'appel répété de la procédure stockée.
+
+Lors de l'exécution du code, EF Core exécute la requête SQL suivante pour chaque voiture de la liste (une seule est affichée ici) :
+
+```sql
+-- Exécuté qu'une seule fois : on "charge" la table
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      
+...
+
+CALL "GetPetName"(@carId, NULL)
+```
+
+### Mise à jour moderne (avec Gemini)
+
+Bien qu'EF Core repose toujours sur [ADO.NET](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/ado-net-overview) en arrière-plan, il n'est plus aussi nécessaire qu'avant de "revenir à l'ancien temps" et d'écrire du code ADO.NET pur (comme `SqlCommand` ou `SqlDataReader`) pour gérer les procédures stockées
+
+Pour comprendre la situation actuelle, il faut comparer la situation passée à celle d'aujourd'hui :
+
+| Fonctionnalité                  | Époque EF 6                                           | Premières versions EF Core                                      | EF Core 7 / 8 / 9 (Aujourd'hui)                                                                            |
+| ------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Requêtes de sélection**       | Nativement supportées via l'importation de fonctions. | Limitées aux types d'entités connus du modèle (`FromSql`).      | Totalement supportées pour n'importe quel type de données (`FromSql` et `SqlQuery`).                       |
+| **Opérations d'écriture (CUD)** | Mappage automatique et transparent via le designer.   | Non supporté. Obligation d'utiliser ADO.NET ou du SQL brut.     | **Support complet** via le mappage fluide `InsertUsingStoredProcedure`, `UpdateUsingStoredProcedure`, etc. |
+| **Dépendance ADO.NET**          | Cachée.                                               | Très visible (souvent obligatoire pour contourner les manques). | Optionnelle (réservée aux cas extrêmes comme les paramètres `OUTPUT` multiples).                           |
+
+#### Ce que EF Core fait très bien aujourd'hui (Plus besoin d'ADO.NET)
+
+Depuis les dernières mises à jour de Microsoft, vous pouvez gérer la majorité des scénarios directement dans votre `DbContext` :
+
+##### Mappage automatique du CRUD (Nouveauté EF Core 7+)
+
+Vous pouvez configurer EF Core pour qu'il utilise automatiquement des procédures stockées à la place des requêtes générées lors de l'appel à `SaveChangesAsync()`
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+modelBuilder.Entity<Produit>()
+	.InsertUsingStoredProcedure("InsertProduit", sp => sp.HasParameter(p => p.Nom))
+	.UpdateUsingStoredProcedure("UpdateProduit", sp => sp.HasParameter(p => p.Id))
+	.DeleteUsingStoredProcedure("DeleteProduit", sp => sp.HasParameter(p => p.Id));
+}
+```
+
+##### Retour de types non-entités (Nouveauté EF Core 8+)
+
+Auparavant, les procédures de sélection devaient obligatoirement retourner une table correspondant à une classe de votre base de données. Désormais, la méthode `SqlQuery` permet de récupérer des types simples ou des DTO personnalisés sans qu'ils soient enregistrés comme entités : 
+
+```cs
+var rapports = context.Database
+    .SqlQuery<RapportVentesDto>($"EXECUTE dbo.ObtenirRapportVentes {anne}")
+    .ToList();
+```
+
+#### Quand reste-t-il vrai qu'il faut "revenir à ADO.NET" ?
+
+La part de vérité de votre affirmation réside dans les scénarios complexes où EF Core atteint encore ses limites :
+
+- **Plusieurs jeux de résultats (Multiple Result Sets) :** Si votre procédure stockée renvoie deux ou trois tableaux de données différents en une seule exécution, EF Core ne sait pas les lire nativement. Vous devez récupérer la connexion ADO.NET sous-jacente via `context.Database.GetDbConnection()` et utiliser un `DbDataReader`.
+- **Paramètres de sortie (`OUTPUT`) complexes :** La gestion des paramètres `OUTPUT` directionnels combinés à des jeux de résultats reste souvent plus verbeuse et moins intuitive en EF Core qu'en ADO.NET pur ou avec un micro-ORM comme [Dapper](https://github.com/DapperLib/Dapper).
+
+Avec une procédure SQL Server, vous êtes obligé d'exécuter la procédure telle quelle. Vous ne pouvez pas la filtrer en C# avant l'exécution. 
+
+Avec une fonction PostgreSQL qui retourne une table, **vous pouvez composer votre requête LINQ par-dessus la fonction**. EF Core va fusionner le tout en une seule requête SQL envoyée à PostgreSQL
+
+```cs
+// EF Core va générer : SELECT * FROM obtenir_ventes(2026) WHERE montant > 1000 LIMIT 10;
+var topVentes = context.Database
+    .SqlQuery<VenteDto>($"SELECT * FROM obtenir_ventes({annee})")
+    .Where(v => v.Montant > 1000)
+    .Take(10)
+    .ToList();
+```
+
+Npgsql vous permet d'enregistrer votre fonction PostgreSQL directement dans le `DbContext`. Vous pouvez ensuite l'utiliser de manière totalement transparente à l'intérieur de vos requêtes LINQ classiques, comme s'il s'agissait d'une méthode C# native : 
+
+```cs
+// 1. Déclaration dans le DbContext
+public class MonDbContext : DbContext {
+    public double CalculerRemise(int clientId, decimal total) => throw new NotSupportedException();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder) {        
+		modelBuilder.HasDbFunction(typeof(MonDbContext).GetMethod(nameof(CalculerRemise)))
+.HasName("calculer_remise_pg"); // Nom de la fonction dans PostgreSQL
+    }
+}
+
+// 2. Utilisation transparente dans LINQ
+var clientsPrivilegues = context.Commandes
+    .Where(c => context.CalculerRemise(c.ClientId, c.Total) > 15.0)
+    .ToList();
+```
+
+Ici, ADO.NET est totalement invisible. EF Core traduit directement `context.CalculerRemise` en appel de fonction PostgreSQL lors de la génération du SQL.
+
+#### Qu'en est-il du CRUD (CUD) automatique ?
+
+Dans la sous-section précédente, j'évoquais `InsertUsingStoredProcedure` (introduit dans EF Core 7).
+
+- **Attention :** Cette API spécifique a été conçue pour les _procédures_ (qui utilisent `CALL` ou `EXEC`).
+- Si vos opérations d'écriture reposent sur des _fonctions_ PostgreSQL personnalisées (qui nécessitent un `SELECT * FROM modifier_produit()`), vous ne pourrez pas utiliser directement ces méthodes de configuration fluide du CRUD automatique. Vous devrez exécuter ces fonctions d'écriture manuellement via `context.Database.ExecuteSqlAsync(...)`
+
+# Interrogation des données connexes
+
+**Les propriétés de navigation d'entités permettent de charger les données associées d'une entité. Ces données peuvent être chargées de manière immédiate (une instruction LINQ, une requête SQL), de manière immédiate avec des requêtes fractionnées (une instruction LINQ, plusieurs requêtes SQL), explicitement (plusieurs appels LINQ, plusieurs requêtes SQL) ou différée (une instruction LINQ, plusieurs requêtes SQL à la demande).**
+
+***==Outre la possibilité de charger les données associées via les propriétés de navigation, EF Core corrige automatiquement les entités lors de leur chargement dans le `ChangeTracker`==***. Par exemple, supposons que tous les enregistrements `Make` soient chargés dans la propriété de collection `DbSet<Make>`. Ensuite, tous les enregistrements `Car` sont chargés dans `DbSet<Car>`. **Bien que les enregistrements aient été chargés séparément, ils resteront accessibles les uns aux autres via les propriétés de navigation.**
+
+## Chargement anticipé
+
+**Le *chargement anticipé* désigne le chargement d'enregistrements liés provenant de plusieurs tables en une seule requête de base de données. Ceci est analogue à la création d'une requête T-SQL reliant deux tables ou plus par des jointures.** Lorsque les entités possèdent des propriétés de navigation et que ces propriétés sont utilisées dans les requêtes LINQ, le moteur de traduction utilise des jointures pour obtenir les données des tables liées et charge les entités correspondantes. Cette méthode est généralement beaucoup plus efficace que d'exécuter une requête pour obtenir les données d'une table, puis d'exécuter des requêtes supplémentaires pour chacune des tables liées. **==Pour les cas où l'utilisation d'une seule requête est moins efficace, EF Core 5 a introduit le fractionnement des requêtes, présenté ci-après.==**
+
+**Les méthodes `Include()` et `ThenInclude()` (pour les propriétés de navigation suivantes) permettent de parcourir les propriétés de navigation dans les requêtes LINQ. Si la relation est obligatoire, le moteur de traduction LINQ créera un `INNER JOIN`. Si la relation est facultative, il créera un `LEFT JOIN`.**
+
+Par exemple, pour charger tous les enregistrements de voiture avec leurs informations de marque associées, exécutez la requête LINQ suivante :
+
+```cs
+static async Task RelatedData()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var carsWithMakes = await context
+        .Cars.Include(c => c.MakeNavigation)
+        .ToListAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête LINQ précédente exécute la requête suivante sur la base de données :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin, m."Id", m."Name", m."TimeStamp", m.xmin
+      FROM public."Inventory" AS i
+      INNER JOIN public."Makes" AS m ON i."MakeId" = m."Id"
+```
+
+>[!note]
+>L'instruction `SELECT` renvoie tous les champs des tables `Inventory` et `Makes`. EF Core établit ensuite correctement les liens entre les données, renvoyant le graphe d'objets approprié.
+
+**La propriété `MakeNavigation` est une relation obligatoire car la propriété `MakeId` de l'entité `Car` est non nulle. Étant donné qu'elle est obligatoire, la table `Make` est jointe à la table `Inventory` par une jointure interne (`INNER JOIN`). Si
+la propriété de navigation était facultative (`MakeId` était défini comme un `int?`), la jointure serait une jointure externe (`OUTER JOIN`).** L'exemple suivant illustre les relations facultatives dans les requêtes générées.
+
+**Plusieurs instructions `Include()` peuvent être utilisées dans la même requête pour joindre plusieurs entités à l'entité d'origine.** ***==Pour parcourir l'arborescence des propriétés de navigation, utilisez `ThenInclude()` après une instruction `Include()`==***. Par exemple, pour obtenir tous les enregistrements `Make` avec leurs enregistrements `Car` associés et les enregistrements `Driver` provenant de `Cars`, utilisez l'instruction suivante :
+
+```cs
+static async Task RelatedData()
+{
+	...
+	
+    var makesWithCarsAndDrivers = await context
+        .Makes.Include(c => c.Cars)
+            .ThenInclude(d => d.Drivers)
+        .ToListAsync();
+}
+```
+
+>[!note]
+>
+>L’appel à `Clear()` sur `ChangeTracker` est ajouté pour garantir que les exemples de code précédents n’interfèrent pas avec les résultats du code en cours d’analyse.
+
+La requête LINQ précédente exécute la requête suivante sur la base de données :
+
+```sql
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin, s0."Id", s0."Color", 
+	s0."DateBuilt", s0."Display", s0."IsDrivable", s0."MakeId", s0."PetName", 
+	s0."TimeStamp", s0.xmin, s0."InventoryId", s0."DriverId", s0."Id0", 
+	s0."TimeStamp0", s0.xmin0, s0."Id00", s0."TimeStamp00", s0.xmin00, 
+	s0."FirstName", s0."LastName"
+FROM public."Makes" AS m
+LEFT JOIN (
+	  SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", 
+		  i."MakeId", i."PetName", i."TimeStamp", i.xmin, s."InventoryId", 
+		  s."DriverId", s."Id" AS "Id0", s."TimeStamp" AS "TimeStamp0", s.xmin AS 
+		  xmin0, s."Id0" AS "Id00", s."TimeStamp0" AS "TimeStamp00", s.xmin0 AS 
+		  xmin00, s."FirstName", s."LastName"
+	  FROM public."Inventory" AS i
+	  LEFT JOIN (
+			  SELECT i0."InventoryId", i0."DriverId", i0."Id", i0."TimeStamp", 
+				  i0.xmin, d."Id" AS "Id0", d."TimeStamp" AS "TimeStamp0", d.xmin 
+				  AS xmin0, d."FirstName", d."LastName"
+              FROM public."InventoryToDrivers" AS i0
+              INNER JOIN public."Drivers" AS d ON i0."DriverId" = d."Id"
+	  ) AS s ON i."Id" = s."InventoryId"
+) AS s0 ON m."Id" = s0."MakeId"
+ORDER BY m."Id", s0."Id", s0."InventoryId", s0."DriverId"
+```
+
+**La présence de la clause `ORDER BY` peut paraître étrange, car la requête LINQ ne comportait aucun ordre. Lors de l'utilisation d'inclusions chaînées (avec les instructions `Include()`/`ThenInclude()`), le moteur de traduction LINQ ajoute une clause `ORDER BY` en fonction de l'ordre des tables incluses et de leurs clés primaires et étrangères. Cet ordre s'ajoute à tout autre ordre spécifié dans la requête LINQ.**
+
+Voici un exemple mis à jour :
+
+```cs
+static async Task RelatedData()
+{
+	...
+	
+    var orderedMakes = await context
+        .Makes.Include(c => c.Cars)
+            .ThenInclude(d => d.Drivers)
+        .OrderBy(d => d.Name)
+        .ToListAsync();
+	context.ChangeTracker.Clear();
+}
+```
+
+Le code SQL généré sera trié selon toutes les clauses de tri de la requête LINQ, suivies des clauses `ORDER BY` générées automatiquement :
+
+```sql
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin, s0."Id", s0."Color", 
+	s0."DateBuilt", s0."Display", s0."IsDrivable", s0."MakeId", s0."PetName", 
+	s0."TimeStamp", s0.xmin, s0."InventoryId", s0."DriverId", s0."Id0", 
+	s0."TimeStamp0", s0.xmin0, s0."Id00", s0."TimeStamp00", s0.xmin00, 
+	s0."FirstName", s0."LastName"
+FROM public."Makes" AS m
+LEFT JOIN (
+	  SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", 
+			  i."MakeId", i."PetName", i."TimeStamp", i.xmin, s."InventoryId", 
+			  s."DriverId", s."Id" AS "Id0", s."TimeStamp" AS "TimeStamp0", 
+			  s.xmin AS xmin0, s."Id0" AS "Id00", s."TimeStamp0" AS 
+			  "TimeStamp00", s.xmin0 AS xmin00, s."FirstName", s."LastName"
+	  FROM public."Inventory" AS i
+	  LEFT JOIN (
+		    SELECT i0."InventoryId", i0."DriverId", i0."Id", i0."TimeStamp", 
+			      i0.xmin, d."Id" AS "Id0", d."TimeStamp" AS "TimeStamp0", d.xmin 
+			      AS xmin0, d."FirstName", d."LastName"
+			FROM public."InventoryToDrivers" AS i0
+            INNER JOIN public."Drivers" AS d ON i0."DriverId" = d."Id"
+      ) AS s ON i."Id" = s."InventoryId"
+) AS s0 ON m."Id" = s0."MakeId"
+ORDER BY m."Name", m."Id", s0."Id", s0."InventoryId", s0."DriverId"
+```
+
+### Méthode `Include()` filtrée
+
+==Introduite dans EF Core 5, la fonctionnalité d'inclusion permet de filtrer et de trier les données incluses.== Les opérations autorisées sur la navigation de collection sont : `Where()`, `OrderBy()`, `OrderByDescending()`, `ThenBy()`, `ThenByDescending()`, `Skip()` et `Take()`. Par exemple, pour obtenir tous les enregistrements de marque, mais uniquement les enregistrements de voiture associés dont la couleur est jaune, il suffit de filtrer la propriété de navigation dans l'expression lambda, comme ceci :
+
+```cs
+static async Task RelatedData()
+{
+    var makesWithYellowCars = await context
+        .Makes.Include(x => x.Cars.Where(x => x.Color == "Yellow"))
+        .ToListAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+La requête exécutée est la suivante :
+
+```sql
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin, i0."Id", i0."Color", 
+	   i0."DateBuilt", i0."Display", i0."IsDrivable", i0."MakeId", i0."PetName", 
+	   i0."TimeStamp", i0.xmin
+FROM public."Makes" AS m
+LEFT JOIN (
+	  SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", 
+		    i."MakeId", i."PetName", i."TimeStamp", i.xmin
+	  FROM public."Inventory" AS i
+	  WHERE i."Color" = 'Yellow'
+) AS i0 ON m."Id" = i0."MakeId"
+ORDER BY m."Id"
+```
+
+### Chargement anticipé avec requêtes fractionnées
+
+**Lorsqu'une requête LINQ contient de nombreuses inclusions, cela peut impacter négativement les performances. Pour résoudre ce problème, EF Core 5 a introduit les requêtes fractionnées. Au lieu d'exécuter une seule requête, EF Core divise la requête LINQ en plusieurs requêtes SQL, puis connecte toutes les données associées.** Par exemple, la requête précédente peut être exécutée sous forme de plusieurs requêtes SQL en ajoutant `AsSplitQuery()` à la requête LINQ, comme ceci :
+
+```cs
+static async Task RelatedData()
+{
+	...
+ 
+   var splitMakes = await context
+        .Makes.AsSplitQuery()
+        .Include(x => x.Cars.Where(x => x.Color == "Yellow"))
+        .ToListAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+Les requêtes exécutées sont affichées ici :
+
+```sql
+SELECT i0."Id", i0."Color", i0."DateBuilt", i0."Display", i0."IsDrivable", 
+	  i0."MakeId", i0."PetName", i0."TimeStamp", i0.xmin, m."Id"
+FROM public."Makes" AS m
+INNER JOIN (
+	  SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", 
+		  i."MakeId", i."PetName", i."TimeStamp", i.xmin
+	  FROM public."Inventory" AS i
+	  WHERE i."Color" = 'Yellow'
+) AS i0 ON m."Id" = i0."MakeId"
+ORDER BY m."Id"
+```
+
+*==L'utilisation de requêtes fractionnées présente un inconvénient : si les données changent entre l'exécution des requêtes, les données renvoyées seront incohérentes.==*
+
+### Requêtes plusieurs-à-plusieurs
+
+**La nouvelle prise en charge par EF Core de la conception de tables plusieurs-à-plusieurs s'étend aux requêtes de données avec LINQ. Avant cette prise en charge, les requêtes devaient passer par la table pivot. Désormais, vous pouvez écrire l'instruction LINQ suivante pour obtenir les enregistrements de la `Car` et du conducteur associé :**
+
+```cs
+static async Task RelatedData()
+{
+	...
+	
+    var carsAndDrivers = await context
+        .Cars.Include(x => x.Drivers)
+        .Where(x => x.Drivers.Any())
+        .ToListAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+Comme vous pouvez le constater dans la requête SQL `SELECT` générée, EF Core se charge de parcourir le tableau croisé dynamique afin d'associer correctement les enregistrements de `Car` et `Driver` :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin, s."InventoryId", s."DriverId", s."Id", 
+	  s."TimeStamp", s.xmin, s."Id0", s."TimeStamp0", s.xmin0, s."FirstName", 
+	  s."LastName"
+FROM public."Inventory" AS i
+LEFT JOIN (
+	  SELECT i1."InventoryId", i1."DriverId", i1."Id", i1."TimeStamp", i1.xmin, 
+		    d0."Id" AS "Id0", d0."TimeStamp" AS "TimeStamp0", d0.xmin AS xmin0, 
+		    d0."FirstName", d0."LastName"
+	  FROM public."InventoryToDrivers" AS i1
+	  INNER JOIN public."Drivers" AS d0 ON i1."DriverId" = d0."Id"
+) AS s ON i."Id" = s."InventoryId"
+WHERE EXISTS (
+	  SELECT 1
+	  FROM public."InventoryToDrivers" AS i0
+	  INNER JOIN public."Drivers" AS d ON i0."DriverId" = d."Id"
+	  WHERE i."Id" = i0."InventoryId"
+)
+ORDER BY i."Id", s."InventoryId", s."DriverId"
+```
+
+## Chargement explicite
+
+**Le chargement explicite consiste à charger des données le long d'une propriété de navigation après le chargement de l'objet principal. Ce processus implique l'exécution d'un appel de base de données supplémentaire pour obtenir les données associées.** ==Cela peut s'avérer utile si votre application a besoin d'obtenir sélectivement les enregistrements associés au lieu de les récupérer systématiquement.==
+
+**Le processus commence avec une entité déjà chargée et utilise la méthode `Entry()` sur le `DbContext` dérivé.** Lors d'une requête sur une propriété de navigation de référence (par exemple, pour obtenir les informations du `Make` d'une voiture), utilisez la méthode `Reference()`. Lors d'une requête sur une propriété de navigation de collection, utilisez la méthode `Collection()`. **La ​​requête est différée jusqu'à l'exécution de `Load()`, `ToList()` ou d'une fonction d'agrégation (par exemple, `Count()`, `Max()`).**
+
+Les exemples suivants montrent comment obtenir la donnée `Make` associées ainsi que les `Driver` associés à un enregistrement de  `Car` :
+
+```cs
+static async Task RelatedData()
+{
+	...
+	
+    // Récupère l'enregistrment Car
+    var car = await context.Cars.FirstAsync(x => x.Id == 1);
+    // Récupère l'information de Make
+    await context.Entry(car).Reference(c => c.MakeNavigation).LoadAsync();
+    // Récupère n'importe quel Driver lié à l'enregistrment Car
+    await context.Entry(car).Collection(c => c.Drivers).Query().LoadAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+Les instructions précédentes génèrent les requêtes suivantes :
+
+```sql
+-- Récupère l'enregistrement Car
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
+WHERE i."Id" = 1
+LIMIT 1
+      
+-- Récupère les informations de Make      
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin
+FROM public."Makes" AS m
+WHERE m."Id" = @p
+LIMIT 1
+     
+-- Récupère n'importe quel Driver lié à l'enregistrement Car 
+SELECT s."Id", s."TimeStamp", s.xmin, s."FirstName", s."LastName", i."Id", 
+	  s."InventoryId", s."DriverId", s0."InventoryId", s0."DriverId", s0."Id", 
+	  s0."TimeStamp", s0.xmin, s0."Id0", s0."Color", s0."DateBuilt", 
+	  s0."Display", s0."IsDrivable", s0."MakeId", s0."PetName", s0."TimeStamp0", 
+	  s0.xmin0
+FROM public."Inventory" AS i
+INNER JOIN (
+	  SELECT d."Id", d."TimeStamp", d.xmin, i0."InventoryId", i0."DriverId", 
+		    d."FirstName", d."LastName"
+	  FROM public."InventoryToDrivers" AS i0
+	  INNER JOIN public."Drivers" AS d ON i0."DriverId" = d."Id"
+) AS s ON i."Id" = s."InventoryId"
+LEFT JOIN (
+	  SELECT i1."InventoryId", i1."DriverId", i1."Id", i1."TimeStamp", i1.xmin, 
+		    i2."Id" AS "Id0", i2."Color", i2."DateBuilt", i2."Display", 
+		    i2."IsDrivable", i2."MakeId", i2."PetName", i2."TimeStamp" AS 
+		    "TimeStamp0", i2.xmin AS xmin0
+	  FROM public."InventoryToDrivers" AS i1
+	  INNER JOIN public."Inventory" AS i2 ON i1."InventoryId" = i2."Id"
+	  WHERE i2."Id" = @p
+) AS s0 ON s."Id" = s0."DriverId"
+WHERE i."Id" = @p
+ORDER BY i."Id", s."InventoryId", s."DriverId", s."Id", s0."InventoryId", s0."DriverId"
+```
+
+***==Comme vous pouvez le constater, cette troisième et dernière requête effectue un travail considérable pour simplement obtenir les enregistrements de conducteur associés à l'enregistrement de voiture sélectionné.==*** Cela met en évidence deux points importants : 
+
+1) Si vous pouvez tout écrire dans une seule requête en utilisant le chargement anticipé, il est généralement préférable de le faire, ce qui évite d'avoir à retourner à la base de données pour obtenir les enregistrements associés 
+2) EF Core ne génère pas toujours les requêtes les plus performantes. Je vous ai déjà montré comment utiliser le chargement anticipé dans la section précédente. 
+
+**Plus loin dans ce chapitre, je vous montrerai comment utiliser des instructions SQL avec ou sans instructions LINQ supplémentaires pour extraire des données de la base de données. Ceci est utile lorsque EF Core génère des requêtes sous-optimales.**
+
+## Chargement différé
+
+>[!tip]- Une alternative à la méthode utilisé par l'auteur existe (Avec Gemini)
+>
+> Microsoft a introduit une alternative majeure qui vous permet d'utiliser le Lazy Loading (chargement différé) **sans aucun proxy** (c'est-à-dire sans modifier la nature de vos classes d'entités avec du code généré dynamiquement) :
+> 
+> **Le Lazy Loading sans Proxies (Via Injection de Dépendances)**
+>
+>Cette méthode utilise le type `ILazyLoader` injecté directement dans le constructeur de votre entité. Vos classes restent des classes C# standards (sans avoir besoin de marquer toutes les propriétés en `virtual`).
+>
+> Pour plus de détail, voir la [documentation Microsoft](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.infrastructure.ilazyloader?view=efcore-10.0)
+>>[!attention] 
+>>
+>> Cette atlernative est extrêmement plus verbeuse (utilisation de champs privés avec des propriétés possédant des accesseurs manuels) et est donc largement moins utilisé.
+>>
+>> Cette manière de faire existe principalement pour résoudres les trois problèmes suivant :
+>> 
+>> 1. **Le cauchemar de la Sérialisation (JSON)**
+>> 
+>>	C'est la raison numéro un. Lorsque vous utilisez des proxies, EF Core ne vous renvoie pas un objet `Car`. Il crée dynamiquement en mémoire une classe masquée qui hérite de votre classe, du style `Castle.Proxies.CarProxy`.
+>>
+>>	- Si vous essayez de sérialiser cet objet en JSON pour l'envoyer à une API Web (avec `System.Text.Json`), le sérialiseur plante souvent ou lève une exception de boucle infinie.
+>>	- Avec `ILazyLoader`, l'objet reste une vraie instance de `Car`. La sérialisation se passe sans aucun problème.
+>>
+>>2. **La pureté du Domain-Driven Design (DDD)**
+>>
+>>	Dans les architectures logicielles strictes (comme l'architecture hexagonale ou le DDD), le modèle métier ne doit pas être pollué par des exigences techniques de la base de données.
+>>
+>> 	- Forcer un développeur à mettre `virtual` partout uniquement "pour faire plaisir à l'ORM" est considéré par certains architectes comme une mauvaise pratique.
+>> 	- L'alternative `ILazyLoader` permet de garder des classes scellées (`sealed`) ou d'éviter le polymorphisme forcé par `virtual`.
+>> 
+>> 3. **Les performances et les contraintes du compilateur**
+>> 
+>> 	La création de proxies dynamiques au runtime a un coût en termes de mémoire et de CPU, car le framework doit générer du code IL (Intermediate Language) à la volée. De plus, certaines plateformes ou configurations de compilation modernes (comme le mode **AOT - Ahead-Of-Time**, très mis en avant dans .NET 8/9 pour le cloud-native) **interdisent** la génération de code dynamique au runtime. Les proxies y sont donc tout simplement inutilisables.
+
+**Le chargement différé consiste à charger un enregistrement à la demande lorsqu'une propriété de navigation est utilisée pour accéder à un enregistrement associé qui n'est pas encore chargé en mémoire.** Le chargement différé est une fonctionnalité d'EF 6 qui a été réintégrée à EF Core avec la version 2.1. ==Bien qu'il puisse sembler judicieux de l'activer, son activation peut entraîner des problèmes de performance dans votre application en effectuant des allers-retours potentiellement inutiles vers votre base de données.== Le chargement différé peut être utile dans les applications clientes intelligentes (WPF, WinForms), mais **son utilisation est déconseillée dans les applications web ou de service. C'est pourquoi le chargement différé est désactivé par défaut dans EF Core (il est maintenant activé par défaut depuis EF 6).**
+
+**Pour utiliser le chargement différé, les propriétés de navigation à charger de manière différée doivent être marquées comme `virtual`. En effet, les propriétés de navigation seront encapsulées dans un proxy. Ce proxy permettra alors à EF Core d'effectuer un appel à la base de données si la propriété de navigation n'a pas été chargée lorsqu'elle est référencée dans votre application.**
+
+**Pour utiliser le chargement différé avec des proxys, le `DbContext` dérivé doit être correctement configuré. Commencez par ajouter le package `Microsoft.EntityFrameworkCore.Proxies` à votre projet. Vous devez ensuite activer l'utilisation des proxys de chargement différé dans les options du `DbContext` dérivé.** ==Bien que cela soit normalement configuré dans votre code d'application lors de la configuration de votre `DbContext` dérivé, nous allons activer les proxys à l'aide de la classe `ApplicationDbContextFactory` que nous avons créée précédemment. N'oubliez pas que cette classe est conçue pour la conception et ne doit pas être utilisée dans votre code d'application. Cependant, pour l'apprentissage et l'exploration, elle fonctionnera parfaitement.==
+
+Ouvrez le fichier *ApplicationDbContextFactory.cs* et accédez à la méthode `CreateDbContext()`. Nous utiliserons le paramètre `args` pour indiquer que nous souhaitons que la méthode renvoie un `DbContext` dérivé configuré pour utiliser les proxys de chargement différé. Mettez à jour la méthode `CreateDbContext()` comme suit :
+
+```cs
+public ApplicationDbContext CreateDbContext(string[] args)
+{
+	...
+	
+   if (
+		args != null
+		&& args.Length == 1
+		&& args[0].Equals("lazy", StringComparison.OrdinalIgnoreCase)
+	)
+	{
+		optionBuilder = optionBuilder.UseLazyLoadingProxies();
+	}
+	optionBuilder = optionBuilder.UseNpgsql(
+		conStringBuilder.ConnectionString
+	);
+	return new ApplicationDbContext(optionBuilder.Options);
+}
+```
+
+Ensuite, mettez à jour la classe `Car` comme suit :
+
+```cs
+namespace AutoLot.Samples.Models;
+
+[Table("Inventory", Schema = "public")]
+[Index(nameof(MakeId), Name = "IX_Inventory_MakeId")]
+[EntityTypeConfiguration(typeof(CarConfiguration))]
+public class Car : BaseEntity
+{
+    private string _color;
+
+    [Required, StringLength(50)]
+    public string Color
+    {
+        get => _color;
+        set => _color = value;
+    }
+
+    [Required, StringLength(50)]
+    public string PetName { get; set; }
+    public int MakeId { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public string Display { get; set; }
+
+    [ForeignKey(nameof(MakeId))]
+    public virtual Make MakeNavigation { get; set; }
+    public virtual Radio RadioNavigation { get; set; }
+
+
+    public DateTime? DateBuilt { get; set; }
+    private bool? _isDrivable;
+    public bool IsDrivable
+    {
+        get => _isDrivable ?? true;
+        set => _isDrivable = value;
+    }
+
+    [InverseProperty(nameof(Driver.Cars))]
+    public virtual IEnumerable<Driver> Drivers { get; set; } =
+        new List<Driver>();
+        
+    [InverseProperty(nameof(CarDriver.CarNavigation))]
+    public virtual IEnumerable<CarDriver> CarDrivers { get; set; } =
+        new List<CarDriver>();
+}
+```
+
+**Maintenant que les propriétés sont déclarées `virtual`, elles peuvent être utilisées avec le chargement différé.** Ajoutez la méthode suivante à votre fichier *Program.cs* (notez que nous n'utilisons pas encore le paramètre `args` de la méthode `CreateDbContext()`) et appelez-la depuis vos instructions de niveau supérieur :
+
+```cs
+static async Task LazyLoadCar()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.AsQueryable();
+    var cars = await query.ToListAsync();
+    var make = cars[0].MakeNavigation;
+    Console.WriteLine(make.Name);
+}
+```
+
+*==Lorsque vous exécuterez cet exemple, vous recevrez une exception de référence nulle en tentant d'accéder à la propriété `Name` de l'instance `Make`.==* Cela est dû au fait que l'enregistrement `Make` n'a pas été chargé et que nous n'utilisons pas la version compatible avec le proxy de la classe `DbContext()` dérivée. Mettez à jour la méthode pour transmettre l'argument `"lazy"` à `CreateDbContext()`, ce qui active la prise en charge du chargement différé par proxy :
+
+```cs
+// Collection expression (C# 12)
+var context = new ApplicationDbContextFactory().CreateDbContext(["lazy"]);
+```
+
+Lorsque vous exécuterez à nouveau le code, vous pourriez être surpris de recevoir une exception `InvalidOperationException`. **Lorsque vous utilisez des proxys chargés en différés, *toutes* les propriétés de navigation des modèles doivent être marquées comme virtuelles, même celles qui ne sont pas directement impliquées dans le bloc de code en cours d'exécution.** Jusqu'à présent, nous n'avons mis à jour que l'entité Car. Mettez à jour les autres modèles comme suit :
+
+```cs
+// CarDriver.cs
+[Table("InventoryToDrivers", Schema = "public")]
+public class CarDriver : BaseEntity
+{
+    public int DriverId { get; set; }
+
+    [ForeignKey(nameof(DriverId))]
+    public virtual Driver DriverNavigation { get; set; }
+
+    [Column("InventoryId")]
+    public int CarId { get; set; }
+
+    [ForeignKey(nameof(CarId))]
+    public virtual Car CarNavigation { get; set; }
+}
+```
+
+```cs
+// Driver.cs
+[Table("Drivers", Schema = "public")]
+[EntityTypeConfiguration(typeof(DriverConfiguration))]
+public class Driver : BaseEntity
+{
+    public Person PersonInfo { get; set; } = new Person();
+
+    [InverseProperty(nameof(Car.Drivers))]
+    public virtual IEnumerable<Car> Cars { get; set; } = new List<Car>();
+
+    [InverseProperty(nameof(CarDriver.DriverNavigation))]
+    public virtual IEnumerable<CarDriver> CarDrivers { get; set; } =
+        new List<CarDriver>();
+}
+```
+
+```cs
+// Make.cs
+[Table("Makes", Schema = "public")]
+public class Make : BaseEntity
+{
+    [Required, StringLength(50)]
+    public string Name { get; set; }
+
+    [InverseProperty(nameof(Car.MakeNavigation))]
+    public virtual IEnumerable<Car> Cars { get; set; } = new List<Car>();
+}
+```
+
+```cs
+[Table("Radios", Schema = "public")]
+[EntityTypeConfiguration(typeof(RadioConfiguration))]
+public class Radio : BaseEntity
+{
+    public bool HasTweeters { get; set; }
+    public bool HasSubWoofers { get; set; }
+
+    [Required, StringLength(50)]
+    public string RadioId { get; set; }
+
+    [Column("InventoryId")]
+    public int CarId { get; set; }
+
+    [ForeignKey(nameof(CarId))]
+    public virtual Car CarNavigation { get; set; }
+}
+```
+
+>[!note]
+>
+Bien que la classe `Owned Person` représente une relation, il ne s'agit pas d'une propriété de navigation, et les propriétés de type `Owned` n'ont pas besoin d'être marquées comme `virtual`.
+
+Maintenant, lorsque vous exécuterez à nouveau le programme, la marque de la voiture s'affichera dans la console. En observant l'activité du serveur SQL, vous pourrez clairement constater que deux requêtes ont été exécutées :
+
+```sql
+
+```
+
+Si vous souhaitez en savoir plus sur le chargement différé et son utilisation avec EF Core, consultez la [documentation](https://docs.microsoft.com/en-us/ef/core/querying/related-data/lazy).
 
 ## Résilience de la connection
 

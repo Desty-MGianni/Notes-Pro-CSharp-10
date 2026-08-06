@@ -918,7 +918,7 @@ $$;
 > 
 > Si on garde une `PROCEDURE` avec Postgres, plus tard lorsque l'on voudra l'exécuter, l'utilisation de `CommandType.StoredProcedure` avec un paramètre `OUT` (technique standard de SQL Server présentée dans le livre) se transforme en un enfer technique insoluble sous PostgreSQL en raison de contraintes architecturales profondes.
 > 
-> ### 1. La différence fondamentale : FUNCTION vs PROCEDURE (Postgres)
+> ### 1. La différence fondamentale : `FUNCTION` vs `PROCEDURE` (Postgres)
 > * **`FUNCTION`** : Conçue pour calculer, transformer et **renvoyer des données** via une clause `RETURNS`. C'est l'équivalent d'une méthode C# qui retourne un type (ex: `string MyMethod()`).
 > * **`PROCEDURE`** : Conçue pour exécuter des scripts d'action ou des tâches de maintenance (comme des batchs). Elle a la capacité unique de gérer ses propres transactions internes (`COMMIT`/`ROLLBACK`), mais elle n'est pas faite à l'origine pour retourner des données à une application.
 > 
