@@ -1,7 +1,6 @@
 ---
 publish: true
 ---
-
 # <big><big><big><b><font color =green>Exploration d'Entity Framework Core</font></b></big></big></big>
 
 Le chapitre précédent a présenté les composants d'EF Core. **Ce chapitre explore les fonctionnalités d'EF Core, en commençant par les opérations CRUD** (création, lecture, mise à jour et suppression). Après avoir abordé les opérations CRUD, **nous examinerons les fonctionnalités spécifiques d'EF Core,** notamment les filtres de requêtes globales, la combinaison de requêtes SQL et LINQ, les projections, et bien plus encore.
@@ -1887,7 +1886,16 @@ ORDER BY i."Id", s."InventoryId", s."DriverId", s."Id", s0."InventoryId", s0."Dr
 
 ## Chargement différé
 
->[!tip]- Une alternative à la méthode utilisé par l'auteur existe (Avec Gemini)
+>[!danger] Rappel
+>
+>**Les compiled models (`dotnet ef dbcontext optimize`) sont incompatibles avec `UseLazyLoadingProxies()` et les change-tracking proxies. ([[Chapitre 21#La commande `optimize` de `dbcontext`|Chapitre 21]]).** 
+>
+>**En EF Core 10, cette incompatibilité est encore plus stricte car EF Core détecte automatiquement les compiled models via des attributs assembly sans appel explicite à `UseModel()`.** Pour utiliser le lazy loading avec proxies, il faut :
+>- Soit supprimer physiquement le dossier `CompiledModels/` du projet
+>- Soit utiliser `ILazyLoader` (voir prochain callout)
+>
+
+>[!tip] l'interface `ILazyLoader`
 >
 > Microsoft a introduit une alternative majeure qui vous permet d'utiliser le Lazy Loading (chargement différé) **sans aucun proxy** (c'est-à-dire sans modifier la nature de vos classes d'entités avec du code généré dynamiquement) :
 > 
@@ -1896,7 +1904,7 @@ ORDER BY i."Id", s."InventoryId", s."DriverId", s."Id", s0."InventoryId", s0."Dr
 >Cette méthode utilise le type `ILazyLoader` injecté directement dans le constructeur de votre entité. Vos classes restent des classes C# standards (sans avoir besoin de marquer toutes les propriétés en `virtual`).
 >
 > Pour plus de détail, voir la [documentation Microsoft](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.infrastructure.ilazyloader?view=efcore-10.0)
->>[!attention] 
+>>[!attention]-
 >>
 >> Cette atlernative est extrêmement plus verbeuse (utilisation de champs privés avec des propriétés possédant des accesseurs manuels) et est donc largement moins utilisé.
 >>
@@ -2096,10 +2104,371 @@ Bien que la classe `Owned Person` représente une relation, il ne s'agit pas d'u
 Maintenant, lorsque vous exécuterez à nouveau le programme, la marque de la voiture s'affichera dans la console. En observant l'activité du serveur SQL, vous pourrez clairement constater que deux requêtes ont été exécutées :
 
 ```sql
+-- Récupère les enregistrement initiaux de Inventory/Car
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
 
+-- Récupère l'enregistrement Make pour le premier enregistrement Inventory/Car
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin
+FROM public."Makes" AS m
+WHERE m."Id" = @p
+LIMIT 1
 ```
 
 Si vous souhaitez en savoir plus sur le chargement différé et son utilisation avec EF Core, consultez la [documentation](https://docs.microsoft.com/en-us/ef/core/querying/related-data/lazy).
+
+### Chargement différé sans proxies avec `ILazyLoader`
+
+>[!failure] 
+>
+> Je n'ai jamais réussie à le faire marché (Avec l'aide de Gemini ET Claude). le problème est que lors de l'itération initiale dans la table `Inventory`, le programme génère un `QueryIterationFailed[10100]` => `NpgsqlOperationInProgressException` (Lié au problème *N + 1*, expliqué [ici](https://medium.com/@898guptarajashish/the-lazy-path-to-performance-demystifying-lazy-loading-in-entity-framework-core-6cf127c0d0d9))
+
+En EF Core 10, les **Compiled Models** et `UseLazyLoadingProxies()` sont incompatibles.
+`ILazyLoader` est l'alternative qui permet le chargement différé sans dépendre de
+Castle DynamicProxy, et donc sans conflit avec les compiled models.
+
+Si ce n'est pas déjà fait, il faut retirer `UseLazyLoadingProxies()` de `ApplicationDbContextFacotry` :
+
+```csharp
+var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+    .UseNpgsql(connectionString) // Pas de UseLazyLoadingProxies() !
+    .Options;
+```
+
+Pour une question de simplicité, nous allons ajouté l'espace de noms `Microsoft.EntityframeworkCore.Infrastructure` dans le fichier *GlobalUsings.cs* :
+
+```cs
+...
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+...
+```
+
+Ensuite, il faut ajouter `ILazyLoader` dans chaque entité avec des propriété de navigation. **Chaque entité nécessite** :
+
+- Un **constructeur public sans paramètres** (pour EF Core)
+- Un **constructeur privé** avec `ILazyLoader` (injecté automatiquement par EF Core)
+- Un **backing field** pour chaque navigation property
+- Un **getter** qui appelle `_lazyLoader.Load()`
+
+```csharp
+// Car.cs
+namespace AutoLot.Samples.Models;
+
+[Table("Inventory", Schema = "public")]
+[Index(nameof(MakeId), Name = "IX_Inventory_MakeId")]
+[EntityTypeConfiguration(typeof(CarConfiguration))]
+public class Car : BaseEntity
+{
+	// Champ pour ILazyLoader
+    private readonly ILazyLoader _lazyLoader;
+
+	// Consctructeur public obligatoire
+    public Car() { }
+
+	// Constructeur privé injecté automatiquement par EF Core
+    private Car(ILazyLoader lazyLoader)
+    {
+        _lazyLoader = lazyLoader;
+    }
+
+    private string _color;
+
+    [Required, StringLength(50)]
+    public string Color
+    {
+        get => _color;
+        set => _color = value;
+    }
+
+    [Required, StringLength(50)]
+    public string PetName { get; set; }
+    public int MakeId { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public string Display { get; set; }
+
+    public DateTime? DateBuilt { get; set; }
+
+    private bool? _isDrivable;
+    public bool IsDrivable
+    {
+        get => _isDrivable ?? true;
+        set => _isDrivable = value;
+    }
+
+	// Propriété de navigation avec des backing fields et ILazyLoader
+    private Make _makeNavigation;
+
+    [ForeignKey(nameof(MakeId))]
+    public Make MakeNavigation
+    {
+        get => _lazyLoader.Load(this, ref _makeNavigation);
+        set => _makeNavigation = value;
+    }
+    private Radio _radioNavigation;
+    public Radio RadioNavigation
+    {
+        get => _lazyLoader.Load(this, ref _radioNavigation);
+        set => _radioNavigation = value;
+    }
+
+    private IEnumerable<Driver> _drivers = new List<Driver>();
+
+    [InverseProperty(nameof(Driver.Cars))]
+    public IEnumerable<Driver> Drivers
+    {
+        get => _lazyLoader.Load(this, ref _drivers);
+        set => _drivers = value;
+    }
+
+    private IEnumerable<CarDriver> _carDrivers = new List<CarDriver>();
+
+    [InverseProperty(nameof(CarDriver.CarNavigation))]
+    public IEnumerable<CarDriver> CarDrivers
+    {
+        get => _lazyLoader.Load(this, ref _carDrivers);
+        set => _carDrivers = value;
+    }
+}
+```
+
+```cs
+// Make.cs
+namespace AutoLot.Samples.Models;
+
+[Table("Makes", Schema = "public")]
+public class Make : BaseEntity
+{
+    private readonly ILazyLoader _lazyLoader;
+
+    public Make() { }
+
+    private Make(ILazyLoader lazyLoader)
+    {
+        _lazyLoader = lazyLoader;
+    }
+
+    [Required, StringLength(50)]
+    public string Name { get; set; }
+
+    private IEnumerable<Car> _cars = new List<Car>();
+
+    [InverseProperty(nameof(Car.MakeNavigation))]
+    public IEnumerable<Car> Cars
+    {
+        get => _lazyLoader.Load(this, ref _cars);
+        set => _cars = value;
+    }
+}
+```
+
+```cs
+// Driver.cs
+namespace AutoLot.Samples.Models;
+
+[Table("Drivers", Schema = "public")]
+[EntityTypeConfiguration(typeof(DriverConfiguration))]
+public class Driver : BaseEntity
+{
+    private readonly ILazyLoader _lazyLoader;
+
+    public Driver() { }
+
+    private Driver(ILazyLoader lazyLoader)
+    {
+        _lazyLoader = lazyLoader;
+    }
+
+    public Person PersonInfo { get; set; } = new Person();
+
+    private IEnumerable<Car> _cars = new List<Car>();
+
+    [InverseProperty(nameof(Car.Drivers))]
+    public IEnumerable<Car> Cars
+    {
+        get => _lazyLoader.Load(this, ref _cars);
+        set => _cars = value;
+    }
+
+    private IEnumerable<CarDriver> _carDrivers = new List<CarDriver>();
+
+    [InverseProperty(nameof(CarDriver.DriverNavigation))]
+    public IEnumerable<CarDriver> CarDrivers
+    {
+        get => _lazyLoader.Load(this, ref _carDrivers);
+        set => _carDrivers = value;
+    }
+}
+```
+
+```cs
+// CarDriver.cs
+namespace AutoLot.Samples.Models;
+
+[Table("InventoryToDrivers", Schema = "public")]
+public class CarDriver : BaseEntity
+{
+    private readonly ILazyLoader _lazyLoader;
+
+    public CarDriver() { }
+
+    private CarDriver(ILazyLoader lazyLoader)
+    {
+        _lazyLoader = lazyLoader;
+    }
+
+    public int DriverId { get; set; }
+
+    private Driver _driverNavigation;
+
+    [ForeignKey(nameof(DriverId))]
+    public Driver DriverNavigation
+    {
+        get => _lazyLoader.Load(this, ref _driverNavigation);
+        set => _driverNavigation = value;
+    }
+
+    [Column("InventoryId")]
+    public int CarId { get; set; }
+
+    private Car _carNavigation;
+
+    [ForeignKey(nameof(CarId))]
+    public Car CarNavigation
+    {
+        get => _lazyLoader.Load(this, ref _carNavigation);
+        set => _carNavigation = value;
+    }
+}
+```
+
+```cs
+// Radio.cs
+namespace AutoLot.Samples.Models;
+
+[Table("Radios", Schema = "public")]
+[EntityTypeConfiguration(typeof(RadioConfiguration))]
+public class Radio : BaseEntity
+{
+    private readonly ILazyLoader _lazyLoader;
+
+    public Radio() { }
+
+    private Radio(ILazyLoader lazyLoader)
+    {
+        _lazyLoader = lazyLoader;
+    }
+
+    public bool HasTweeters { get; set; }
+    public bool HasSubWoofers { get; set; }
+
+    [Required, StringLength(50)]
+    public string RadioId { get; set; }
+
+    [Column("InventoryId")]
+    public int CarId { get; set; }
+
+    private Car _carNavigation;
+
+    [ForeignKey(nameof(CarId))]
+    public Car CarNavigation
+    {
+        get => _lazyLoader.Load(this, ref _carNavigation);
+        set => _carNavigation = value;
+    }
+}
+```
+
+**EF Core détecte automatiquement le constructeur privé avec `ILazyLoader` et l'injecte lors de la matérialisation des entités. Quand une navigation property est accédée pour la première fois, `_lazyLoader.Load()` déclenche une requête SQL pour charger les données.**
+
+>[!warning] Points d'attention
+>
+>- `ILazyLoader` est dans le namespace `Microsoft.EntityFrameworkCore.Infrastructure`
+>- Le constructeur privé avec `ILazyLoader` **ne doit pas** être appelé manuellement
+>- Le constructeur public sans paramètres est **obligatoire**
+>- Chaque entité avec des navigation properties doit implémenter ce pattern
+>- Le problème N+1 s'applique toujours : chaque accès à une navigation property
+>  non chargée génère une requête SQL supplémentaire
+
+#### La variante `LoadAsync()`
+
+```cs
+private IEnumerable<Car> _cars = new List<Car>();
+[InverseProperty(nameof(Car.MakeNavigation))]
+public IEnumerable<Car> Cars
+{
+    get => _lazyLoader.Load(this, ref _cars);
+    set => _cars = value;
+}
+
+// Version async séparée
+public async Task<IEnumerable<Car>> GetCarsAsync(CancellationToken cancellationToken = default)
+{
+    await _lazyLoader.LoadAsync(this, cancellationToken, ref _cars);
+    return _cars;
+}
+```
+
+C# ne supporte pas les getters `async`. La convention est donc d'avoir :
+
+- La propriété normale avec `Load()` pour la compatibilité synchrone
+- Une méthode `GetXxxAsync()` séparée pour la version async
+
+
+# Mettre à jour des enregistrements
+
+**Les enregistrements sont mis à jour en les chargeant dans `DbSet<T>` en tant qu'entité suivie, en les modifiant par le biais du code, puis en appelant `SaveChanges()` sur le contexte. Lors de l'exécution de `SaveChanges()`, le `ChangeTracker` signale toutes les entités modifiées, et EF Core (avec le fournisseur de base de données) crée la ou les instructions SQL appropriées pour mettre à jour le ou les enregistrements.**
+
+##  État de l'entité
+
+Lorsqu'une entité suivie est modifiée, son état (`EntityState`) passe à `Modified`. Une fois les modifications enregistrées, l'état (`EntityState`) revient à `Unchanged`.
+
+## Mise à jour des entités suivies
+
+La mise à jour d'un enregistrement est similaire à son ajout, à ceci près que l'enregistrement initial est récupéré de la base de données et non créé par programmation. Chargez l'enregistrement depuis la base de données dans une entité suivie, effectuez les modifications nécessaires, puis appelez la méthode SaveChanges(). Notez qu'il n'est pas nécessaire d'appeler les méthodes Update()/UpdateRange() sur le `DbSet<T>`, puisque les entités sont déjà suivies. Le code suivant met à jour un seul enregistrement, mais la procédure reste identique pour la mise à jour et l'enregistrement de plusieurs entités suivies.
+
+```cs
+static async Task UpdateRecords()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = await context.Cars.FirstAsync();
+    car.Color = "Green";
+    await context.SaveChangesAsync();
+}
+```
+
+La requête SQL exécutée est indiquée ici :
+
+```sql
+UPDATE public."Inventory" SET "Color" = @p0
+WHERE "Id" = @p1 AND xmin = @p2
+RETURNING "Display", xmin;
+```
+
+>[!note]
+>
+>La clause `WHERE` précédente vérifiait non seulement la colonne `Id`, mais aussi la colonne `TimeStamp` (SQL Server) / `xmin` (PostgreSQL). Il s'agit d'EF Core utilisant la vérification de concurrence, un sujet abordé plus loin dans ce chapitre.
+
+## Mise à jour des entités non suivies
+
+**Les entités non suivies peuvent également servir à mettre à jour les enregistrements de la base de données. Le processus est similaire à celui de la mise à jour des entités suivies, à ceci près que l'entité est créée par le code** (et non par une requête), **et qu'EF Core doit être informé que l'entité existe déjà dans la base de données et doit être mise à jour.** Il existe deux façons d'informer EF Core que cette entité doit être traitée comme une mise à jour. La première consiste à appeler la méthode `Update()` sur le `DbSet<T>`, ce qui définit l'état sur `Modified`, comme ceci :
+
+```cs
+
+```
+
+
+
+
+
+
+
+
+
 
 ## Résilience de la connection
 
