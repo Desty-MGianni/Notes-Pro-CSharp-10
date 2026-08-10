@@ -1260,7 +1260,7 @@ var item = context.MaClasseAvecCléComposite.Find(27, 3);
 
 ==Nous utiliserons ces outils car la méthode `ToQueryString()` ne fonctionne pas avec l'agrégation.==
 
-Ce premier exemple compte tous les enregistrements de voitures dans la base de données.
+Ce premier exemple compte tous les enregistrements de `Car` dans la base de données.
 
 >[!info] 
 >
@@ -1336,7 +1336,7 @@ SELECT avg(i."Id"::double precision)
 
 **Les méthodes `Any()` et `All()` vérifient si un ensemble d'enregistrements correspond aux critères (`Any()`) ou si tous les enregistrements correspondent aux critères (`All()`).** Tout comme les méthodes d'agrégation, la méthode `Any()` (mais pas la méthode `All()`) peut être ajoutée à la fin d'une requête LINQ avec les méthodes `Where()`, ou l'expression de filtre peut être contenue dans la méthode elle-même. Les méthodes `Any()` et `All()` s'exécutent côté serveur et renvoient une valeur `bool`. ***==Ce sont deux fonctions de terminaison.==*** Les filtres de requête globaux affectent également les fonctions `Any()` et `All()` et peuvent être désactivés avec `IgnoreQueryFilters()`.
 
-==La méthode `ToQueryString()` ne fonctionne pas non plus avec les fonctions Any()/All(), c'est pourquoi toutes les instructions SQL présentées dans cette section ont été avec les mêmes moyens que les sections précédentes.==
+==La méthode `ToQueryString()` ne fonctionne pas non plus avec les fonctions `Any()`/`All()`, c'est pourquoi toutes les instructions SQL présentées dans cette section ont été avec les mêmes moyens que les sections précédentes.==
 
 Ce premier exemple vérifie si des enregistrements de `Car` ont un `MakeId` égal à $1$.
 
@@ -2455,18 +2455,359 @@ RETURNING "Display", xmin;
 
 ## Mise à jour des entités non suivies
 
-**Les entités non suivies peuvent également servir à mettre à jour les enregistrements de la base de données. Le processus est similaire à celui de la mise à jour des entités suivies, à ceci près que l'entité est créée par le code** (et non par une requête), **et qu'EF Core doit être informé que l'entité existe déjà dans la base de données et doit être mise à jour.** Il existe deux façons d'informer EF Core que cette entité doit être traitée comme une mise à jour. La première consiste à appeler la méthode `Update()` sur le `DbSet<T>`, ce qui définit l'état sur `Modified`, comme ceci :
+**Les entités non suivies peuvent également servir à mettre à jour les enregistrements de la base de données.** Le processus est similaire à celui de la mise à jour des entités suivies, à ceci près que l'entité est créée par le code (et non par une requête), et qu'EF Core doit être informé que l'entité existe déjà dans la base de données et doit être mise à jour. **==Il existe deux façons d'informer EF Core que cette entité doit être traitée comme une mise à jour.==** La première consiste à appeler la méthode `Update()` sur le `DbSet<T>`, ce qui définit l'état sur `Modified`, comme ceci :
 
 ```cs
-
+context.Cars.Update(updatedCar);
 ```
 
+La seconde consiste à utiliser l'instance de contexte et la méthode `Entry()` pour définir l'état sur `Modified`, comme ceci :
 
+```cs
+context.Entry(updatedCar).State = EntityState.Modified;
+```
 
+**Dans tous les cas, la fonction `SaveChanges()` doit être appelée pour que les valeurs soient conservées.**
 
+>[!note]
+>Vous vous demandez peut-être quand mettre à jour une entité non suivie. Prenons l'exemple d'une requête `POST` ASP.NET Core qui envoie les valeurs d'une entité via HTTP. Les données mises à jour doivent être enregistrées, et cette technique permet d'éviter un nouvel appel à la base de données pour intégrer l'entité au `ChangeTracker`.
 
+L'exemple suivant lit un enregistrement non suivi (simulant une publication dans ASP.NET Core) et modifie une propriété (`Color`). Ensuite, il définit l'état sur `Modified` en appelant la méthode `Update()` sur `DbSet<T>`.
 
+```cs
+static async Task UpdateRecords()
+{
+	...
+	
+    var carToUpdate = await context
+        .Cars.AsNoTracking()
+        .FirstAsync(x => x.Id == 1);
+    carToUpdate.Color = "Orange";
+    context.Cars.Update(carToUpdate);
+    await context.SaveChangesAsync();
+    context.ChangeTracker.Clear();
+}
+```
 
+Comme l'entité n'est pas suivie, EF Core met à jour toutes les valeurs de propriété dans le SQL généré :
+
+```sql
+UPDATE public."Inventory" SET "Color" = @p0, "DateBuilt" = @p1, "IsDrivable" = 
+	  @p2, "MakeId" = @p3, "PetName" = @p4, "TimeStamp" = @p5
+WHERE "Id" = @p6 AND xmin = @p7
+RETURNING "Display", xmin;
+```
+
+L'exemple suivant suit la même logique, mais au lieu d'appeler la méthode `Update()`, le code modifie manuellement l'`EntityState` à `Modified`, puis appelle `SaveChanges()`. La méthode `Clear()` est appelée sur le `ChangeTracker` pour éviter tout conflit entre les différents chemins d'exécution. Le code SQL généré est identique à celui de l'exemple précédent.
+
+```cs
+static async Task UpdateRecords()
+{
+	...
+	
+    var carToUpdate2 = await context
+        .Cars.AsNoTracking()
+        .FirstAsync(x => x.Id == 1);
+    carToUpdate2.Color = "Orange";
+    context.Entry(carToUpdate2).State = EntityState.Modified;
+    await context.SaveChangesAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+# Suppression des enregistrements
+
+**Une ou plusieurs entités sont marquées pour suppression en appelant la méthode `Remove()`** (pour une seule entité) **ou `RemoveRange()`** (pour une liste d'entités) **sur la propriété `DbSet<T>` appropriée, ou en définissant l'état de la ou des entités sur `Deleted`.** ==Le processus de suppression entraîne des effets en cascade sur les propriétés de navigation, conformément aux règles configurées dans `OnModelCreating()` (ou aux conventions EF Core). Si la suppression est empêchée par la politique de cascade, une exception est levée.==
+
+## État de l'entité
+
+**Lorsque la méthode `Remove()` est appelée sur une entité suivie, son `EntityState` est défini sur `Deleted`. Une fois la méthode `SaveChanges()` exécutée avec succès, l'entité est supprimée du `ChangeTracker` et son état passe à `Detached`. Notez que l'entité existe toujours dans votre application, sauf si elle est sortie de la portée et a été collectée par le ramasse-miettes.**
+
+## Suppression des enregistrements suivis
+
+**Le processus de suppression est identique au processus de mise à jour.** Une fois l'entité suivie, appelez `Remove()` sur cette instance, puis appelez `SaveChanges()` pour supprimer l'enregistrement de la base de données.
+
+```cs
+static async Task DeleteRecords()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    await ClearSampleData();
+    await LoadMakesAndCarData();
+    var car = await context.Cars.FirstAsync(x => x.Color != "Green");
+    context.Cars.Remove(car);
+    await context.SaveChangesAsync();
+}
+```
+
+La requête SQL exécutée pour la suppression est indiquée ici :
+
+```sql
+DELETE FROM public."Inventory"
+WHERE "Id" = @p0 AND xmin = @p1;
+```
+
+***==Il est important de noter qu'après l'appel à `SaveChanges()`, l'instance d'entité existe toujours, mais n'est plus présente dans le `ChangeTracker`. L'état de l'entité sera alors `Detached`.==***
+
+```cs
+static async Task DeleteRecords()
+{
+	...
+    Console.WriteLine(
+        $"{car.PetName}'s state is {context.Cars.Entry(car).State}"
+    );
+    context.ChangeTracker.Clear();
+}
+```
+
+## Suppression des entités non suivies
+
+**Les entités non suivies peuvent supprimer des enregistrements de la même manière qu'elles peuvent les mettre à jour. La différence réside dans le fait que l'entité est suivie en appelant `Remove()`/`RemoveRange()` ou en définissant son état sur `Deleted`, puis en appelant `SaveChanges()`.**
+
+L'exemple suivant suit le même modèle pour la mise à jour des entités non suivies. Il lit un enregistrement comme non suivi, puis utilise la méthode `Remove()` sur `DbSet<T>` (premier exemple) ou modifie manuellement l'état de l'entité sur `Deleted` (deuxième exemple). Dans chaque cas, le code appelle `SaveChanges()` pour enregistrer la suppression. L'appel `Clear()` sur `ChangeTracker` garantit l'absence de conflit entre le premier exemple et le second.
+
+```cs
+static async Task DeleteRecords()
+{
+	...
+
+    var carToDelete = await context
+        .Cars.AsNoTracking()
+        .FirstAsync(x => x.Color != "Green");
+    context.Cars.Remove(carToDelete);
+    await context.SaveChangesAsync();
+
+    context.ChangeTracker.Clear();
+
+    var carToDelete2 = await context
+        .Cars.AsNoTracking()
+        .FirstAsync(x => x.Color != "Green");
+    context.Entry(carToDelete2).State = EntityState.Deleted;
+    await context.SaveChangesAsync();
+}
+```
+
+## Gestion des échecs de suppression en cascade
+
+**EF Core lève une exception `DbUpdateException` lorsqu'une tentative de suppression d'un enregistrement échoue en raison des règles de suppression en cascade.** Le test suivant illustre ce comportement :
+
+```cs
+static async Task DeleteRecords()
+{
+	...
+	
+    var make = await context.Makes.FirstAsync();
+    context.Makes.Remove(make);
+    try
+    {
+        await context.SaveChangesAsync();
+    }
+    catch (DbUpdateException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+```
+
+**Ceci conclut la présentation des opérations CRUD (Créer, Lire, Mettre à jour et Supprimer) avec EF Core**. La section suivante aborde les principales fonctionnalités d'EF Core qui améliorent le code d'accès aux données et la productivité des développeurs.
+
+# Fonctionnalités notables d'EF Core
+
+De nombreuses fonctionnalités d'EF 6 ont été reprises dans EF Core, et d'autres sont ajoutées à chaque nouvelle version. Beaucoup de ces fonctionnalités ont été considérablement améliorées dans leur implémentation EF Core, tant au niveau des fonctionnalités que des performances. Outre la reprise des fonctionnalités d'EF 6, EF Core a ajouté de nombreuses nouveautés. Voici quelques-unes des fonctionnalités les plus notables d'EF Core (sans ordre particulier).
+
+## Filtres de requêtes globaux
+
+>[!danger] Même problème que pour le chargement différé
+>
+>En EF Core 10, les compiled models s'auto-activent dès que leur dossier est présent dans le projet, sans appel explicite à `UseModel()`. Pour tester ces fonctionnalités, supprimer physiquement le dossier `CompiledModels/` et le régénérer avec `dotnet ef dbcontext optimize` quand nécessaire.
+
+**Les filtres de requêtes globaux permettent d'ajouter une clause `WHERE` à toutes les requêtes LINQ pour une entité donnée.** Par exemple, ==il est courant d'utiliser la suppression logique plutôt que la suppression définitive.== **Un champ est ajouté à la table pour indiquer le statut de suppression de l'enregistrement. Si l'enregistrement est « supprimé », la valeur est définie sur vrai (ou 1), mais l'enregistrement n'est pas supprimé de la base de données.** ==C'est ce qu'on appelle une *suppression logique*.== Pour exclure les enregistrements supprimés logiquement des opérations normales, chaque clause `WHERE` doit vérifier la valeur de ce champ. Se souvenir d'inclure ce filtre dans chaque requête peut s'avérer fastidieux, voire problématique.
+
+**EF Core permet d'ajouter un *filtre de requête global* à une entité, qui est ensuite appliqué à chaque requête impliquant cette entité. Dans l'exemple de suppression logique décrit précédemment, vous définissez un filtre sur la classe d'entité pour exclure les enregistrements supprimés logiquement. Vous n'avez plus besoin de vous souvenir d'inclure la clause `WHERE` pour filtrer les enregistrements supprimés logiquement dans chaque requête que vous écrivez.**
+
+Supposons que tous les enregistrements `Car` non utilisables doivent être exclus des requêtes classiques. Ouvrez la classe `CarConfiguration` et ajoutez la ligne suivante à la méthode `Configure()` :
+
+```cs
+public void Configure(EntityTypeBuilder<Car> builder)
+{
+	...
+	builder.HasQueryFilter(c=>c.IsDrivable == true);
+	...
+}
+```
+
+Grâce au filtre de requête global, les requêtes impliquant l'entité `Car` excluront automatiquement les voitures non utilisables. Prenons l'exemple de la requête LINQ suivante qui récupère toutes les voitures, à l'exception de celles exclues par le filtre de requête :
+
+```cs
+static async Task QueryFilters()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = await context.Cars.ToListAsync();
+    Console.WriteLine($"Total number of driveable cars: {cars.Count}");
+}
+```
+
+Le code SQL généré est le suivant :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", i."PetName", i."TimeStamp", i.xmin
+      FROM public."Inventory" AS i
+      WHERE i."IsDrivable"
+```
+
+>[!note]
+>**Les filtres de requête ne s'additionnent pas. Le dernier filtre ajouté est prioritaire.** Si vous ajoutez un autre filtre de requête pour l'entité `Car`, il remplacera le filtre existant.
+
+**Si vous devez récupérer tous les enregistrements, y compris ceux filtrés par le filtre de requête global, ajoutez la méthode `IgnoreQueryFilters()` à la requête LINQ :**
+
+```cs
+static async Task QueryFilters()
+{
+	...
+    var allCars = await context.Cars.IgnoreQueryFilters().ToListAsync();
+    Console.WriteLine($"Total numbers of cars: {allCars.Count}");
+    var radios = await context.Radios.ToListAsync();
+    var allRadios = await context.Radios.IgnoreQueryFilters().ToListAsync();
+}
+```
+
+L'ajout de `IgnoreQueryFilters()` à la requête LINQ supprime la clause `WHERE` excluant les enregistrements supprimés logiquement.
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
+```
+
+**Il est important de noter que l'appel à `IgnoreQueryFilters()` supprime le filtre de requête pour chaque entité de la requête LINQ, y compris celles impliquées dans les instructions `Include()` ou `ThenInclude()`**.
+
+>[!note]
+>Les filtres de requêtes globales sont une construction entièrement EF Core. Aucune modification n'est apportée à la base de données. Même avec le filtre d'exclusion des véhicules non roulants activé, si vous ouvrez SSMS/Azure Data Studio et exécutez une requête pour sélectionner tous les enregistrements d'inventaire (n'oubliez pas que l'entité `Car` est mappée à la table `Inventory`), vous verrez tous les enregistrements, y compris ceux des véhicules non roulants.
+
+### Filtres de requête globaux sur les propriétés de navigation
+
+**Des filtres de requête globaux peuvent également être définis sur les propriétés de navigation.** Supposons que vous souhaitiez exclure les radios qui se trouvent dans une `Car` non utilisable. Le filtre de requête est créé sur la propriété de navigation `CarNavigation` de l'entité `Radio`, comme ceci (en utilisant la classe `RadioConfiguration`) :
+
+```cs
+public void Configure(EntityTypeBuilder<Radio> builder)
+{
+	...
+	builder.HasQueryFilter(e => e.CarNavigation.IsDrivable);
+	...
+}
+```
+
+Lors de l'exécution d'une requête LINQ standard, les commandes contenant un véhicule non roulant seront exclues du résultat.
+
+```cs
+static async Task QueryFilters()
+{
+	...
+    var radios = await context.Radios.ToListAsync();
+}
+```
+
+Voici l'instruction LINQ et l'instruction SQL générée :
+
+```sql
+SELECT r."Id", r."InventoryId", r."HasSubWoofers", r."HasTweeters", r."RadioId", 
+	  r."TimeStamp", r.xmin
+FROM public."Radios" AS r
+INNER JOIN (
+	  SELECT i."Id", i."IsDrivable"
+	  FROM public."Inventory" AS i
+	  WHERE i."IsDrivable"
+) AS i0 ON r."InventoryId" = i0."Id"
+WHERE i0."IsDrivable"
+```
+
+Pour supprimer le filtre de requête, utilisez `IgnoreQueryFilters()`. Voici les instructions LINQ mises à jour et le code SQL généré :
+
+```cs
+static async Task QueryFilters()
+{
+	...
+    var allRadios = await context.Radios.IgnoreQueryFilters().ToListAsync();
+}
+```
+
+```sql
+SELECT r."Id", r."InventoryId", r."HasSubWoofers", r."HasTweeters", r."RadioId", 
+	  r."TimeStamp", r.xmin
+FROM public."Radios" AS r
+```
+
+*==Attention : EF Core ne détecte pas les filtres de requête globaux cycliques ; soyez donc prudent lorsque vous ajoutez des filtres de requête aux propriétés de navigation.
+
+### Chargement explicite avec filtres de requête globaux
+
+**Les filtres de requête globaux sont également actifs lors du chargement explicite de données associées.** Par exemple, si vous souhaitez charger les enregistrements de `Car` pour un `make` donnée, le filtre `IsDrivable` empêchera le chargement en mémoire des `Car` non utilisables. Voici un exemple d'extrait de code :
+
+```cs
+static async Task RelatedDataQueryFilters()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var make = await context.Makes.FirstAsync(x => x.Id == 1);
+    // Récupère la collection de Car
+    await context.Entry(make).Collection(c => c.Cars).LoadAsync();
+    context.ChangeTracker.Clear();
+}
+```
+
+Il ne devrait plus être surprenant que la requête SQL générée inclue le filtre pour les voitures non roulantes.
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
+WHERE i."IsDrivable" AND i."MakeId" = @p
+```
+
+**Il existe une petite difficulté à ignorer les filtres de requête lors du chargement explicite de données. Le type renvoyé par la méthode `Collection()` est `CollectionEntry<Make,Car>` et n'implémente pas explicitement l'interface `IQueryable<T>`. Pour appeler `IgnoreQueryFilters()`, vous devez d'abord appeler `Query()`, qui renvoie un `IQueryable<Car>`.**
+
+```cs
+static async Task RelatedDataQueryFilters()
+{
+	...
+    // Récupère la collection de Car
+    await context
+        .Entry(make)
+        .Collection(c => c.Cars)
+        .Query()
+        .IgnoreQueryFilters()
+        .LoadAsync();
+    ...
+}
+```
+
+Il n'est donc pas surprenant que le code SQL généré par EF Core n'inclue pas le filtre pour les voitures non utilisables :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", i."IsDrivable", i."MakeId", 
+	  i."PetName", i."TimeStamp", i.xmin
+FROM public."Inventory" AS i
+WHERE i."MakeId" = @p
+```
+
+**La même procédure s'applique lors de l'utilisation de la méthode `Reference()` pour récupérer des données à partir d'une propriété de navigation de référence. Appelez d'abord `Query()`, puis `IgnoreQueryFilters()`.**
+
+## Requêtes SQL brutes avec LINQ
+
+Il arrive que l'obtention de l'instruction LINQ correcte pour une requête complexe soit plus difficile que d'écrire directement le SQL. Ou encore, le SQL généré par votre requête LINQ peut être sous-optimal. Heureusement, **EF Core propose un mécanisme permettant d'exécuter des instructions SQL brutes sur un `DbSet<T>`. Les méthodes `FromSqlRaw()` et `FromSqlRawInterpolated()` prennent en paramètre une chaîne de caractères qui remplace la requête LINQ. Cette requête est exécutée côté serveur.**
+
+**Si l'instruction SQL brute n'est pas terminée** (par exemple, il ne s'agit ni d'une procédure stockée, ni d'une fonction définie par l'utilisateur, d'une instruction utilisant une expression de table commune, ni d'une instruction se terminant par un point-virgule), **des instructions LINQ supplémentaires peuvent être ajoutées à la requête. Ces instructions LINQ supplémentaires, telles que les clauses `Include()`, `OrderBy()` ou `Where()`, seront combinées avec l'appel SQL brut d'origine et les filtres de requête globaux, et la requête entière sera exécutée côté serveur.**
+
+**Lors de l'utilisation d'une des variantes de `FromSql`, la requête doit être écrite en utilisant le schéma de la base de données et le nom de la table, et non les noms des entités. `FromSqlRaw()` transmet la chaîne telle quelle. `FromSqlInterpolated()` utilise l'interpolation de chaînes C#, et chaque chaîne interpolée est traduite dans le paramètre SQL.** **==Il est recommandé d'utiliser la version interpolée lorsque vous utilisez des variables, pour la protection accrue inhérente aux requêtes paramétrées.==**
+
+**Pour obtenir le schéma de la base de données et le nom de la table, utilisez la propriété `Model` du `DbContext` dérivé. Le `Model` expose une méthode appelée `FindEntityType()` qui renvoie un `IEntityType`, lequel possède des méthodes permettant d'obtenir le schéma et le nom de la table.** Cette méthode a été utilisée précédemment dans ce chapitre pour configurer l'insertion d'identité pour SQL Server. Le code suivant affiche le schéma et le nom de la table :
 
 
 
