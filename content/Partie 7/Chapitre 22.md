@@ -2809,7 +2809,321 @@ Il arrive que l'obtention de l'instruction LINQ correcte pour une requête compl
 
 **Pour obtenir le schéma de la base de données et le nom de la table, utilisez la propriété `Model` du `DbContext` dérivé. Le `Model` expose une méthode appelée `FindEntityType()` qui renvoie un `IEntityType`, lequel possède des méthodes permettant d'obtenir le schéma et le nom de la table.** Cette méthode a été utilisée précédemment dans ce chapitre pour configurer l'insertion d'identité pour SQL Server. Le code suivant affiche le schéma et le nom de la table :
 
+```cs
+static void UsingFromSql()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
+    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
+    Console.WriteLine($"{metadata.GetSchema()}.{metadata.GetTableName()}");
+}
+```
+
+En supposant que le filtre de requête global de la section précédente soit défini sur l'entité `Car`, l'instruction LINQ suivante récupère le premier enregistrement de `Inventory` dont l'`Id` est égal à $1$, inclut les données de `Make` associées et filtre les `Car` non utilisables :
+
+```cs
+static async Task UsingFromSql()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
+    Console.WriteLine($"{metadata.GetSchema()}.{metadata.GetTableName()}");
+
+    // Limitation de Postgres : obligé d'utilisé Min/MinAsync au lieu de 1.
+    int carId = 1;
+    var car = await context
+        .Cars.FromSqlInterpolated(
+            $"SELECT \"Inventory\".*, \"Inventory\".\"xmin\" FROM \"Inventory\" WHERE \"Id\" = {carId}"
+        )
+        .Include(x => x.MakeNavigation)
+        .FirstAsync();
+}
+```
+
+>[!note]
+>**Malheureusement, le nom de la table et du schéma ne peut pas être ajouté à la requête à l'aide de l'interpolation de chaînes C#, car SQL Server / PostgreSQL ne prend pas en charge la paramétrisation de ces éléments.**
+
+Le moteur de traduction LINQ to SQL combine l'instruction SQL brute avec le reste des instructions LINQ et exécute la requête suivante :
+
+```sql
+SELECT a."Id", a."Color", a."DateBuilt", a."Display", a."IsDrivable", a."MakeId", 
+	  a."PetName", a."TimeStamp", a.xmin, m."Id", m."Name", m."TimeStamp", m.xmin
+FROM (
+	  SELECT "Inventory".*, "Inventory"."xmin" FROM "Inventory" WHERE "Id" = @p0
+) AS a
+INNER JOIN public."Makes" AS m ON a."MakeId" = m."Id"
+WHERE a."IsDrivable"
+LIMIT 1
+```
+
+***==Sachez que certaines règles doivent être respectées lors de l'utilisation de SQL brut avec LINQ.==***
+
+- La requête SQL doit renvoyer des données pour toutes les propriétés du type d'entité.
+- Les noms de colonnes doivent correspondre aux propriétés auxquelles ils sont associés (une amélioration par rapport à EF 6 où les associations étaient ignorées).
+- La requête SQL ne peut pas contenir de données liées.
+
+## Projections
+
+Outre l'utilisation de requêtes SQL brutes avec LINQ, **les modèles de vue peuvent être alimentés par des projections. Une *projection* consiste à composer un autre type d'objet à la fin d'une requête LINQ, en projetant les données dans un autre type de données.** Une projection peut être un sous-ensemble des données d'origine (par exemple, récupérer toutes les valeurs `Id` des entités `Car` correspondant à une clause `WHERE`) ou un type personnalisé, comme `CarMakeViewModel`.
+
+Pour obtenir la liste de toutes les clés primaires des enregistrements `Car`, ajoutez la méthode suivante à vos instructions de niveau supérieur :
+
+```cs
+static async Task Projections()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    List<int> ids = await context.Cars.Select(x => x.Id).ToListAsync();
+}
+```
+
+Le code SQL généré pour cette instruction est affiché ici. Notez que le filtre de requête global est pris en compte dans la projection :
+
+```sql
+SELECT i."Id"
+FROM public."Inventory" AS i
+WHERE i."IsDrivable
+```
+
+**Pour initialiser un type personnalisé, utilisez le mot-clé `new` dans la méthode `Select()`. Les valeurs du nouveau type sont initialisées par l'initialisation d'objet, et le moteur de traduction LINQ to SQL se charge de récupérer les propriétés de navigation utilisées pour le nouveau type depuis la base de données.** Ceci est réalisé grâce au chargement anticipé, qui est abordé en détail plus loin dans ce chapitre. Mettez à jour la méthode `Projections()` avec le code suivant pour créer une liste d'entités `CarMakeViewModel` (notez l'instruction `using` supplémentaire qui doit être ajoutée en haut de votre fichier) :
+
+```cs
+static async Task Projections()
+{
+	...
+	
+    var vms = context.Cars.Select(x => new CarMakeViewModel
+    {
+        CarId = x.Id,
+        Color = x.Color,
+        DateBuilt = x.DateBuilt.GetValueOrDefault(new DateTime(2020, 01, 01)),
+        Display = x.Display,
+        Make = x.MakeNavigation.Name,
+        MakeId = x.MakeId,
+        PetName = x.PetName,
+    });
+    foreach (CarMakeViewModel c in vms)
+        Console.WriteLine($"{c.PetName} is a {c.Make}");
+}
+```
+
+Le code SQL généré pour cette instruction est présenté ci-dessous. Notez la jointure interne permettant de récupérer la propriété `Make` `Name` et le fait que le filtre de requête global est à nouveau appliqué :
+
+```sql
+SELECT i."Id", i."Color", i."DateBuilt", i."Display", m."Name", i."MakeId", 
+	  i."PetName"
+FROM public."Inventory" AS i
+INNER JOIN public."Makes" AS m ON i."MakeId" = m."Id"
+WHERE i."IsDrivable"
+```
+
+## Gestion des valeurs générées par la base de données
+
+**Outre le suivi des modifications et la génération de requêtes SQL à partir de LINQ, un avantage significatif de l'utilisation d'EF Core par rapport à ADO.NET est la gestion transparente des valeurs générées par la base de données. Après l'ajout ou la mise à jour d'une entité, EF Core interroge la base de données pour obtenir les données générées et met automatiquement à jour l'entité avec les valeurs correctes. Avec ADO.NET, cette opération doit être effectuée manuellement.**
+
+Par exemple, la table `Inventory` possède une clé primaire de type entier définie dans SQL Server / PostgreSQL comme une colonne d'identité. **Les colonnes `IDENTITY` sont initialisées par SQL Server / PostgreSQL avec un numéro unique (issu d'une séquence) lors de l'ajout d'un enregistrement, et cette clé primaire ne peut pas être modifiée lors des mises à jour normales de l'enregistrement (sauf dans le cas particulier où l'insertion d'identité est activée). De plus, la table `Inventory` possède une colonne `Timestamp` / `xmin` utilisée pour la gestion des accès concurrents. La gestion des accès concurrents sera abordée plus loin, mais pour l'instant, retenez simplement que la colonne `Timestamp` est gérée par SQL Server (`xmin` par PostgreSQL) et mise à jour lors de chaque ajout ou modification.** Nous avons également ajouté deux colonnes avec des valeurs par défaut à la table, `DateBuilt` et `IsDrivable`, ainsi qu'une colonne calculée, `Display`.
+
+Le code suivant ajoute une nouvelle `Car` à la table `Inventory`, de manière similaire au code utilisé précédemment dans ce chapitre :
+
+```cs
+static async Task AddCar()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie",
+    };
+    await context.Cars.AddAsync(car);
+    await context.SaveChangesAsync();
+}
+```
+
+Lors de l'exécution de `SaveChanges()`, deux requêtes (Pour SQL Server) sont effectuées sur la base de données. 
+
+```sql
+-- Effecture l'insertion
+INSERT INTO [Dbo].[Inventory] ([Color], [MakeId], [PetName])
+VALUES (N'Yellow', 1, N'Herbie');
+```
+
+La seconde requête renvoie les valeurs de la clé primaire et toutes les autres données générées par le serveur. Dans ce cas, la requête renvoie les valeurs Id, DateBuilt, Display, IsDrivable et Timestamp. EF Core met ensuite à jour l'entité avec les valeurs générées par le serveur.
+
+```sql
+-- Retourne les valeurs maintenues par le serveur à EF Core
+SELECT [Id], [DateBuilt], [Display], [IsDrivable], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+```
+
+>[!note]
+>EF Core exécute en réalité des requêtes paramétrées, mais j'ai simplifié les exemples SQL pour plus de clarté.
+
+Pour PostgreSQL, une seule requête est généré avec une clause `RETURNING`. 
+
+```sql
+INSERT INTO public."Inventory" ("Color", "MakeId", "PetName", "TimeStamp")
+VALUES (@p0, @p1, @p2, @p3)
+RETURNING "Id", "DateBuilt", "Display", "IsDrivable", xmin;
+```
+
+**Lors de l'ajout d'un enregistrement qui attribue des valeurs par défaut aux propriétés, vous constaterez qu'EF Core n'interroge pas ces propriétés, car l'entité possède déjà les valeurs correctes.** Prenons l'exemple de code suivant :
+
+```cs
+static async Task AddCarWithDefaultsSet()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie",
+        IsDrivable = true,
+        DateBuilt = new DateTime(2021, 01, 01),
+    };
+    await context.Cars.AddAsync(car);
+    await context.SaveChangesAsync();
+}
+```
+
+Lors de l'exécution de `SaveChanges()`, les deux instructions SQL suivantes sont exécutées. Notez que seules les valeurs Id (clé primaire), `Display` et `TimeStamp` / `xmin` sont récupérées :
+
+```sql
+-- Insertion de la valeur
+INSERT INTO [dbo].[Inventory] ([Color], [DateBuilt], [IsDrivable], [MakeId], 
+	  [PetName])
+VALUES (N'Yellow','2021-01-01 00:00:00',1,1, N'Herbie');
+
+-- Récupère les valeurs gérés par la base de données
+SELECT [Id], [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+```
+
+Pour PostgreSQL :
+
+```sql
+INSERT INTO public."Inventory" ("Color", "DateBuilt", "IsDrivable", "MakeId", 
+	  "PetName", "TimeStamp")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id", "Display", xmin;
+```
+
+**Lors de la mise à jour d'enregistrements, les valeurs de la clé primaire étant déjà connues, seuls les champs non liés à la clé primaire et contrôlés par la base de données sont renvoyés. En reprenant l'exemple précédent de `Car`, seule la valeur de `Timestamp` / `xmin` mise à jour est interrogée et renvoyée lors de la mise à jour de l'enregistrement.** Le code suivant récupère un enregistrement de `Car` depuis la base de données, modifie sa couleur, puis enregistre la `Car` mise à jour :
+
+```cs
+static async Task UpdateCar()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var car = await context.Cars.FirstAsync(c => c.Id == 1);
+    car.Color = "White";
+    await context.SaveChangesAsync();
+}
+```
+
+La commande `SaveChanges()` exécute la requête SQL suivante, qui enregistre d'abord les modifications, puis renvoie les nouvelles valeurs `Display` et `Timestamp` / `xmin`
+
+Pour SQL Server, ne vous préoccupez pas de la valeur d'horodatage dans la clause `WHERE` ; elle sera expliquée dans la section suivante.
+
+```sql
+-- Mise à jour le d'enregistrement Car
+UPDATE [dbo].[Inventory] SET [Color] = N'White'
+WHERE [Id] = 1 AND [TimeStamp] = 0x00000000000007E1;
+
+-- Renvoie les valeurs mise à jour de Display et TimeStamp à EF Core
+SELECT [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = 1;
+```
+
+Pour PostgreSQL :
+
+```sql
+UPDATE public."Inventory" SET "Color" = @p0
+WHERE "Id" = @p1 AND xmin = @p2
+RETURNING "Display", xmin;
+```
+
+**Ce processus fonctionne également lors de l'ajout et/ou de la mise à jour de plusieurs éléments dans la base de données.** EF Core sait comment associer les valeurs extraites de la base de données aux entités correspondantes de votre collection.
+
+## Vérification de la concurrence
+
+**Des problèmes de concurrence surviennent lorsque deux processus distincts (utilisateurs ou systèmes) tentent de mettre à jour le même enregistrement quasiment simultanément.** Par exemple, l'utilisateur 1 et l'utilisateur 2 obtiennent tous deux les données du client A. L'utilisateur 1 met à jour l'adresse et enregistre la modification. L'utilisateur 2 met à jour la cote de crédit et tente d'enregistrer le même enregistrement. Si l'enregistrement réussit pour l'utilisateur 2, les modifications de l'utilisateur 1 seront annulées, car l'adresse a été modifiée après la récupération de l'enregistrement par l'utilisateur 2. Une autre option consiste à faire échouer l'enregistrement pour l'utilisateur 2 ; dans ce cas, les modifications de l'utilisateur 1 sont perpétuées, mais pas celles de l'utilisateur 2.
+
+**La gestion de cette situation dépend des exigences de l'application. Les solutions vont de ne rien faire (la seconde mise à jour écrase la première) à l'utilisation d'une gestion optimiste de la concurrence (la seconde mise à jour échoue) à des solutions plus complexes telles que la vérification de chaque champ.** Hormis l'option de ne rien faire (généralement considérée comme une mauvaise pratique de programmation), ==les développeurs doivent être informés de l'apparition de problèmes de concurrence afin de pouvoir les gérer de manière appropriée.==**
+
+**Heureusement, de nombreuses bases de données modernes disposent d'outils pour aider les équipes de développement à gérer les problèmes de concurrence.** ==SQL Server possède un type de données intégré appelé `timestamp`, synonyme de `rowversion`.== Si une colonne est définie avec le type de données `timestamp`, lors de l'ajout d'un enregistrement à la base de données, la valeur de la colonne est créée par SQL Server, et lors de la mise à jour d'un enregistrement, la valeur de la colonne est également mise à jour. **La valeur est quasiment garantie unique et est entièrement contrôlée par SQL Server ; vous n'avez donc rien d'autre à faire que d'activer cette fonctionnalité.**
+
+**EF Core peut exploiter le type de données `timestamp` de SQL Server en implémentant une propriété `Timestamp` sur une entité (représentée par `byte[]` en C#). Les propriétés d'entité définies avec l'attribut `Timestamp` ou la désignation Fluent API sont ajoutées à la clause `WHERE` lors de la mise à jour ou de la suppression d'enregistrements. Au lieu d'utiliser simplement la ou les valeurs de la clé primaire, le SQL généré ajoute la valeur de la propriété `timestamp` à la clause `WHERE`, comme vous l'avez vu dans l'exemple précédent.** ==Cela limite les résultats aux enregistrements où la clé primaire et les valeurs d'horodatage correspondent. Si un autre utilisateur (ou le système) a mis à jour l'enregistrement, les valeurs d'horodatage ne correspondront pas et l'instruction de mise à jour ou de suppression ne mettra pas à jour l'enregistrement.==
+
+**PostgreSQL dispose d'une colonne système intégrée appelée `xmin` présente dans chaque table automatiquement. Contrairement à SQL Server où une colonne `rowversion`/`timestamp` doit être explicitement déclarée, `xmin` est toujours disponible sans aucune configuration de schéma. `xmin` contient l'identifiant de la dernière transaction ayant modifié la ligne, et est mise à jour automatiquement par PostgreSQL à chaque `UPDATE`.**
+
+**EF Core peut exploiter `xmin` via `Npgsql` en déclarant une propriété `uint` nommée exactement `xmin` dans l'entité, annotée avec `[Timestamp]`. Comme pour SQL Server, EF Core ajoute automatiquement la valeur de `xmin` à la clause `WHERE` lors des opérations de mise à jour ou de suppression, garantissant que seul l'enregistrement non modifié depuis sa lecture sera affecté.
+
+==La différence fondamentale avec SQL Server est que `xmin` est une **colonne système invisible** : elle n'apparaît pas dans les migrations, ne crée pas de colonne physique supplémentaire dans la table, et est entièrement gérée par le moteur PostgreSQL sans aucune intervention du développeur au niveau du schéma.==
+
+
+```sql
+UPDATE public."Inventory" SET "Color" = @p0
+WHERE "Id" = @p1 AND xmin = @p2
+```
+
+**Les bases de données (telles que SQL Server et PostgreSQL) signalent le nombre d'enregistrements affectés lors de l'ajout, de la mise à jour ou de la suppression d'enregistrements. Si ce nombre diffère de celui attendu par `ChangeTracker`, EF Core lève une exception `DbUpdateConcurrencyException` et annule la transaction. Cette exception contient des informations sur tous les enregistrements non conservés, notamment leurs valeurs initiales (lors du chargement de l'entité depuis la base de données) et leurs valeurs actuelles (après mise à jour par l'utilisateur ou le système). Une méthode permet également d'obtenir les valeurs actuelles de la base de données (nécessitant un nouvel appel au serveur). Grâce à ces informations, le développeur peut gérer l'erreur de concurrence selon les besoins de l'application. L'exemple de code suivant illustre ce comportement :**
+
+```cs
+static async Task ThrowCuncurrencyException()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    try
+    {
+        // Récupère un enregistrement Car (peu importe lequel)
+        var car = await context.Cars.FirstAsync();
+
+        // Mise à jour de la base de donnée en dehors du contexte
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"UPDATE \"Inventory\" SET \"Color\"='Pink'WHERE \"Id\" = {car.Id}"
+        );
+
+        // Mise à jour de l'enregistrement Car dans le ChangeTracker et
+        // ensuite essaye de sauvegarder les modifications.
+        car.Color = "Yellow";
+        await context.SaveChangesAsync();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        // Récupère l'entitée qui à raté sa mise à jour
+        var entry = ex.Entries[0];
+
+        // Récupère les valeurs originales (quand l'entité à été chargée)
+        PropertyValues originalProps = entry.OriginalValues;
+
+        // Récupère les valeurs actuelles (mis à jour par ce chemin de code)
+        PropertyValues currentProps = entry.CurrentValues;
+
+        // Récupère les valeurs actuelles de la base de données –
+        // Remarque : Ceci nécessite un autre appel à la base de données
+        PropertyValues databaseProps = await entry.GetDatabaseValuesAsync();
+    }
+}
+```
 
 ## Résilience de la connection
+
 
