@@ -3126,4 +3126,80 @@ static async Task ThrowCuncurrencyException()
 
 ## Résilience de la connection
 
+**Les erreurs transitoires sont difficiles à déboguer et encore plus difficiles à reproduire. Heureusement, de nombreux fournisseurs de bases de données intègrent un mécanisme de nouvelle tentative pour les dysfonctionnements du système** (problèmes avec `tempdb`, limites d'utilisateurs, etc.) qui peut être exploité par EF Core. Pour SQL Server, la stratégie `SqlServerRetryingExecutionStrategy` intercepte les erreurs transitoires (telles que définies par l'équipe SQL Server). Si elle est activée dans le `DbContext` dérivé via `DbContextOptions`, EF Core relance automatiquement l'opération jusqu'à ce que le nombre maximal de tentatives soit atteint.
+
+Pour SQL Server, il existe une méthode simplifiée permettant d'activer `SqlServerRetryingExecutionStrategy` avec les valeurs par défaut. Cette méthode, utilisée avec `SqlServerOptions`, est `EnableRetryOnFailure()`.
+
+**La méthode équivalente pour PostgreSQL (utilisant le fournisseur `Npgsql`) est également nommée `EnableRetryOnFailure()`. Le fournisseur `Npgsql` associe cette méthode simplifiée à sa propre classe de stratégie d'exécution sous-jacente, `NpgsqlRetryingExecutionStrategy`, qui vérifie automatiquement la propriété `IsTransient` des instances `NpgsqlException` entrantes pour déterminer si une opération doit être réessayée.**
+
+```cs
+public ApplicationDbContext CreateDbContext(string[] args)
+{
+	...
+	
+	optionBuilder = optionBuilder.UseNpgsql(
+		conStringBuilder.ConnectionString,
+		opts => opts.EnableRetryOnFailure()
+	);
+	return new ApplicationDbContext(optionBuilder.Options);
+}
+```
+
+**Le nombre maximal de tentatives et le délai entre chaque tentative peuvent être configurés selon les besoins de l'application. Si la limite de tentatives est atteinte avant la fin de l'opération, EF Core notifiera l'application des problèmes de connexion en levant une exception `RetryLimitExceededException`. Cette exception, gérée par le développeur, peut transmettre les informations pertinentes à l'utilisateur, offrant ainsi une meilleure expérience.**
+
+```cs
+try
+{
+	Context.SaveChanges();
+
+}
+catch (RetryLimitExceededException ex)
+{
+	// Une erreur de limite de tentatives s'est produite
+	// Doit être gérée intelligemment
+	Console.WriteLine($"Retry limit exceeded! {ex.Message}");
+}
+```
+
+**Lors de l'utilisation d'une stratégie d'exécution, des transactions explicites doivent être créées dans le contexte de la stratégie d'exécution :**
+
+>[!attention]
+>Cette méthodes est déjà présente dans le code du [[Chapitre 21#Transactions explicites et stratégies d'exécution|Chapitre 21]].
+
+```cs
+static async Task TransactionWithExecutionStrategies()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var strategy = context.Database.CreateExecutionStrategy();
+    await strategy.Execute(async () =>
+    {
+        using var trans = context.Database.BeginTransaction();
+        try
+        {
+            // ActionÀExécuter();
+            await trans.CommitAsync();
+        }
+        catch
+        {
+            await trans.RollbackAsync();
+        }
+    });
+}
+```
+
+Pour les fournisseurs de bases de données qui ne proposent pas de stratégie d’exécution intégrée, il est possible de créer des stratégies d’exécution personnalisées. Pour plus d’informations, consultez la [documentation EF Core](https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency).
+
+## Mappage des fonctions de base de données
+
+Les fonctions SQL Server peuvent être mappées à des méthodes C# et incluses dans des instructions LINQ. La méthode C# sert uniquement d'espace réservé, la fonction serveur étant intégrée au code SQL généré pour la requête. La prise en charge du mappage des fonctions table a été ajoutée dans EF Core, en plus de la prise en charge existante du mappage des fonctions scalaires.
+
+EF Core prend déjà en charge de nombreuses fonctions SQL Server intégrées. L'opérateur de fusion de valeurs nulles C# (??) correspond à la fonction COALESCE de SQL Server. La méthode `String.IsNullOrEmpty()` effectue une vérification de valeur nulle et utilise la fonction `len` de SQL Server pour détecter une chaîne vide.
+
+Pour observer le mappage d'une fonction définie par l'utilisateur en pratique, créez une fonction qui renvoie le nombre d'enregistrements de la classe `Car` en fonction de `MakeId`.
+
+
+
 
