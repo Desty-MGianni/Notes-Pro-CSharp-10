@@ -3194,12 +3194,123 @@ Pour les fournisseurs de bases de données qui ne proposent pas de stratégie d�
 
 ## Mappage des fonctions de base de données
 
-Les fonctions SQL Server peuvent être mappées à des méthodes C# et incluses dans des instructions LINQ. La méthode C# sert uniquement d'espace réservé, la fonction serveur étant intégrée au code SQL généré pour la requête. La prise en charge du mappage des fonctions table a été ajoutée dans EF Core, en plus de la prise en charge existante du mappage des fonctions scalaires.
+Les fonctions SQL Server / Postgres peuvent être mappées à des méthodes C# et incluses dans des instructions LINQ. La méthode C# sert uniquement d'espace réservé, la fonction serveur étant intégrée au code SQL généré pour la requête. La prise en charge du mappage des fonctions table a été ajoutée dans EF Core, en plus de la prise en charge existante du mappage des fonctions scalaires.
 
-EF Core prend déjà en charge de nombreuses fonctions SQL Server intégrées. L'opérateur de fusion de valeurs nulles C# (??) correspond à la fonction COALESCE de SQL Server. La méthode `String.IsNullOrEmpty()` effectue une vérification de valeur nulle et utilise la fonction `len` de SQL Server pour détecter une chaîne vide.
+EF Core prend déjà en charge de nombreuses fonctions SQL Server intégrées. L'opérateur de fusion de valeurs nulles C# (`??`) correspond à la fonction `COALESCE` de SQL Server. La méthode `String.IsNullOrEmpty()` effectue une vérification de valeur nulle et utilise la fonction `len` de SQL Server pour détecter une chaîne vide.
+
+**Npgsql traduit nativement de nombreuses méthodes C# standards (comme `??` en `COALESCE` ou `string.IsNullOrEmpty`) et permet le mappage de fonctions définies par l'utilisateur (UDF).**
 
 Pour observer le mappage d'une fonction définie par l'utilisateur en pratique, créez une fonction qui renvoie le nombre d'enregistrements de la classe `Car` en fonction de `MakeId`.
 
+```sql
+CREATE FUNCTION "udf_CountOfMakes" ( makeId int )
+RETURNS INT AS $$
+BEGIN
+	  RETURN ( SELECT COUNT("MakeId") FROM "Inventory" WHERE "MakeId" = makeId);
+END;
+$$ LANGUAGE plpgsql;
+```
 
+**Pour utiliser cette fonctionnalité en C#, créez une nouvelle fonction dans la classe dérivée `DbContext`. Le corps C# de cette fonction n'est jamais exécuté ; il s'agit simplement d'un espace réservé mappé à la fonction SQL Server / PostgreSQL. Notez que cette méthode peut être placée n'importe où, mais elle est généralement placée dans la classe dérivée `DbContext` pour faciliter sa découverte.**
 
+```cs
+[DbFunction("udf_CountOfMakes", Schema = "public")]
+public static int InventoryCountFor(int makeId) =>
+	throw new NotSupportedException();
+```
 
+Cette fonction peut désormais être utilisée dans les requêtes LINQ et fait partie du SQL généré. Pour la voir en action, ajoutez le code suivant à vos instructions de niveau supérieur :
+
+```cs
+static async Task UsingMappedFunctions()
+{
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var makes = await context
+        .Makes.Where(x => ApplicationDbContext.InventoryCountFor(x.Id) > 1)
+        .ToListAsync();
+}
+```
+
+Lorsque ce code est exécuté, la requête SQL suivante est exécutée :
+
+```sql
+SELECT m."Id", m."Name", m."TimeStamp", m.xmin
+FROM public."Makes" AS m
+WHERE public."udf_CountOfMakes"(m."Id") > 1
+```
+
+**EF Core prend également en charge le mappage des fonctions retournant une table.** Ajoutez la fonction suivante à votre base de données :
+
+```sql
+CREATE OR REPLACE FUNCTION "udtf_GetCarsForMake" (makeId INT)
+RETURNS TABLE (
+	  "Id" INT,
+	  "Color" VARCHAR(50),
+	  "PetName" VARCHAR(50),
+	  "MakeId" INT,
+	  "DateBuilt" TIMESTAMPTZ,   -- Type exact pour timestamp with time zone
+	  "IsDrivable" BOOLEAN,
+	  "Display" VARCHAR(50),
+	  "TimeStamp" TIMESTAMPTZ,   -- Type exact pour timestamp with time zone
+	  "xmin" XID                 -- Conservé ici si vous le lisez via EF Core
+ ) AS $$
+ BEGIN
+	  RETURN QUERY
+	  SELECT i."Id", i."Color", i."PetName", i."MakeId", i."DateBuilt", 
+			i."IsDrivable", i."Display", i."TimeStamp", i."xmin"
+       FROM "Inventory" AS i
+       WHERE i."MakeId" = makeId;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+Ajoutez le code suivant à votre classe `ApplicationDbContext` :
+
+```cs
+[DbFunction("udtf_GetCarsForMake", Schema = "public")]
+public IQueryable<Car> GetCarFor(int makeId) =>
+	FromExpression(() => GetCarFor(makeId));
+```
+
+**L'appel à `FromExpression()` permet d'appeler la fonction directement sur le `DbContext` dérivé au lieu d'utiliser un `DbSet<T>` classique.** Ajoutez le code suivant à vos instructions de niveau supérieur pour tester la fonction table :
+
+```cs
+static async Task UsingMappedFunctions()
+{
+	...
+    var cars = await context.GetCarFor(1).ToListAsync();
+}
+```
+
+La requête SQL suivante est exécutée (==notez que le filtre de requête global est pris en compte lors de l'utilisation de la fonction de base de données==) :
+
+```sql
+SELECT u."Id", u."Color", u."DateBuilt", u."Display", u."IsDrivable", u."MakeId", 
+	  u."PetName", u."TimeStamp", u.xmin
+FROM public."udtf_GetCarsForMake"(@makeId) AS u
+WHERE u."IsDrivable"
+```
+
+>[!tip] Bonnes pratiques de nommage pour PostgreSQL
+>
+>L'utilisation des préfixes comme `udf_` (User-Defined Function) ou `udtf_` (User-Defined Table-Valued Function) n'est pas une pratique courante ni recommandée dans l'écosystème PostgreSQL. C'est un héritage direct du monde SQL Server (T-SQL) ou MySQL. 
+>
+>- **Tout est une fonction** : Contrairement à SQL Server qui fait une distinction technique stricte dans la syntaxe entre les fonctions scalaires et les fonctions de table, PostgreSQL utilise la même syntaxe unifiée `CREATE FUNCTION` (ou `CREATE PROCEDURE`) pour tout. Le type de retour (`RETURNS int` vs `RETURNS TABLE(...)`) suffit à les différencier.
+>- **Le typage est roi** : Dans PostgreSQL, les fonctions supportent la surcharge (overloading). Vous pouvez avoir plusieurs fonctions avec le même nom mais des arguments différents. Ajouter un préfixe alourdit inutilement la signature.
+>- **Lisibilité et style idiomatique** : La communauté Postgres privilégie un code proche du langage naturel et suit généralement le style **snake_case** (tout en minuscules avec des traits de soulignement).
+>
+>**La convention standard dans PostgreSQL : *Le style orienté action***
+>
+>Le nom de la fonction commence par un verbe décrivant précisément l'action, suivi du contexte (comme en programmation classique).
+>
+>- **Au lieu de** : `udf_CountOfMakes`
+>- **Privilégiez** : `count_inventory_by_make` ou `get_make_count`
+>- **Au lieu de** : `udtf_GetActiveCars`
+>- **Privilégiez** : `get_active_cars` ou `fetch_active_cars`
+
+pour plus d'informations sur le mappage des fonctions de base de données, consultez la [documentation](https://learn.microsoft.com/en-us/ef/core/querying/user-defined-function-mapping)
+
+## La classe `EF.Functions`
