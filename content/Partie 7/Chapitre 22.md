@@ -3314,3 +3314,158 @@ WHERE u."IsDrivable"
 pour plus d'informations sur le mappage des fonctions de base de données, consultez la [documentation](https://learn.microsoft.com/en-us/ef/core/querying/user-defined-function-mapping)
 
 ## La classe `EF.Functions`
+
+**La classe statique `EF` a été créée comme espace réservé pour les méthodes CLR qui sont traduites en fonctions de base de données, selon le même mécanisme que celui décrit dans la section précédente pour le mappage des fonctions de base de données.** ==La principale différence réside dans le fait que tous les détails d'implémentation sont gérés par les fournisseurs de bases de données.== Le [[#Tableau 22-1 Fonctions disponible via `EF.Functions`|Tableau 22-1]] répertorie les fonctions disponibles.
+
+###### Tableau 22-1: Fonctions disponible via `EF.Functions`
+
+| Fonctions                                                                                                                                                                                                                   | Description                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Like()`                                                                                                                                                                                                                    | Implémentation de l'opération SQL `LIKE`. La sensibilité à la casse et la syntaxe dépendent de la base de données. Pour SQL Server, la comparaison n'est pas sensible à la casse et l'opérateur générique (`%`) doit être fourni. **Pour PostgreSQL, la méthodes est lié à l'opération `ILIKE`.**                                    |
+| `Random()`                                                                                                                                                                                                                  | Introduite dans EF Core 6, cette fonction renvoie un nombre pseudo-aléatoire compris entre 0 et 1 inclus. Elle correspond à la fonction `RAND` de SQL Server. **Pour PostgreSQL, la fonction `RAND` n'existe pas. Le fournisseur Npgsql intercepte la fonctions et le traduit par la fonctions native  `random()`**                  |
+| `Collate<TProperty>()`                                                                                                                                                                                                      | Spécifie le classement à utiliser dans une requête LINQ.                                                                                                                                                                                                                                                                             |
+| `Contains()`                                                                                                                                                                                                                | Correspond à la fonction `CONTAINS` de SQL Server. La table doit être indexée en texte intégral pour utiliser `Contains()`. **Pour PostgreSQL, deux traductions totalement différentes différentes selon le contextes. Sur une chaine de caractères Npgsql utilise `ILIKE`. Sur une liste ou une collections, Npgsql utilise `IN`.** |
+| `FreeText()`                                                                                                                                                                                                                | Correspond à la fonction de stockage `FREETEXT` du serveur. La table doit être indexée en texte intégral pour utiliser `FreeText()`. *==Cette méthode n'est pas disponible dans Npgsql==*                                                                                                                                            |
+| `DataLength()`                                                                                                                                                                                                              | Renvoie le nombre d'octets utilisés pour représenter une expression.                                                                                                                                                                                                                                                                 |
+| `DateDiffYear()`<br>`DateDiffMonth()`<br>`DateDiffWeek()`<br>`DateDiffDay()`<br>`DateDiffHour()`<br>`DateDiffMinute()`<br>`DateDiffSecond()`<br>`DateDiffMillisecond()`<br>`DateDiffMicrosecond()`<br>`DateDiffNansecond()` | Compte le nombre d'intervalles de temps franchis entre la date de début et la date de fin. Correspond à la fonction `DATEDIFF` de SQL Server. *==Ces méthodes ne sont pas disponible dans Npgsql==*                                                                                                                                  |
+| `DateFromParts()`                                                                                                                                                                                                           | Initialise une nouvelle instance de la structure `DateTime` pour l'année, le mois et le jour spécifiés. Correspond à la fonction `DATEFROMPARTS` de SQL Server. *==Cette méthodes et les méthodes suivantes ne sont pas disponibles dans Npgsql==*                                                                                   |
+| `DateTime2FromParts()`                                                                                                                                                                                                      | Initialise une nouvelle instance de la structure `DateTime` pour l'année, le mois, le jour, l'heure, les minutes, les secondes, les fractions et la précision spécifiés. Correspond à la fonction `DATETIME2FROMPARTS` de SQL Server.                                                                                                |
+| `DateTimeFromParts()`                                                                                                                                                                                                       | Initialise une nouvelle instance de la structure `DateTime` pour l'année, le mois, le jour, l'heure, la minute, la seconde et la milliseconde spécifiés. Correspond à la fonction `DATETIMEFROMPARTS` de SQL Server.                                                                                                                 |
+| `DateTimeOffsetFromParts()`                                                                                                                                                                                                 | Initialise une nouvelle instance de la structure `DateTimeOffset` pour l'année, le mois, le jour, l'heure, les minutes, les secondes, les fractions, le décalage horaire, le décalage des minutes et la précision spécifiés. Correspond à la fonction `DATETIMEOFFSETFROMPARTS` de SQL Server.                                       |
+| `SmallDateTimeFromParts()`                                                                                                                                                                                                  | Initialise une nouvelle instance de la structure `DateTime` avec l'année, le mois, le jour, l'heure et la minute spécifiés. Correspond à la fonction `SMALLDATETIMEFROMPARTS` de SQL Server.                                                                                                                                         |
+| `TimeFromParts()`                                                                                                                                                                                                           | Initialise une nouvelle instance de la structure `TimeSpan` pour l'heure, les minutes, les secondes, les fractions et la précision spécifiées. Correspond à la fonction `TIMEFROMPARTS` de SQL Server.                                                                                                                               |
+| `IsDate()`                                                                                                                                                                                                                  | Permet de vérifier si une chaîne de caractères donnée représente une date. Correspond à la fonction `ISDATE()` de SQL Server.                                                                                                                                                                                                        |
+
+Pour illustrer l'utilisation de la méthode `EF.Functions.Like`, ajoutez la fonction locale suivante à vos instructions de niveau supérieur :
+
+```cs
+static async Task UseEFFunctions()
+{
+    Console.WriteLine("**** Using Like ****");
+
+    // Cette fabrique n'est pas censée être utilisée ainsi,
+    // mais c'est un code de démonstration :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // La même chose que Contains
+    var cars = await context
+        .Cars.IgnoreQueryFilters()
+        .Where(x => EF.Functions.Like(x.PetName, "%Clunk%"))
+        .ToListAsync();
+    foreach (var c in cars)
+        Console.WriteLine($"{c.PetName} was found");
+
+    // La même chose que StartsWith
+    cars = await context
+        .Cars.IgnoreQueryFilters()
+        .Where(x => EF.Functions.Like(x.PetName, "Clun%"))
+        .ToListAsync();
+    foreach (var c in cars)
+        Console.WriteLine($"{c.PetName} was found");
+
+    // La même chose que EndsWith
+    cars = await context
+        .Cars.IgnoreQueryFilters()
+        .Where(x => EF.Functions.Like(x.PetName, "%er"))
+        .ToListAsync();
+    foreach (var c in cars)
+        Console.WriteLine($"{c.PetName} was found");
+}
+```
+
+==Notez que le caractère (`%`) est utilisé de la même manière que dans une requête T-SQL.==
+
+### Obtenir les équivalents en PostgreSQL des méthodes `Date*`
+
+Pour que votre code LINQ s'exécute correctement sur PostgreSQL, vous devez abandonner `EF.Functions.DateDiff*` et utiliser à la place les propriétés natives de la structure **`TimeSpan`** issus de la soustraction de deux dates. `Npgsql` se charge de traduire cela en SQL serveur performant.
+
+```cs
+// Code LINQ (Traduit nativement par Npgsql pour PostgreSQL)
+// Calcule la différence en jours
+var cars = await context.Inventory 
+	.Where(c => (DateTime.UtcNow - c.DateBuilt).Days > 30) 
+	.ToListAsync();
+```
+
+#### Pour les dates (`DATEFROMPARTS`)
+
+- **SQL Server** : `DATEFROMPARTS(year, month, day)`
+- **PostgreSQL** : **`make_date(year, month, day)`**
+
+#### Pour les dates et heures (`DATETIMEFROMPARTS`)
+
+- **SQL Server** : `DATETIMEFROMPARTS(year, month, day, hour, minute, seconds, milliseconds)`
+- **PostgreSQL** : **`make_timestamp(year, month, day, hour, minute, seconds)`**  
+    
+*(Note : Les secondes dans `make_timestamp` acceptent un type `double precision`, vous pouvez donc y inclure les millisecondes sous forme décimale, par exemple `30.500` pour 30 secondes et 500 millisecondes).*
+
+#### Pour les fuseaux horaires (`DATETIMEOFFSETFROMPARTS`)
+
+- **SQL Server** : `DATETIMEOFFSETFROMPARTS(...)`
+- **PostgreSQL** : **`make_timestamptz(year, month, day, hour, minute, seconds, 'timezone')`**
+
+### La fonctions `ISDATE()` dans PostgreSQL n'existe pas dans PostgreSQL
+
+#### Solution 1 : Créer la fonction `is_date` dans PostgreSQL
+
+La méthode standard dans PostgreSQL pour imiter le `ISDATE()` de SQL Server consiste à créer une petite fonction personnalisée (UDF) qui tente de transtyper (`cast`) la chaîne en type `DATE`. Si le cast réussit, elle renvoie `true` ; s'il l'opération lève une exception, elle la capture et renvoie `false`
+
+```sql
+CREATE OR REPLACE FUNCTION public.is_date(s VARCHAR) 
+RETURNS BOOLEAN AS $$
+BEGIN
+    PERFORM s::DATE; -- Tente la conversion
+    RETURN TRUE;
+EXCEPTION 
+    WHEN OTHERS THEN 
+        RETURN FALSE; -- Échoue proprement si la date est invalide
+END;
+$$ LANGUAGE plpgsql;
+```
+
+Une fois la fonction créée en base, vous pouvez la mapper à votre code C# à l'aide de l'API Fluent ou d'un attribut :
+
+```cs
+public class ApplicationDbContext : DbContext
+{
+    [DbFunction("is_date", Schema = "public")]
+    public static bool IsDate(string value) 
+        => throw new NotSupportedException();
+}
+```
+
+Il suffit maintenant de l'utiliser dans les requêtes LINQ, comme ceci :
+
+```cs
+var validDateCars = await context.Inventory
+	// Utilise votre fonction personnalisée
+    .Where(c => ApplicationDbContext.IsDate(c.Display)) 
+    .ToListAsync();
+```
+
+#### Solution 2 : Utiliser une validation par Expression Régulière (100% C# / LINQ)
+
+Si vous ne souhaitez pas modifier votre base de données PostgreSQL en y ajoutant une fonction, vous pouvez utiliser les expressions régulières de .NET. Le fournisseur `Npgsql` est capable de traduire la méthode `Regex.IsMatch` en un opérateur de correspondance de pattern natif de PostgreSQL (`~`)
+
+Si vos chaînes de dates suivent un format strict (par exemple `YYYY-MM-DD`), vous pouvez écrire :
+
+```cs
+using System.Text.RegularExpressions;
+
+// Traduit en SQL PostgreSQL à l'aide de l'opérateur de Regex natif
+var cars = await context.Inventory
+    .Where(c => Regex.IsMatch(c.Display, @"^\d{4}-\d{2}-\d{2}$"))
+    .ToListAsync();
+```
+
+##  Traitement par lots des instructions
+
+**EF Core améliore considérablement les performances lors de l'enregistrement des modifications dans la base de données en exécutant les instructions par lots. Cela réduit les allers-retours entre l'application et la base de données, ce qui augmente les performances et peut potentiellement réduire les coûts** (par exemple, pour les bases de données cloud où les clients sont facturés à la transaction).
+
+**EF Core regroupe les instructions `CREATE`, `UPDATE` et `DELETE` à l'aide de paramètres de type table.** **==Le nombre d'instructions regroupées par EF dépend du fournisseur de base de données.==** Par exemple, pour SQL Server, le traitement par lots est inefficace en dessous de 4 instructions et au-delà de 40 ; EF Core limitera donc le nombre d'instructions à 42. **Pour PostgreSQL et le fournisseur Npgsql, la zone idéale pour le regroupement de commande se situe généralement entre 100 et 1000.** ==Quel que soit le nombre de lots, toutes les instructions s'exécutent toujours dans une transaction. La taille des lots peut également être configurée via `DbContextOptions`, mais il est recommandé de laisser EF Core la calculer dans la la plupart des cas (voire tous).==
+
+Si vous deviez insérer quatre `Car` dans une seule transaction comme ceci :
+
+```cs
+
+```
