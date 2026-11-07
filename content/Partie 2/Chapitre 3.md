@@ -54,7 +54,7 @@ namespace SimpleCSharpApp
 }
 ```
 
-La classe `Console` est contenue dans l'espace de noms `System`, et **==avec les espaces de noms globaux implicites fournis par .NET 6/C# 10, l'instruction `using System` n'est plus nécessaire==**. La ligne suivante crée un espace de noms personnalisé (abordé au [[Chapitre 16#Définition des espaces de noms personnalisés (MaJ C 10.0)|Chapitre 16]]) pour encapsuler la classe Program. **L'espace de noms et la classe `Program` peuvent tous deux être supprimés grâce à la fonctionnalité d'instruction de niveau supérieur introduite dans C# 9** (abordée brièvement). Cela nous ramène à la ligne de code unique permettant d'écrire le message dans la console.
+La classe `Console` est contenue dans l'espace de noms `System`, et ==avec les espaces de noms globaux implicites fournis par .NET 6/C# 10, l'instruction `using System` n'est plus nécessaire==. La ligne suivante crée un espace de noms personnalisé (abordé au [[Chapitre 16#Définition des espaces de noms personnalisés (MaJ C 10.0)|Chapitre 16]]) pour encapsuler la classe `Program`. **L'espace de noms et la classe `Program` peuvent tous deux être supprimés grâce à la fonctionnalité d'instruction de niveau supérieur introduite dans C# 9** (abordée brièvement). Cela nous ramène à la ligne de code unique permettant d'écrire le message dans la console.
 
 Pour l'instant, afin de couvrir certaines variations importantes du point d'entrée dans les applications C#, nous utiliserons l'ancien style de code (plus verbeux) au lieu de la version simplifiée de C# 10. Dans ce contexte, mettez à jour la méthode `Main()` de votre classe `Program` avec les instructions de code suivantes :
 
@@ -90,7 +90,7 @@ En plus du mot-clé `static`, ***==cette méthode `Main()` possède un seul para
 La logique de la classe `Program` se trouve dans `Main()`. Ici, vous utilisez la classe `Console`, qui est définie dans l'espace de noms `System`. Parmi ses membres figure la méthode statique `WriteLine()`, qui, comme vous pouvez le supposer, envoie une chaîne de texte et un retour chariot vers la sortie standard (*stdout*). Vous appelez également `Console.ReadLine()` pour vous assurer que le programme reste visible.
 
 >[!note]- Note Visual Studio
->Lorsque vous exécutez des applications .NET Core Console avec Visual Studio (en mode Debug ou Release), la fenêtre de console reste visible par défaut. Ce comportement peut être modifié en activant le paramètre « Fermer automatiquement la console lorsque le débogage s'arrête » qui se trouve sous Outils ➤ Options ➤ Débogage. La méthode Console.ReadLine() permet de garder la fenêtre ouverte si le programme est exécuté à partir de l'Explorateur Windows en double-cliquant sur le fichier *.exe* du produit. Vous en apprendrez davantage sur la classe System.Console dans quelques instants.
+>Lorsque vous exécutez des applications .NET Core Console avec Visual Studio (en mode `Debug` ou `Release`), la fenêtre de console reste visible par défaut. Ce comportement peut être modifié en activant le paramètre « Fermer automatiquement la console lorsque le débogage s'arrête » qui se trouve sous Outils ➤ Options ➤ Débogage. La méthode `Console.ReadLine()` permet de garder la fenêtre ouverte si le programme est exécuté à partir de l'Explorateur Windows en double-cliquant sur le fichier *.exe* du produit. Vous en apprendrez davantage sur la classe `System.Console` dans quelques instants.
 
 ### Comment passer d'une déclaration de haut-niveau à bas niveau
 
@@ -109,22 +109,23 @@ deux Manières différentes sur VSCode:
 **Par défaut, le modèle de projet console .NET génère une méthode `Main()` qui a une valeur de retour `void` et un tableau de type `string` comme seul paramètre d'entrée(`string[]`)**. Cependant, ce n'est pas la seule forme possible de `Main()`. **==Il est possible de construire le point d'entrée de votre application en utilisant l'une des signatures suivantes==** (en supposant qu'elle soit contenue dans une définition de classe ou de structure C#) :
 
 ```cs
-// int return type, array of strings as the parameter.
+// Type de retour int, tableau de chaîne de caractères en paramètre.
 static int Main(string[] args)
 {
-    // Must return a value before exiting!
+	// Doit retourner une valeur avant de sortir de la méthode.
     return 0;
 }
 
-// No return type, no parameters.
-static void Main()
-{
-}
+// Pas de type de retour, pas de paramètre.
+static void Main() { }
 
-// int return type, no parameters.
+// Pas de type de retour, tableau de chaîne de caractères en paramètre
+static void Main(string[] args) { }
+
+// Type de retour int, pas de paramètre.
 static int Main()
 {
-    // Must return a value before exiting!
+    // Doit retourner une valeur avant de sortir de la méthode.
     return 0;
 }
 ```
@@ -141,13 +142,13 @@ static Task<int> Main(string[])
 >[!note] 
 >La méthode `Main()` peut également être définie comme `public` plutôt que `private`. Notez que le modificateur d'accès est présumé `private` si vous ne fournissez pas de modificateur d'accès spécifique. Les modificateurs d'accès sont décrits en détail au [[Chapitre 5#Comprendre les modificateurs d'accès (MaJ C 7.2)|Chapitre 5]].
 
-**Évidemment, votre choix quant à la manière de construire `Main()` dépendra de trois questions: **
+**Évidemment, votre choix quant à la manière de construire `Main()` dépendra de trois questions:**
 
-- Premièrement, souhaitez-vous renvoyer une valeur au système lorsque `Main()` est terminé et que votre programme se termine ? 
+- *Premièrement*, souhaitez-vous renvoyer une valeur au système lorsque `Main()` est terminé et que votre programme se termine ? 
     - Si oui, vous devez renvoyer un type de données `int` (`byte`) plutôt que `void`. 
-- Deuxièmement, avez-vous besoin de traiter des paramètres de ligne de commande fournis par l'utilisateur? 
+- *Deuxièmement*, avez-vous besoin de traiter des paramètres de ligne de commande fournis par l'utilisateur? 
     - Si oui, ils seront stockés dans le tableau de chaînes (`string[]`). 
-- Enfin, avez-vous besoin d'appeler du code *asynchrone* à partir de la méthode `Main()` ? 
+- *Troisièmement*, avez-vous besoin d'appeler du code *asynchrone* à partir de la méthode `Main()` ? 
 
 ==Nous examinerons les deux premières options plus en détail après avoir présenté les instructions de niveau supérieur.==
 
@@ -214,9 +215,8 @@ Bien que la grande majorité de vos méthodes `Main()` (ou instructions de nivea
 
 Lorsque vous utilisez des instructions de niveau supérieur, si le code en cours d'exécution renvoie un entier (`int`), celui-ci constitue le code de retour. **Si rien n'est explicitement renvoyé, la valeur `0` est tout de même renvoyée, comme lors de l'utilisation explicite d'une méthode `Main()`.**
 
-***==Sous le système d'exploitation Windows, la valeur de retour d'une application est stockée dans une variable d'environnement système nommée `%ERRORLEVEL%`==***
-
-**==Sous les systèmes d'exploitation basés sur UNIX, la variable d'environnement qui stocke la valeur de retour est `$?`.==**
+- Sous le système d'exploitation Windows, la valeur de retour d'une application est stockée dans une variable d'environnement système nommée `%ERRORLEVEL%`.
+- Sous les systèmes d'exploitation basés sur UNIX, la variable d'environnement qui stocke la valeur de retour est `$?`.
 
  Si vous deviez créer une application qui lance par programmation un autre exécutable (un sujet examiné au [[Chapitre 17#Chargement dynamique d'assemblies|Chapitre 17]]), vous pouvez obtenir la valeur de `%ERRORLEVEL%` ou `$?` à l'aide de la propriété `ExitCode` du processus lancé.
 
@@ -244,7 +244,7 @@ static int Main()
 }
 ```
 
-**Maintenant, capturons la valeur de retour du programme à l'aide d'un fichier batch**. 
+**Maintenant, capturons la valeur de retour du programme à l'aide d'un fichier batch. **
 
 ### Pour windows -> cmd
 
@@ -295,7 +295,7 @@ fi
 echo "All Done."
 ```
 
->Ici, on stock `$?` (qui est la variable du dernier code de retours) sinon à chaque commande cette valeur change, tandis que l'on veut seulement la valeur de retour de la commande `dotnet run`
+>Ici, on stock `$?` (qui est la variable du dernier code de retours) sinon à chaque commande cette valeur change. On veut seulement la valeur de retour de la commande `dotnet run`
 
 À ce stade, ouvrez une invite de commande (ou utilisez le terminal Visual Studio Code) et accédez au dossier contenant votre nouveau fichier *.cmd* / *.zsh*. Exécutez le fichier en tapant son nom et en appuyant sur la touche Entrée. **Vous devriez obtenir le résultat suivant, à condition que vos instructions de niveau supérieur (ou méthode `Main()`) renvoient $-1$**. Si les instructions de niveau supérieur (ou la méthode `Main()`) renvoyaient $0$, le message "This application succeeded !" s'afficherait dans la console.
 
@@ -354,7 +354,7 @@ return 0;
 ```
 
 >[!note] 
->Cet exemple utilise des instructions globales, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
+>Cet exemple utilise des instructions de niveau supérieur, et non une méthode `Main()`. La mise à jour de la méthode `Main()` pour accepter le paramètre `args` sera abordée prochainement.
 
 Une fois encore, en examinant le CIL généré pour le programme à l'aide d'instructions de niveau supérieur, **notez que la méthode `<Main>$` accepte un tableau de chaines (`string`) nommé `args`, comme indiqué ici (abrégé pour gagner de la place) :**
 
@@ -420,8 +420,7 @@ Enfin, **vous pouvez également accéder aux arguments de ligne de commande à l
 
 >[!tip] La différence entre `GetCommandLineArgs()` et `args`
 > La méthode `GetCommandLineArgs` ne reçoit pas les arguments de l'application via la méthode `Main()` et ne dépend pas du paramètre `string[] args`.
-> 
->>[!note] Le code suivant n'utilise pas la déclaration de haut niveau pour prouver ce point.
+> Le code suivant n'utilise pas la déclaration de haut niveau pour prouver ce point.
 
 ```cs
 class Program
@@ -441,12 +440,12 @@ class Program
 ```
 
 ```
-Arg: /Volumes/GM Disk 1/Code/Livre C#/SimpleCSharpApp/bin/Debug/net10.0/SimpleCSharpApp.dll
+Arg: /.../SimpleCSharpApp/bin/Debug/net10.0/SimpleCSharpApp.dll
 Arg: /arg1
 Arg: -arg2
 ```
 
-**==Bien sûr, c'est à vous de déterminer à quels arguments de ligne de commande votre programme répondra==** (le cas échéant) **==et comment ils doivent être formatés==** (par exemple avec un préfixe `-` ou `/`). Ici, on a simplement passé une série d'options qui ont été affichées directement à l'invite de commande. Supposons toutefois que vous créiez un nouveau jeu vidéo et que vous ayez programmé votre application pour traiter une option nommée `-godmode`. Si l'utilisateur démarre votre application avec ce drapeau, vous savez qu'il s'agit en fait d'un tricheur et vous pouvez prendre les mesures appropriées.
+==Bien sûr, c'est à vous de déterminer à quels arguments de ligne de commande votre programme répondra (le cas échéant) et comment ils doivent être formatés== (par exemple avec un préfixe `-` ou `/`). Ici, on a simplement passé une série d'options qui ont été affichées directement à l'invite de commande. Supposons toutefois que vous créiez un nouveau jeu vidéo et que vous ayez programmé votre application pour traiter une option nommée `-godmode`. Si l'utilisateur démarre votre application avec ce drapeau, vous savez qu'il s'agit en fait d'un tricheur et vous pouvez prendre les mesures appropriées.
 
 # Membres supplémentaires de la classe `System.Environment` (MaJ C# 10.0)
 
@@ -525,14 +524,14 @@ Presque toutes les applications d'exemple créées au cours des premiers chapitr
 
 **Comme son nom l'indique, la classe `Console` encapsule les manipulations des flux d'entrée, de sortie et d'erreur pour les applications basées sur la console** (*stdin*, *stdout* et *stderr* sur les systèmes basés sur *Unix*). Le [[#Tableau 3-2 Sélection de membres de la classe `Console`|tableau 3-2]] répertorie certains membres intéressants (mais certainement pas tous). Comme vous pouvez le constater, ***==la classe `Console` fournit certains membres qui peuvent enrichir une application en ligne de commande simple, tels que la possibilité de modifier les couleurs d'arrière-plan et de premier plan et d'émettre des bips sonores.==***
 
->[!Info]- Seulement pour windows
->La méthode `Console.Beep` permet de modifier la tonalité du bip sonore (avec un paramètre dédié).
+>[!Info]- Fonctionnalité uniquement pour windows
+>La méthode `Console.Beep` permet de modifier la tonalité du bip sonore ainsi que sa durée (avec un paramètre dédié).
 
 ###### Tableau 3-2: Sélection de membres de la classe `Console`
 
 | Membre                                                           | Description                                                                                                                                                                         |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Beep()`                                                         | Cette méthode force la console à émettre une tonalité  (d'une certaine fréquence et durée pour windows)                                                                             |
+| `Beep()`                                                         | Cette méthode force la console à émettre une tonalité.                                                                                                                              |
 | `BackgroundColor`<br>`ForegroundColor`                           | Ces propriétés définissent les couleurs d'arrière-plan/de premier plan pour la sortie actuelle.Ils peuvent être assignés à n'importe quel membre de l'*énumération* `ConsoleColor`. |
 | `BufferHeight`<br>`BufferWidgh`                                  | Ces propriétés contrôlent la hauteur et la largeur de la zone de tampon de la console.                                                                                              |
 | `Title`                                                          | Cette propriété récupère ou assigne le titre de la console acutelle.                                                                                                                |
@@ -633,6 +632,7 @@ Si vous avez besoin d'un formatage plus élaboré pour les données numériques,
 | `G` ou `g`                        | **Représente le caractère générique**. Ce caractère peut être utilisé pour formater un nombre au format fixe ou exponentiel.                            |
 | `N` ou `n`                        | **Utilisé pour le formatage numérique de base (avec des virgules)**.                                                                                    |
 | `X` ou `x`                        | **Utilisé pour le formatage hexadécimal.** Si vous utilisez un X majuscule, votre format hexadécimal contiendra également des caractères majuscules.    |
+| `B` ou `b`                        | **Utilisé pour le formatage binaire.** ==Disponible depuis .NET 8+==                                                                                    |
 | `P` ou `p`                        | **Utilisé pour le formatage pourcentage**. (1 sera affiché 100%, 3 -> 300%,...)                                                                         |
 
 **Ces caractères de format sont ajoutés à une valeur de remplacement donnée à l'aide du symbole deux-points** (par exemple, `{0:C}`, `{1:d}`, `{2:X}`). Pour illustrer cela, mettez à jour les instructions de niveau supérieur afin d'appeler une nouvelle fonction d'aide nommée `FormatNumericalData()`. Implémentez cette méthode dans votre fichier *Program.cs* afin de formater une valeur numérique fixe de différentes manières.
@@ -801,7 +801,7 @@ static void LocalVarDeclarations()
 
 ### Valeur littérale par défaut (Nouveauté C# 7.1)
 
-**La valeur littérale `default` attribue à une variable la valeur par défaut pour son type de données**. Cela fonctionne pour les types de données standard ainsi que pour les classes personnalisées ([[Chapitre 5#Présentation du type de classe C|Chapitre 5]]) et les types génériques ([[Chapitre 10#Premier aperçu des collections génériques `<T>`|Chapitre 10]]). Créez une nouvelle méthode nommée `DefaultDeclarations()` et ajoutez le code suivant :
+**La valeur littérale `default` attribue à une variable la valeur par défaut pour son type de données**. Cela fonctionne pour les types de données standard ainsi que pour les classes personnalisées ([[Chapitre 5#Présentation du type classe C|Chapitre 5]]) et les types génériques ([[Chapitre 10#Premier aperçu des collections génériques `<T>`|Chapitre 10]]). Créez une nouvelle méthode nommée `DefaultDeclarations()` et ajoutez le code suivant :
 
 ```cs
 static void DefaultDeclarations()
@@ -857,17 +857,17 @@ static void NewingDataTypes()
 
 ## Comprendre la hiérarchie des classes de types de données
 
-**Il est intéressant de noter que même les types de données primitifs .NET sont organisés dans une *hiérarchie de classes***. Si vous découvrez le monde de l'héritage, vous trouverez tous les détails dans le [[Chapitre 6#Comprendre les mécanismes fondamentaux de l'héritage|Chapitre 6]]. En attendant, ***==retenez simplement que les types situés au sommet d'une hiérarchie de classes fournissent certains comportements par défaut qui sont accordés aux types dérivés==***. La relation entre ces types système de base peut être comprise comme illustré dans l'image ci-présente:.
+**Il est intéressant de noter que même les types de données primitifs .NET sont organisés dans une *hiérarchie de classes***. Si vous découvrez le monde de l'héritage, vous trouverez tous les détails dans le [[Chapitre 6#Comprendre les mécanismes fondamentaux de l'héritage|Chapitre 6]]. En attendant, ==retenez simplement que les types situés au sommet d'une hiérarchie de classes fournissent certains comportements par défaut qui sont accordés aux types dérivés==. La relation entre ces types système de base peut être comprise comme illustré dans l'image ci-présente:.
 
 ![[Figure 3.2.png|La hiérarchie des classes des types System]]
 
-***==Notez que chaque type dérive en fin de compte de `System.Object`, qui définit un ensemble de méthodes==*** (par exemple, `ToString()`, `Equals()`, `GetHashCode()`) ***==communes à tous les types des bibliothèques de classes de base .NET Core==*** (ces méthodes sont décrites en détail au [[Chapitre 6#Comprendre la classe parente ultime `System.Object`|Chapitre 6]]).
+==Notez que chaque type dérive en fin de compte de `System.Object`, qui définit un ensemble de méthodes== (par exemple, `ToString()`, `Equals()`, `GetHashCode()`) ==communes à tous les types des bibliothèques de classes de base .NET Core== (ces méthodes sont décrites en détail au [[Chapitre 6#Comprendre la classe parente ultime `System.Object`|Chapitre 6]]).
 
-***==Notez également que de nombreux types de données numériques dérivent d'une classe nommée `System.ValueType`==***. Les descendants de `ValueType` sont automatiquement alloués sur la *pile (Stack)* et ont donc une durée de vie prévisible et sont très efficaces. En revanche, les types qui n'ont pas `System.ValueType` dans leur chaîne d'héritage (tels que `System.Type`, `System.String`, `System.Array`, `System.Exception` et `System.Delegate`) ne sont pas alloués dans le *stack*, mais sur le *tas (heap)*, collecté par le *ramasse-miettes* (*garbage collector*).
+==Notez également que de nombreux types de données numériques dérivent d'une classe nommée `System.ValueType`==. Les descendants de `ValueType` sont automatiquement alloués sur la *pile (Stack)* et ont donc une durée de vie prévisible et sont très efficaces. En revanche, les types qui n'ont pas `System.ValueType` dans leur chaîne d'héritage (tels que `System.Type`, `System.String`, `System.Array`, `System.Exception` et `System.Delegate`) ne sont pas alloués dans le *stack*, mais sur le *tas (heap)*, collecté par le *ramasse-miettes* (*garbage collector*).
 
 >Vous trouverez plus d'informations sur cette distinction au [[Chapitre 4#Comprendre les types de valeur et les types de référence|Chapitre 4]]
 
-Sans trop s'attarder sur les détails de `System.Object` et `System.ValueType`, il suffit de comprendre que, **comme un mot-clé C#== (tel que `int`) est simplement une notation abrégée pour le type système correspondant** (dans ce cas, `System.Int32`), **la syntaxe suivante est parfaitement légale,** étant donné que `System.Int32` (le `int` C#) dérive finalement de `System.Object` et peut donc invoquer n'importe lequel de ses membres publics, comme l'illustre cette fonction d'aide supplémentaire :
+Sans trop s'attarder sur les détails de `System.Object` et `System.ValueType`, il suffit de comprendre que, **comme un mot-clé C# (tel que `int`) est simplement une notation abrégée pour le type système correspondant** (dans ce cas, `System.Int32`), **la syntaxe suivante est parfaitement légale,** étant donné que `System.Int32` (le `int` C#) dérive finalement de `System.Object` et peut donc invoquer n'importe lequel de ses membres publics, comme l'illustre cette fonction d'aide supplémentaire :
 
 ```cs
 static void ObjectFunctionality()
@@ -928,7 +928,7 @@ Console.WriteLine("bool.TrueString: {0}", bool.TrueString);
 
 ## Comprendre les membres de `System.Char`
 
-**Les données textuelles C# sont représentées par les mots-clés `string` et `char`, qui sont des notations abrégées simples pour `System.String` et `System.Char`, tous deux *Unicode* sous le capot**. Comme vous le savez peut-être déjà, ***==une chaîne représente un ensemble contigu de caractères==*** (par exemple, « Bonjour »), ***==tandis que le caractère peut représenter un seul emplacement dans une chaîne==*** (par exemple, « H »). 
+**Les données textuelles C# sont représentées par les mots-clés `string` et `char`, qui sont des notations abrégées simples pour `System.String` et `System.Char`, tous deux *Unicode* sous le capot**. Comme vous le savez peut-être déjà, ==une chaîne représente un ensemble contigu de caractères== (par exemple, « Bonjour »), ==tandis que le caractère peut représenter un seul emplacement dans une chaîne== (par exemple, « H »). 
 
 Le type `System.Char` vous offre de nombreuses fonctionnalités au-delà de la capacité de contenir un seul point de données de caractères. **À l'aide des méthodes statiques de `System.Char`, vous pouvez déterminer si un caractère donné est numérique, alphabétique, un signe de ponctuation ou autre**. Considérez la méthode suivante :
 
@@ -950,7 +950,7 @@ static void CharFunctionality()
 }
 ```
 
-==Comme illustré dans la méthode précédente, de nombreux membres de `System.Char` ont deux conventions d'appel : un caractère unique ou une chaîne avec un index numérique qui spécifie la position du caractère à tester.
+Comme illustré dans la méthode précédente, de nombreux membres de `System.Char` ont deux conventions d'appel : un caractère unique ou une chaîne avec un index numérique qui spécifie la position du caractère à tester.
 
 ## Convertir des valeurs à partir de données de type chaîne 
 
@@ -974,7 +974,7 @@ static void ParseFromStrings()
 
 ## Utilisation de `TryParse` pour convertir les valeurs à partir de données de type chaîne
 
-*==L'un des problèmes du code précédent est qu'une exception sera levée si la chaîne ne peut pas être convertie correctement en type de données approprié==*. Par exemple, le code suivant échouera lors de l'exécution :
+==L'un des problèmes du code précédent est qu'une exception sera levée si la chaîne ne peut pas être convertie correctement en type de données approprié==. Par exemple, le code suivant échouera lors de l'exécution :
 
 ```cs
 bool b = bool.Parse("Hello");
@@ -1009,7 +1009,7 @@ static void ParseFromStringsWithTryParse()
 }
 ```
 
-Si vous débutez en programmation et que vous ne savez pas comment fonctionnent les instructions `if/else`, elles sont expliquées en détail plus loin dans ce chapitre. ***==L'élément important à retenir de l'exemple précédent est que si une chaîne peut être convertie au type de données demandé, la méthode `TryParse()` renvoie `true` et attribue la valeur analysée à la variable transmise à la méthode. Si la valeur ne peut pas être analysée, la variable se voit attribuer sa valeur par défaut, et la méthode `TryParse()` renvoie `false`==***.
+Si vous débutez en programmation et que vous ne savez pas comment fonctionnent les instructions `if/else`, elles sont expliquées en détail plus loin dans ce chapitre. L'élément important à retenir de l'exemple précédent est que ==si une chaîne peut être convertie au type de données demandé, la méthode `TryParse()` renvoie `true` et attribue la valeur analysée à la variable transmise à la méthode. Si la valeur ne peut pas être analysée, la variable se voit attribuer sa valeur par défaut, et la méthode `TryParse()` renvoie `false`==.
 
 ## Utilisation de `System.DateTime` et `System.TimeSpan` (MaJ C# 10.0)
 
@@ -1089,7 +1089,7 @@ Même si la plupart de vos applications .NET Core n'auront probablement jamais b
 using System.Numerics;
 ```
 
-À ce stade, vous pouvez créer une variable `BigInteger` à l'aide de opérateur `new`. **Dans le constructeur, vous pouvez spécifier une valeur numérique, y compris des données à virgule flottante**. *==Cependant, C# type implicitement les nombres sans virgule flottant comme `int` et les nombres à virgule flottante comme `double`==*. Comment, alors, pouvez-vous définir `BigInteger` sur une valeur massive sans *déborder (Overflow)* les types de données par défaut utilisés pour les valeurs numériques brutes ?
+À ce stade, vous pouvez créer une variable `BigInteger` à l'aide de opérateur `new`. **Dans le constructeur, vous pouvez spécifier une valeur numérique, y compris des données à virgule flottante**. ==Cependant, C# type implicitement les nombres sans virgule flottant comme `int` et les nombres à virgule flottante comme `double`==. Comment, alors, pouvez-vous définir `BigInteger` sur une valeur massive sans *déborder (Overflow)* les types de données par défaut utilisés pour les valeurs numériques brutes ?
 
 **L'approche la plus simple consiste à définir la valeur numérique massive comme un *littéral de texte***, qui peut être converti en variable `BigInteger` via la méthode statique `Parse()`. Si nécessaire, vous pouvez également passer un tableau d'octets (`byte[]`) directement au constructeur de la classe `BigInteger`.
 

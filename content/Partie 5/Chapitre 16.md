@@ -2,7 +2,6 @@
 title: "Chapitre 16: Création et Configuration des Bibliothèques de Classes"
 publish: true
 ---
-
 # <big><big><big><b><font color =green>Création et Configuration des Bibliothèques de Classes</font></b></big></big></big>
 
 **Dans la plupart des exemples présentés jusqu'ici dans ce livre, vous avez créé des applications exécutables « autonomes », dans lesquelles toute la logique de programmation était regroupée dans un seul assembly** (*.dll*) **et exécutée à l'aide de** *dotnet* (ou d'une copie de *dotnet* portant le nom de l'assembly). Ces assemblies utilisaient peu de choses autre que les bibliothèques de classes de base .NET. Bien que certains programmes .NET simples puissent être construits en utilisant uniquement les bibliothèques de classes de base, **==il est probable que vous==** (ou vos collègues) **==ayez souvent recours à l'isolation de la logique de programmation réutilisable dans des bibliothèques de classes *personnalisées*==** (fichiers *.dll*), **==partageables entre les applications.==**
@@ -1514,7 +1513,7 @@ Microsoft a fait marche arrière. Désormais, même si on spécifies un RID, le 
 
 **Cela place votre application et ses fichiers de support** ($226$ fichiers au total) **dans le répertoire autonome**. **==Si vous avez copié ces fichiers sur un autre ordinateur dont l'identifiant d'exécution correspond, vous pouvez exécuter l'application même si le runtime .NET 6 n'est pas installé.==**
 
->[!tip]- Le fait d'avoir 2 fois les mêmes fichier est le comportement normal de la commande. (Gemini)
+>[!tip]- Le fait d'avoir 2 fois les mêmes fichiers est le comportement normal de la commande. (Gemini)
 >
 > 1. Le dossier `osx-arm64/` : L'aire de préparation
 >

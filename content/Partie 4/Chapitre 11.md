@@ -940,7 +940,7 @@ Supposons que vous ayez une classe en production. ==Avec le temps, il devient é
 
 Considérons maintenant cette situation. ==Supposons que vous ayez une structure== (ou peut-être une classe scellée) ==et que vous souhaitiez ajouter de nouveaux membres pour qu'elle se comporte de manière polymorphe dans votre système==. **Comme les structures et les classes scellées ne peuvent pas être étendues, votre seul choix est d'ajouter les membres au type, au risque une fois de plus de rompre la compatibilité ascendante**.
 
-***==Grâce aux méthodes d'extension, vous pouvez modifier les types sans créer de sous-classe et sans modifier le type directement. Le hic, c'est que la nouvelle fonctionnalité n'est offerte à un type que si les méthodes d'extension ont été référencées pour être utilisées dans votre projet actuel==***.
+Grâce aux méthodes d'extension, **vous pouvez modifier les types sans créer de sous-classe et sans modifier le type directement**. ==Le hic, c'est que la nouvelle fonctionnalité n'est offerte à un type que si les méthodes d'extension ont été référencées pour être utilisées dans votre projet actuel.==
 
 ## Définition des méthodes d'extension
 
@@ -1268,7 +1268,7 @@ Console.WriteLine("***** Support for Extension Method GetEnumerator *****\n");
 
 Garage carLot = new Garage();
 
-// Donner chaque voiture de la collection ?
+// Renvoie chaque voiture de la collection ?
 foreach (Car c in carLot)
 {
     Console.WriteLine("{0} is going {1} km/h", c.PetName, c.CurrentSpeed);

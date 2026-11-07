@@ -1740,7 +1740,7 @@ Quel que soit le constructeur choisi, avant C# 10, **il était impossible de dé
 ```cs
 struct Point
 {
-// Omis pour brièveté.
+	// Omis pour brièveté.
 	// constructeur sans paramètres (C#10)
 	public Point()
 	{

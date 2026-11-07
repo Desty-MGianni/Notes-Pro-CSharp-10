@@ -1,6 +1,6 @@
 ---
 title: TODO
-publish:
+publish: false
 ---
 # Notes
 

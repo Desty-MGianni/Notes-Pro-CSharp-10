@@ -4,7 +4,7 @@ publish: true
 ---
 # <big><big><big><b><font color =green>Entrées/Sorties de Fichiers et Sérialisation d'Objets</font></b></big></big></big>
 
->[!important] Tri précis entre ce qui est obsolète et ce qui est toujours recommandé (Gemini)
+>[!important] Tri entre ce qui est obsolète et ce qui est toujours recommandé (Gemini)
 >
 >## Ce qui est obsolète (À NE PLUS UTILISER)
 >
