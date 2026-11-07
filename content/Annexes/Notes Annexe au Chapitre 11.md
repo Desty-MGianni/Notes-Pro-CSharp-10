@@ -1,5 +1,5 @@
 ---
-title: "Note Annexe au Chapitre 11"
+title: Notes Annexe au Chapitre 11
 publish: true
 ---
 

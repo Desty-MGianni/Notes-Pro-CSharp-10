@@ -2,8 +2,9 @@
 title: Tableau Dentelés vs Tableau Multidimensionnels
 publish: true
 ---
-
 # Comparatif Détaillé : Tableaux Dentelés (`int[][]`) vs Tableaux Rectangulaires (`int[,]`) en C# et .NET
+
+>[!note] Cette note à été généré par Gemini
 
 Ce document résume les différences architecturales, la disposition en mémoire, le fonctionnement au niveau du CLR et les caractéristiques de performance qui distinguent les tableaux dentelés (*jagged arrays*) des tableaux rectangulaires (*rectangular / multidimensional arrays*).
 
@@ -45,7 +46,7 @@ En-tête de l'objet | Dim 0 = 4 | Dim 1 = 4 | [0,0][0,1][0,2][0,3][1,0][1,1]...[
 ## 2. Pourquoi un tableau rectangulaire n'est-il pas traité comme "4 tableaux classiques" ?
 
 1. **Absence d'en-têtes d'objets individuels pour les lignes :**
-   En .NET, tout tableau classique (`int[]`) possède un en-tête d'objet complet (SyncBlockIndex, MethodTable pointer, longueur). Dans `int[4,4]`, les lignes n'ont pas d'en-tête propre. La ligne n° 2 n'existe pas en tant qu'instance d'objet indépendante. Vous ne pouvez donc pas extraire `grid[1]` sous forme d'un `int[]`.
+   En .NET, tout tableau classique (`int[]`) possède un en-tête d'objet complet (*SyncBlockIndex*, *MethodTable* *pointer*, longueur). Dans `int[4,4]`, les lignes n'ont pas d'en-tête propre. La ligne n° 2 n'existe pas en tant qu'instance d'objet indépendante. Vous ne pouvez donc pas extraire `grid[1]` sous forme d'un `int[]`.
 
 2. **Typage CIL et instructions Bytecode distinctes :**
    * Le type `int[]` est un **`SZArray`** (*Single-dimensional Zero-based array* / Vector). Le CIL dispose d'opcodes d'accès natifs et dédiés (`newarr`, `ldelem`, `stelem`, `ldlen`).
@@ -60,14 +61,14 @@ En-tête de l'objet | Dim 0 = 4 | Dim 1 = 4 | [0,0][0,1][0,2][0,3][1,0][1,1]...[
 
 ## 3. Tableau Comparatif des Performances
 
-| Critère | Tableau Dentelé (`int[][]`) | Tableau Rectangulaire (`int[,]`) |
-| :--- | :--- | :--- |
-| **Type CLR/CIL** | `SZArray` de `SZArray` | `MDArray` (Rank 2) |
-| **Nombre d'allocations** | $N + 1$ allocations sur le tas | **1 seule allocation** sur le tas |
-| **Contiguïté mémoire** | Fragmentée (chaque ligne est isolée) | **Parfaite** (optimale pour le cache CPU L1/L2) |
-| **Accès aux éléments** | 2 déréférencements de pointeurs | 1 calcul d'offset ($i \times \text{cols} + j$) |
+| Critère                                      | Tableau Dentelé (`int[][]`)                    | Tableau Rectangulaire (`int[,]`)                  |
+| :------------------------------------------- | :--------------------------------------------- | :------------------------------------------------ |
+| **Type CLR/CIL**                             | `SZArray` de `SZArray`                         | `MDArray` (Rank 2)                                |
+| **Nombre d'allocations**                     | $N + 1$ allocations sur le tas                 | **1 seule allocation** sur le tas                 |
+| **Contiguïté mémoire**                       | Fragmentée (chaque ligne est isolée)           | **Parfaite** (optimale pour le cache CPU L1/L2)   |
+| **Accès aux éléments**                       | 2 déréférencements de pointeurs                | 1 calcul d'offset ($i \times \text{cols} + j$)    |
 | **Vérification des bornes (*Bounds Check*)** | **Éliminée par le JIT** dans les boucles `for` | Réalisée à **chaque itération** (2 vérifications) |
-| **Vitesse de parcours** | **Très rapide** (grâce à l'optimisation JIT) | Plus lente en code managé standard |
+| **Vitesse de parcours**                      | **Très rapide** (grâce à l'optimisation JIT)   | Plus lente en code managé standard                |
 
 ---
 

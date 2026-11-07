@@ -74,7 +74,7 @@ Notes réalisé par Gianni MUCCI sur le Livre *Pro C# 10 with .NET 6* de Andrew 
 
 - [[Liens GitHub]]
 - [[Launcher.cs]]
-- [[Note annexe au chapitre 11]]
+- [[Notes Annexe au Chapitre 11]]
 - [[Nouveaute NET 7 et superieur]]
 - [[Extraire le code assembleur d'un projet]]
 - [[DotnetUp]]
