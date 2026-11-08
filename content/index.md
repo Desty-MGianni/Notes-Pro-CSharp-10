@@ -72,5 +72,7 @@ Notes réalisé par Gianni MUCCI sur le Livre *Pro C# 10 with .NET 6* de Andrew 
 
 ### Notes supplémentaires
 
+
+testtest
 - [[Annexes/index|Annexes par chapitre]]
 - [[Divers/index|Divers]]
