@@ -494,6 +494,8 @@ Bien qu'il s'agisse d'un exemple simple, ==il illustre l'un des problèmes liés
 >
 >Les implémentations par défauts sont un outil de **maintenance d'architecture** plutôt qu'un outil de développement quotidien. Elles servent à faire survivre les interfaces sur le long terme sans forcer tous les utilisateurs à réécrire leur code.
 
+>[!tip] L'explication sous le capot de ce comportement est disponible dans [[Notes Annexe au Chapitre 8|la note annexe de ce chapitre]]
+
 # Constructeurs et membres statiques (Nouveauté C# 8.0)
 
 **Une autre nouveauté des interfaces en C# 8.0 est la possibilité d'utiliser des constructeurs et des membres statiques, qui fonctionnent de la même manière que les membres statiques des définitions de classe, mais sont définis dans les interfaces**. Mettez à jour l'interface `IRegularPointy` avec un exemple de propriété statique et de constructeur statique.

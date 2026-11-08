@@ -878,8 +878,7 @@ static void StringTarget(string arg)
 
 ==Lorsque vous adoptez cette approche, vous vous retrouvez généralement avec plusieurs délégués personnalisés qui ne seront peut-être jamais utilisés au-delà de la tâche en cours== (par exemple, `MyGenericDelegate<T>`, `CarEngineHandler`, etc.). Bien qu'il puisse certainement être nécessaire d'avoir un type de délégué personnalisé et nommé de manière unique pour votre projet, le nom exact du type de délégué est parfois sans importance. ==Dans de nombreux cas, vous souhaitez simplement un délégué qui prend un ensemble d'arguments et qui peut éventuellement renvoyer une valeur autre que `void`.== **Dans ces cas, vous pouvez utiliser les types de délégués intégrés `Action<>` et `Func<>` du framework**. Pour illustrer leur utilité, créez un nouveau projet d'application console nommé *ActionAndFuncDelegates*.
 
-**Le délégué générique `Action<>` est défini dans l'espace de noms `System`, et vous pouvez utiliser ce
-délégué générique pour « pointer » vers une méthode qui prend jusqu'à** *16 arguments* (ce qui devrait être suffisant !) **et qui renvoie `void`**. ==Rappelons que, puisque `Action<>` est un délégué générique, vous devrez également spécifier le type sous-jacent de chaque paramètre.==
+**Le délégué générique `Action<>` est défini dans l'espace de noms `System`, et vous pouvez utiliser ce délégué générique pour « pointer » vers une méthode qui prend jusqu'à** *16 arguments* (ce qui devrait être suffisant !) **et qui renvoie `void`**. ==Rappelons que, puisque `Action<>` est un délégué générique, vous devrez également spécifier le type sous-jacent de chaque paramètre.==
 
 Mettez à jour votre fichier *Program.cs* pour définir une nouvelle méthode statique prenant trois paramètres uniques (environ). Voici un exemple :
 
@@ -971,7 +970,6 @@ Comme vous pouvez le constater, **l'utilisation du délégué `Action<>` vous é
 | **FONCTION**  | `Func`        | Laisse une valeur dans le registre `RAX`.    | **TRANSFORMATION** : "Deviens cela."     |
 | **PRÉDICAT**  | `Predicate`   | Laisse un drapeau (0 ou 1) dans le registre. | **VALIDATION** : "Est-ce vrai ?"         |
 | **ITÉRATEUR** | `IEnumerable` | Crée une machine à états sur le Tas.         | **GÉNÉRATION** : "Donne-moi le suivant." |
-
 
 > [!IMPORTANT]- Faire le lien entre le [[Chapitre 11#Utilisation des types pointeurs|Chapitre 11]] et les délégués
 > ## Le Délégué : L'unique "Pointeur de Fonction" du monde managé
@@ -1421,7 +1419,6 @@ static void CarAboutToBlow(object sender, CarEventArgs e)
 >>```
 >>
 >>Certains frameworks modernes comme **Reactive Extensions (Rx)** ou les **source generators** adoptent d'ailleurs des approches plus typées.
-
 
 ## Le délégué générique `EventHandler<T>`
 

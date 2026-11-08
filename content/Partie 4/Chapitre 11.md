@@ -638,7 +638,7 @@ MiniVan newVan = myVan * yourVan;
 
 **La surcharge d'opérateurs est généralement utile uniquement lors de la création de types de données atomiques**. *Les vecteurs, les matrices, le texte, les points, les formes, les ensembles*, etc., ==sont de bons candidats pour la surcharge d'opérateurs==. Les personnes, les gestionnaires, les voitures, les connexions aux bases de données et les pages web ne le sont pas. ***==En règle générale, si un opérateur surchargé rend plus difficile la compréhension du fonctionnement d'un type par l'utilisateur, il vaut mieux ne pas l'utiliser. Utilisez cette fonctionnalité avec discernement==***.
 
->[!example] Dans [[Notes Annexe au Chapitre 11|cette note]], une implémentation de l'interface `INumber<T>` est proposé permettant, entre autre, de surcharger les opérateurs
+>[!example] Dans [[L'interface INumber|cette note]], une implémentation de l'interface `INumber<T>` est proposé permettant, entre autre, de surcharger les opérateurs
 
 # Comprendre les conversions de types personnalisés
  

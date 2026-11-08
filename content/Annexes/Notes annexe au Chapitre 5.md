@@ -2,8 +2,7 @@
 title: Note Annexe au Chapitre 5
 publish: true
 ---
-
-# **Chapitre 5 : Comprendre l'encapsulation — Sous le capot**
+# Chapitre 5 : Comprendre l'encapsulation — Sous le capot
 
 >[!note] Cette note à été généré par Geminni
 
@@ -11,7 +10,7 @@ Ce document explore les mécanismes internes du runtime (CLR), du compilateur et
 
 ---
 
-## **1. Propriétés en lecture seule à l'initialisation (Setters `init`) & `IsExternalInit`**
+## 1. Propriétés en lecture seule à l'initialisation (Setters `init`) & `IsExternalInit`
 
 Lorsque vous définissez une propriété avec un accesseur `init` :
 
@@ -30,7 +29,7 @@ public class Personne
 
 ---
 
-## **2. Types `record`, égalité de valeur et code synthétisé**
+## 2. Types `record`, égalité de valeur et code synthétisé
 
 La déclaration d'un `record` positionnel :
 
@@ -47,7 +46,7 @@ Amène le compilateur C# à générer automatiquement une classe complète conte
 
 ---
 
-## **3. Constructeurs statiques (`.cctor`) & `beforefieldinit`**
+## 3. Constructeurs statiques (`.cctor`) & `beforefieldinit`
 
 Dans les métadonnées CIL, les constructeurs statiques sont nommés `.cctor` (_class constructor_).
 
@@ -79,7 +78,7 @@ Déclarer un constructeur `static` explicite supprime le drapeau `beforefieldini
 
 ---
 
-## **4. Littéraux `const` vs Champs `static readonly`**
+## 4. Littéraux `const` vs Champs `static readonly`
 
 - **`const`** :
     - Doit pouvoir être déterminé dès la compilation.

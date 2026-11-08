@@ -37,8 +37,7 @@ public static class MyLib
 }
 ```
 
-
-# Ce qu'est un `.so`
+# Qu'est ce q'un `.so` ?
 
 Un `.so` (Shared Object) est l'équivalent Linux/macOS d'une DLL Win32 : du **code machine natif** directement exécutable par le CPU, sans runtime intermédiaire. C'est ce que C/C++/Rust produisent nativement.
 
@@ -55,13 +54,3 @@ C'est l'équivalent de `extern "C"` en C/C++.
 ## Pourquoi `unsafe`
 
 Le passage de données entre un `.so` et un appelant externe (Python, C, Rust...) ne passe **pas** par le système de types de C#. Tu manipules directement des pointeurs et de la mémoire brute, ce qui nécessite `unsafe`.
-
-
-
-
-
-
-
-
-
-
