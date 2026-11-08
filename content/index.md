@@ -70,11 +70,7 @@ Notes réalisé par Gianni MUCCI sur le Livre *Pro C# 10 with .NET 6* de Andrew 
 - [[Chapitre 33]]
 - [[Chapitre 34]]
 
-### Annexes
+### Notes supplémentaires
 
-- [[Liens GitHub]]
-- [[Launcher.cs]]
-- [[L'interface INumber]]
-- [[Nouveaute NET 7 et superieur]]
-- [[Extraire le code assembleur d'un projet]]
-- [[DotnetUp]]
+- [[Annexes/index|Annexes par chapitre]]
+- [[Divers/index|Divers]]
